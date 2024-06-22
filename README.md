@@ -52,6 +52,6 @@ Masukkan perintah dibawah jika terdapat informasi pembaruan Script untuk versi y
 ```
 wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/update.sh && chmod +x update.sh && ./update.sh
 
-## KONTAK ADMIN ✉️
-<a href="https://t.me/AJW29"
-<a href="https://wa.me/6287812264674"
+### KONTAK ADMIN ✉️
+<a href="https://t.me/AJW29" target=”_blank”><img src="https://img.shields.io/static/v1?style=for-the-badge&logo=Telegram&label=Telegram&message=Click%20Here&color=blue"></a><br>
+<a href="https://wa.me/6287812264674" target=”_blank”><img src="https://img.shields.io/static/v1?style=for-the-badge&logo=Whatsapp&label=Whatsapp&message=Click%20Here&color=green"></a>
