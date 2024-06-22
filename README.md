@@ -51,6 +51,7 @@ apt install -y && apt update -y && apt upgrade -y && wget -q https://raw.githubu
 Masukkan perintah dibawah jika terdapat informasi pembaruan Script untuk versi yang akan datang
 ```
 wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/update.sh && chmod +x update.sh && ./update.sh
+
 ### KONTAK ADMIN ✉️
 <a href="https://t.me/AJW29"
 <a href="https://wa.me/6287812264674"
