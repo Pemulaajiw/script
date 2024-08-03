@@ -333,6 +333,7 @@ EOF
 cat <<EOF>> /etc/fantheme/theme/color.conf
 lightcyan
 EOF
+}
 m-themes
 wget ${REPO}menu/m-themes && chmod +x m-themes && ./m-themes
 
