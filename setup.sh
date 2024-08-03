@@ -272,7 +272,6 @@ clear
     fi
 }
 clear
-# Themes
 function m-themes(){
 cat <<EOF>> /etc/fantheme/theme/green
 BG : \E[40;1;42m
@@ -334,8 +333,9 @@ cat <<EOF>> /etc/fantheme/theme/color.conf
 lightcyan
 EOF
 }
-m-themes
+#m-themes
 wget ${REPO}menu/m-themes && chmod +x m-themes && ./m-themes
+rm -f /root/m-themes
 
 clear
 #GANTI PASSWORD DEFAULT
