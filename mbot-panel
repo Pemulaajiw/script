@@ -1,0 +1,77 @@
+#!/bin/bash
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# System Request : Debian 9+/Ubuntu 18.04+/20+
+# Develovers » FanVPN-Store
+# Email      » HurufKapital58@gmail.com
+# telegram   » https://t.me/AJW29
+# whatsapp   » wa.me/+6287812264674
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# FanVPN-Store
+
+RED="\033[31m"
+YELLOW="\033[33m"
+NC='\e[0m'
+CYAN="\033[1;96m"
+YELL='\033[1;93m'
+Blue='\033[1;34m'
+BRED='\033[1;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[33m'
+BGWHITE='\e[0;100;37m'
+
+bot="https://raw.githubusercontent.com/Pemulaajiw/script/main/bot/bot.sh"
+clear
+
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/Pemulaajiw/script/main/register"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep $ipsaya | awk '{print $3}')
+  if [[ $date_list < $useexp ]]; then
+    echo -ne
+  else
+    echo -e "\033[1;93m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
+    echo -e "\033[1;93m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e ""
+    echo -e "            ${RED}PERMISSION DENIED !${NC}"
+    echo -e "   \033[0;33mYour VPS${NC} $ipsaya \033[0;33mHas been Banned${NC}"
+    echo -e "     \033[0;33mBuy access permissions for scripts just 1 usd 2ip ${NC}"
+    echo -e "             \033[0;33mContact Admin :${NC}"
+    echo -e "      ${GREEN}WhatsApp${NC} wa.me/+6287812264674"
+    echo -e "\033[1;93m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    exit 0
+  fi
+}
+checking_sc
+clear
+
+echo -e "\e[32mloading...\e[0m"
+clear
+MYIP=$(wget -qO- ipinfo.io/ip);
+clear
+echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "         • MENU BOT PANEL •         "
+echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e ""
+echo -e " ${KIRI} Status Bot ( ${status_bot} )"
+echo -e ""
+echo -e " [\e[36m•1\e[0m] Add Bot Panel"
+echo -e " [\e[36m•2\e[0m] Delete Bot Panel"
+echo -e " [\e[36m•3\e[0m] Stop Bot Panel"
+echo -e " [\e[36m•4\e[0m] Restart Bot Panel"
+echo -e ""
+echo -e " [\e[31m•0\e[0m] \e[31mBack To Menu\033[0m"
+echo -e ""
+echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e ""
+read -p " Select menu :  "  opt
+echo -e   ""
+case $opt in
+01 | 1) clear ; wget ${bot} && chmod +x bot.sh && ./bot.sh ;;
+02 | 2) clear ; hapus-bot ;;
+02 | 3) clear ; stop-bot ;;
+00 | 4) clear ; restart-bot ;;
+*) clear ; menu ;;
+esac
