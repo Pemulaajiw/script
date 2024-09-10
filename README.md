@@ -20,9 +20,9 @@ Yang Nyomot Gw Sumpahin Berak Batu Kerikil Ampe Mampus🗿
 
 ## Sewa Autoscript
 ```html
-1 Bulan 1 IP  : 5.000
-1 Bulan 2 IP  : 10.000
-2 Bulan 2 IP  : 15.000
+1 Bulan 1 IP  : 8.000
+1 Bulan 2 IP  : 15.000
+2 Bulan 2 IP  : 25.000
 4 Bulan 2 IP  : 40.000
 Lifetime 2 IP : 70.000
 Lifetime 5 IP : 100.000
