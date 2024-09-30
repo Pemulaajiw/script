@@ -295,7 +295,7 @@ echo -e "${COLOR1} │  ${WH}[${COLOR1}04${WH}]${NC} ${COLOR1}• ${WH} TROJAN  
 echo -e "${COLOR1} │  ${WH}[${COLOR1}09${WH}]${NC} ${COLOR1}• ${WH} SYSTEM     ${WH}[${COLOR1}Menu${WH}]${NC}"  "${WH}  [${COLOR1}10${WH}]${NC} ${COLOR1}• ${WH} UPDATE     ${WH}[${COLOR1}Menu${WH}]${NC}" "${COLOR1}      │${NC}"
 echo -e "${COLOR1} │  ${WH}[${COLOR1}11${WH}]${NC} ${COLOR1}• ${WH} BACKUP BOT ${WH}[${COLOR1}Menu${WH}]${NC}"  "${WH}  [${COLOR1}12${WH}]${NC} ${COLOR1}• ${WH} FEATURES   ${WH}[${COLOR1}Menu${WH}]${NC}" "${COLOR1}      │${NC}"
 echo -e "${COLOR1} │                                                           $NC${COLOR1} $NC"
-echo -e " ${COLOR1} $NC [${COLOR1}13${NC}]$COLOR1 TROJANGO ${COLOR1}$NC [${COLOR1}14${NC}]$COLOR1 INSTALL WARP$NC${COLOR1}|$NC [${COLOR1}15${NC}]$COLOR1 BOT CYBER $NC${COLOR1} $NC"
+echo -e "${COLOR1} |$NC [${COLOR1}13${NC}]$COLOR1 TROJANGO ${COLOR1}$NC [${COLOR1}14${NC}]$COLOR1 INSTALL WARP$NC${COLOR1}|$NC [${COLOR1}15${NC}]$COLOR1 BOT CYBER $NC${COLOR1} $NC"
 echo -e "${COLOR1} └─────────────────────────────────────────────────────┘${NC}"
 echo -e " ${COLOR1}        ${KIRI} *JANGAN LUPA SHOLAT KAWAN*📴  ${KANAN}" | lolcat
 echo -e "${COLOR1}     ╭──────────── • ${WH}PANEL ADMIN VIP${NC}${COLOR1} • ───────────╮${NC}"
