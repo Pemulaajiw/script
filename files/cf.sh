@@ -18,8 +18,8 @@ echo ""
 echo ""
 #sub=$(</dev/urandom tr -dc a-z0-9 | head -c3)
 read -rp "Input Domain Name. Example ( Fan-Store ): " -e sub
-DOMAIN=ultrvvip.web.id
-SUB_DOMAIN=${sub}.ultrvvip.web.id
+DOMAIN=fanntunnel.online
+SUB_DOMAIN=${sub}.fanntunnel.online
 CF_ID=mbahkoid13@gmail.com
 CF_KEY=HX3ov-quBQKm9RrqjBA4pj8OjdmswMBeaKouh_m8
 set -euo pipefail
