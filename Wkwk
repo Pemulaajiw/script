@@ -1,0 +1,31 @@
+    echo -e "${BLUE}┌──────────────${NC}${COLBG1}${WH}[ SYSTEM INFORMATION ]${NC}${BLUE}──────────────┐"
+    system_name=$(grep -w PRETTY_NAME /etc/os-release | cut -d '=' -f2 | tr -d '"')
+    echo -e "│   \e[38;5;226mOS          : \e[0m$system_name"
+    total_ram_kb=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+    available_ram_kb=$(awk '/MemAvailable/ {print $2}' /proc/meminfo)
+    if [[ "$total_ram_kb" && "$available_ram_kb" ]]; then
+        total_ram_gb=$(awk "BEGIN {printf \"%.2f\", $total_ram_kb / 1024 / 1024}")
+        used_ram_kb=$((total_ram_kb - available_ram_kb))
+        used_ram_gb=$(awk "BEGIN {printf \"%.2f\", $used_ram_kb / 1024 / 1024}")
+        echo -e "│   ${WH}RAM         : \e[0m${used_ram_gb}GB / ${total_ram_gb}GB"
+    else
+        echo -e "│   ${WH}RAM         : \e[0mN/A"
+    fi
+    echo -e "│   ${WH}UPTIME      : \e[0m$(uptime -p | cut -d ' ' -f2-)"
+    echo -e "│   ${WH}CPU Cores   : \e[0m$(nproc)"
+    echo -e "│   ${WH}IP Address  : \e[0m$(wget -qO- ipv4.icanhazip.com 2>/dev/null || echo 'Unavailable')"
+    echo -e "│   ${WH}ISP         : \e[0m$(cat /etc/xray/isp 2>/dev/null || echo 'Unknown')"
+    echo -e "│   ${WH}Domain      : \e[0m$(cat /etc/xray/domain 2>/dev/null || echo 'No domain registered')"
+#    echo -e "│   ${WH}NS Domain   : \e[0m$(cat /etc/xray/dns 2>/dev/null || echo 'No NS registered')"
+    echo -e "└──────────────────────────────────────────────────┘"
+    echo -e "${BLUE}┌──────────────${NC}${COLBG1}${WH}[ ACCOUNT INFORMATION ]${NC}${BLUE}─────────────┐"
+    echo -e "│   ${WH}SSH/OVPN    : \e[0m$ssh ACCOUNT"
+    echo -e "│   ${WH}VMESS       : \e[0m$vm ACCOUNT"
+    echo -e "│   ${WH}VLESS       : \e[0m$vl ACCOUNT"
+    echo -e "│   ${WH}TROJAN      : \e[0m$tr ACCOUNT"
+    echo -e "│   ${WH}SHADOWSOCKS : \e[0m$ss ACCOUNT"
+    echo -e "└──────────────────────────────────────────────────┘"
+    echo -e "$BLUE┌───────────────${NC}${COLBG1}${WH}[ SCRIPT INFORMATION ]${NC}${BLUE}─────────────┐"
+    echo -e "│   ${WH}User Key    : \e[0m$(cat /root/.key || echo 'Unavailable')"
+    echo -e "│   ${WH}Channel     : \e[0m@osproject_backend"
+    echo -e "└──────────────────────────────────────────────────┘"
