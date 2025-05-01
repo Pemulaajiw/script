@@ -1,5 +1,5 @@
 echo -e "$COLOR1┌─────────────────────────────────────────────────┐${NC}"
-echo -e "$COLOR1│${NC} ${COLBG1}               SFvpn TUNNELING                 \033[0m \e[96;1m│\e[0m"
+echo -e "$COLOR1│${NC} ${COLBG1}               FVIP TUNNELING              ${NC} $COLOR1│ $NC"
 echo -e "$COLOR1└─────────────────────────────────────────────────┘${NC}"
 }
 function Service_System_Operating() {
