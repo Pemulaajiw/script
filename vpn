@@ -220,8 +220,11 @@ function main_menu() {
   echo -e "  │ ${CYAN}6) View ALLVPN User List      ${BLUE}│"
   echo -e "  │ ${CYAN}7) Delete User L2TP/PPTP      ${BLUE}│"
   echo -e "  │ ${CYAN}8) Delete User WIREGUARD      ${BLUE}│"
-  echo -e "  │ ${CYAN}9) Service Status             ${BLUE}│"
-  echo -e "  │${CYAN}10) Connection Guide           ${BLUE}│"
+  echo -e "  │ ${CYAN}9) Service Status L2TP/PPTP   ${BLUE}│"
+  echo -e "  │${CYAN}10) Connection Guide L2TP/PPTP ${BLUE}│"
+  echo -e "  │${CYAN}11) Rennew PPTP User           ${BLUE}│"
+  echo -e "  │${CYAN}12) Rennew L2TP User           ${BLUE}│"
+  echo -e "  │${CYAN}13) Rennew WIREGUARD User      ${BLUE}│"
   echo -e "  │${RED}99) Exit                        ${BLUE}│"
   echo -e "  │${RED}0X) MENU                        ${BLUE}│"
   echo -e "  ╰──────────────────────────────╯${NC}"
@@ -231,12 +234,19 @@ function main_menu() {
   case $pilihan in
     1) add_pptp_user ;;
     2) add_l2tp_user ;;
-    3) list_users ;;
-    4) delete_user ;;
-    5) show_status ;;
-    6) connection_guide ;;
-    8) menu ;;
-    7) echo -e "\n${GREEN}Exiting...${NC}"; exit 0 ;;
+    3) add-wg ;;
+    4) cek-pptp ;;
+    5) cek-wg ;;
+    6) list_users ;;
+    7) delete_user ;;
+    8) del-wg ;;
+    9) show_status ;;
+   10) connection_guide ;;
+   11) renew-pptp ;;
+   12) renew-l2tp ;;
+   13) renew-wg ;;
+   0X) menu ;;
+   99) echo -e "\n${GREEN}Exiting...${NC}"; exit 0 ;;
     *) echo -e "\n${RED}Invalid selection!${NC}" ;;
   esac
   
