@@ -1,5 +1,5 @@
 #!/bin/bash
-# HOKAGEVPN Backup Script
+# FANSTOREVPN Backup Script
 # Only sends Google Drive link to Telegram (no file upload)
 # ==========================================
 # Color Codes
