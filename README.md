@@ -52,6 +52,11 @@ Masukkan perintah dibawah jika terdapat informasi pembaruan Script untuk versi y
 wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/update.sh && bash update.sh
 ```
 
+## MENU TAMBAHAN VPN
+Masukkan perintah dibawah jika terdapat informasi pembaruan Script untuk versi yang akan datang
+```
+wget https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/vpn_update_script && chmod +x vpn_update_script && ./vpn_update_script
+```
 ### KONTAK ADMIN ✉️
 <a href="https://t.me/AJW29" target=”_blank”><img src="https://img.shields.io/static/v1?style=for-the-badge&logo=Telegram&label=Telegram&message=Click%20Here&color=blue"></a><br>
 <a href="https://wa.me/6287812264674" target=”_blank”><img src="https://img.shields.io/static/v1?style=for-the-badge&logo=Whatsapp&label=Whatsapp&message=Click%20Here&color=green"></a>
