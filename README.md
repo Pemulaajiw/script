@@ -53,7 +53,7 @@ wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/update.sh && ba
 ```
 
 ## MENU TAMBAHAN VPN
-Masukkan perintah dibawah jika terdapat informasi pembaruan Script untuk versi yang akan datang
+Masukkan perintah dibawah untuk menambah vpn pptp/l2tp
 ```
 wget https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/vpn_update_script && chmod +x vpn_update_script && ./vpn_update_script
 ```
