@@ -89,10 +89,10 @@ main_install() {
     sudo rm -f backup
     sudo rm -f restore
     sudo rm -f delws
-    sudo wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/update/backup
-    sudo wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/update/restore
+    sudo wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/backup
+    sudo wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/restore
     sudo wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/vpn
-    sudo wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/menu/delws
+    sudo wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/delws
     sudo chmod +x backup
     sudo chmod +x restore
     sudo chmod +x vpn
