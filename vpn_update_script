@@ -54,18 +54,22 @@ main_install() {
     SPINNER_PID=$!
     
     # 1. Install PPTP/L2TP/SSTP
-    echo -e "\n${YELLOW}▶ Installing PPTP/L2TP/SSTP & TROJANGO...${NC}"
+    echo -e "\n${YELLOW}▶ Installing PPTP/L2TP/SSTP/WIREGUARD & TROJANGO...${NC}"
     cd
     rm -f installer-sstp.sh
     wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/installer-sstp.sh
-    wget https://raw.githubusercontent.com/king-vpn/autoscript-vip/refs/heads/main/install/ins-trgo.sh
+    wget -q https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/installer-wg.sh
+    wget -q https://raw.githubusercontent.com/king-vpn/autoscript-vip/refs/heads/main/install/ins-trgo.sh
     chmod +x installer-sstp.sh
+    chmod +x installer-wg.sh
     chmod +x ins-trgo.sh
     sudo ./installer-sstp.sh
+    sudo ./installer-wg.sh
     sudo ./ins-trgo.sh
     rm -f installer-sstp.sh
+    rm -f installer-wg.sh
     rm -f ins-trgo.sh
-    echo -e "${GREEN}✔ PPTP/L2TP/SSTP & TROJANGO installed successfully${NC}"
+    echo -e "${GREEN}✔ PPTP/L2TP/SSTP/WIREGUARD & TROJANGO installed successfully${NC}"
     
     # 2. Install System Updates
     echo -e "\n${YELLOW}▶ Installing System Updates...${NC}"
