@@ -84,7 +84,7 @@ upload_to_drive() {
 send_to_telegram() {
     echo -e "${YELLOW}Sending notification to Telegram...${NC}"
     
-    message="<b>HOKAGEVPN Backup Notification</b>
+    message="<b>FANSTOREVPN Backup Notification</b>
 <code>────────────────────</code>
 <b>🖥️ IP VPS:</b> <code>$IP</code>
 <b>🌐 Domain:</b> <code>${domain:-Not Set}</code>
