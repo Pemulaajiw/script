@@ -27,7 +27,7 @@ Yang Nyomot Gw Sumpahin Berak Batu Kerikil Ampe Mampus🗿
 Lifetime 2 IP : 70.000
 Lifetime 5 IP : 100.000
 ```
-# free add ip ke domain < off proxies> thanks to Candra
+# free add ip ke domain < off proxies>
 https://sub.irawancandra2303.workers.dev/
 ## UPGRADE FOR DEBIAN
 Masukkan perintah dibawah jika anda menggunakan OS Debian Version 9 atau 10
