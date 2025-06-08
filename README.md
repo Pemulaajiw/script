@@ -40,13 +40,58 @@ Masukkan perintah dibawah jika anda menggunakan OS Ubuntu Version 18 atau 20
 ```
 apt update && apt upgrade -y && update-grub && sleep 2 && reboot
 ```
-
 ## INSTALL SCRIPT 
 Masukkan perintah dibawah untuk menginstall Autoscript Premium
 ```
 apt install -y && apt update -y && apt upgrade -y && wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/setup.sh && chmod +x setup.sh && ./setup.sh
 ```
+==========================================================================================
 
+
+
+
+## TESTED INSTALL DI OS UBUNTU 22/24 & DEBIAN 11/12
+
+### UPGRADE SCRIPT UBUNTU
+
+Masukkan perintah dibawah jika anda menggunakan OS Ubuntu Version 22 atau 24
+
+```
+cd
+rm ubuntu_debian
+ apt update -y && apt upgrade -y && wget -q https://github.com/Pemulaajiw/script/raw/refs/heads/main/ubuntu_debian && chmod +x ubuntu_debian && ./ubuntu_debian
+cd
+rm ubuntu_debian
+```
+### UPGRADE SCRIPT DEBIAN
+Masukkan perintah dibawah jika anda menggunakan OS Debian Version 11 atau 12
+```
+cd
+rm ubuntu_debian
+ apt update -y && apt upgrade -y && wget -q https://github.com/Pemulaajiw/script/raw/refs/heads/main/debian && chmod +x debian && ./debian
+cd
+rm ubuntu_debian
+```
+Masukkan perintah dibawah untuk Jalankan Portnya
+   
+ ```
+cd
+rm port.sh
+ wget -q https://github.com/Pemulaajiw/script/raw/refs/heads/main/port.sh && chmod +x port.sh && ./port.sh
+cd
+rm port.sh
+```
+- KELUAR ATAU LOGOUT DARI REMOTE DENGAN MENGETIKAN "exit"
+- Buka/Masuk Kembali REMOTE NYA DAN MASUK DENGAN
+- KETIK
+  ```
+  lxc exec ubuntu20 -- bash
+  ```
+  Lalu Install Script seperti biasa, setelah install jalankan perintah ketik diatas untuk reboot vps
+  Ketikan " welcome "
+   UNTUK MEMBUKA KE FILE SCRIPT SSH-XRAY-HAPROXY-VPN
+
+  SCRIPT SIAP DI GUNAKAN
 ## UPDATE SCRIPT
 Masukkan perintah dibawah jika terdapat informasi pembaruan Script untuk versi yang akan datang
 ```
