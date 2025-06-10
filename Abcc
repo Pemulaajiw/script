@@ -1,0 +1,73 @@
+echo -e "$GREEN┌───────────────────────────────────┐$NC"
+echo -e "$GREEN│$NC ${WHITEBLD}${LEFT_SPACE}${TEXT}${RIGHT_SPACE}${NC} $GREEN│$NC"
+echo -e "$GREEN└───────────────────────────────────┘$NC"
+
+    echo -e "\033[96;1m┌───────────────────────────────────┐\033[0m"
+    echo -e "\033[96;1m│  \e[93mSYSTEM :\e[97m $(grep -w PRETTY_NAME /etc/os-release | cut -d'=' -f2 | tr -d '"')\033[0m"
+    echo -e "\033[96;1m│  \e[93mRAM    :\e[97m $(free -m | awk 'NR==2 {print $2}') MB\033[0m"
+    echo -e "\033[96;1m│  \e[93mUPTIME :\e[97m $(uptime -p | cut -d " " -f 2-)\033[0m"
+    echo -e "\033[96;1m│  \e[93mIP     :\e[97m $(curl -s ipv4.icanhazip.com)\033[0m"
+    echo -e "\033[96;1m│  \e[93mCITY   :\e[97m $(cat /etc/xray/city)\033[0m"
+    echo -e "\033[96;1m│  \e[93mISP    :\e[97m $(cat /etc/xray/isp)\033[0m"
+    echo -e "\033[96;1m│  \e[93mDOMAIN :\e[97m $(cat /etc/xray/domain)\033[0m"
+    echo -e "\033[96;1m└───────────────────────────────────┘\033[0m"
+
+
+
+    echo -e "\033[96;1m┌────────── SERVICE STATUS ─────────┐\033[0m"
+    echo -e "\033[96;1m│  \e[93mPROXY  :\e[97m $status_haproxy      \e[93mNGINX    :\e[97m $status_nginx\033[0m"
+    echo -e "\033[96;1m│  \e[93mXRAY   :\e[97m $status_xray      \e[93mDROPBEAR :\e[97m $status_dropbear\033[0m"
+    echo -e "\033[96;1m│────────── ACCOUNT INFORMATION\033[0m"
+    echo -e "\033[96;1m│  \e[93mXRAY   :\e[97m $status_xray      \e[93mDROPBEAR :\e[97m $status_dropbear\033[0m"
+    echo -e "\033[96;1m└───────────────────────────────────┘\033[0m"
+    echo -e "\e[38;5;51m┌──────────────[ ACCOUNT INFORMATION ]─────────────┐"
+    echo -e "│   \e[38;5;208mSSH/OVPN    : \e[0m$ssh ACCOUNT"
+    echo -e "│   \e[38;5;208mVMESS       : \e[0m$vm ACCOUNT"
+    echo -e "│   \e[38;5;208mVLESS       : \e[0m$vl ACCOUNT"
+    echo -e "│   \e[38;5;208mTROJAN      : \e[0m$tr ACCOUNT"
+    echo -e "│   \e[38;5;208mSHADOWSOCKS : \e[0m$ss ACCOUNT"
+    echo -e "└──────────────────────────────────────────────────┘"
+
+    echo -e "\033[96;1m┌────────── CLIENT DETAILS ─────────┐\033[0m"
+    echo -e "\033[96;1m│  \e[93mVERSION :\e[97m $(cat /opt/.ver) by NEWBIE\033[0m"
+    echo -e "\033[96;1m│  \e[93mCLIENTS :\e[97m $(cat /usr/bin/.User)\033[0m"
+    echo -e "\033[96;1m│  \e[93mEXPIRY  :\e[97m Lifetime\033[0m"
+    echo -e "\033[96;1m└───────────────────────────────────┘\033[0m"
+
+    echo -e "\033[96;1m┌────────── AVAILABLE COMMANDS ─────┐\033[0m"
+    echo -e "\033[96;1m│  \e[34m1.)\e[93m SSH/OPENVPN   \e[34m6.)\e[93m FIX DOMAIN      \033[0m"
+    echo -e "\033[96;1m│  \e[34m2.)\e[93m XRAY MANAGER  \e[34m7.)\e[93m SPEEDTEST    \033[0m"
+    echo -e "\033[96;1m│  \e[34m3.)\e[93m INFO VPS      \e[34m8.)\e[93m UPGRADE TO VIP   \033[0m"
+    echo -e "\033[96;1m│  \e[34m4.)\e[93m CHANGE DOMAIN \e[34m9.)\e[93m BACKUP RESTORE  \033[0m"
+    echo -e "\033[96;1m│  \e[34m5.)\e[93m FIX HAPROXY  \e[34m10.)\e[93m REBOOT       \033[0m"
+    echo -e "\033[96;1m└───────────────────────────────────┘\033[0m"
+echo ""
+read -p "Select From option [1/11 or x] :  " hallo
+case $hallo in
+1) clear ; m-ssh ;; # menu ssh
+2) clear ; m-xray ;; # menu vmess
+3) clear ; gotop ;; # menu vles
+4) clear ; change-domain ;; # menu trojan
+5) clear ; fixhap ;; # menu sadowsocks
+6) clear ; fixcert ;; # menu noobzvps
+7) clear ; speedtest ;; # menu bot telegram
+8) clear ; about ;; #Update script
+9) clear ; m-bkp ;; # menu backup
+10) clear ; reboot ;; # limit ip on off
+*)
+  echo -e "${RED}Input tidak valid!${NC} Silakan pilih menu yang benar."
+  sleep 2
+  ;;
+    esac
+
+    # Menunggu input sebelum kembali ke menu
+    read -p "Tekan Enter untuk kembali ke menu..."
+done
+}
+
+
+
+
+
+
+
