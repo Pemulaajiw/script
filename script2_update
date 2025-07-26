@@ -1,0 +1,71 @@
+#!/bin/bash
+colornow=$(cat /etc/rmbl/theme/color.conf)
+colorfont=$(cat /etc/rmbl/warnafont/warnaf.conf)
+export COLOR1="$(cat /etc/rmbl/theme/$colornow | grep -w "TEXT" | cut -d: -f2|sed 's/ //g')"
+export COLBG1="$(cat /etc/rmbl/theme/$colornow | grep -w "BG" | cut -d: -f2|sed 's/ //g')"
+export WH="$(cat /etc/rmbl/warnafont/$colorfont | grep -w "WARNAF" | cut -d: -f2|sed 's/ //g')"
+#WH='\033[1;37m'
+export y='\033[1;33m'
+export BGX="\033[42m"
+export BICyan="\033[0;36m"
+export z="\033[95;1m"
+export f="\033[1;97;41m"
+export G="\033[92m"
+export RED='\033[1;31m'
+export BRED='\033[1;31m'
+export NC='\033[0m'
+export gray="\e[1;30m"
+export UNGU="\033[1;35m"
+export Blue="\033[1;34m"
+export bblue="\033[1;34m"
+export green='\033[0;32m'
+export GREEN='\033[1;32m'
+export grenbo="\e[92;1m"
+export pr="\033[0;95m"
+export YELL='\033[1;93m'
+export orange='\033[33m'
+export mg='\033[35m'
+export white='\033[1;97m'
+export bwhite='\033[1;37m'
+export CLR='\033[41;1;97;1m'
+# File path
+MENU_FILE="/usr/local/sbin/menu"
+
+# Create backup
+cp "$MENU_FILE" "$MENU_FILE.bak"
+
+# 1. FIRST remove any existing VPN menu entries (clean slate)
+sed -i '/MENU VPN/d' "$MENU_FILE"
+sed -i '/13 | 013)/,/;;/d' "$MENU_FILE"
+
+# 2. Insert VPN menu in EXACT position - AFTER Trojan, BEFORE border
+sed -i '/echo -e "${COLOR1} │  ${WH} \[${COLOR1}03${WH}\]${NC}${COLOR1}• ${WH} VLESS   ${WH}[${GREEN}GOOD${WH}]${NC}/{
+a\
+echo -e "${COLOR1} │  ${WH} [${COLOR1}98${WH}]${NC}${COLOR1}• ${WH} VPN   ${WH}[${GREEN}GOOD${WH}]${NC}${COLOR1}    | ${NC}${WH} [${COLOR1}99${WH}]${NC}${COLOR1}• ${WH} TROJANGO   ${WH}[${GREEN}GOOD${WH}]${NC} "
+}' "$MENU_FILE"
+
+# 3. Add case handler in CORRECT position - AFTER option 8
+sed -i '/^6 | 06)/,/;;/ {
+  /;;/ a\
+\
+98)\
+clear\
+vpn\
+;;
+}' "$MENU_FILE"
+
+sed -i '/^13 | 013)/,/;;/ {
+  /;;/ a\
+\
+99)\
+clear\
+m-trgo\
+;;
+}' "$MENU_FILE"
+
+# 4. Fix any potential formatting issues
+
+sed -i 's/╭════════════════╮╭══════════════════╮╭════════════════════╮/╭════════════════╮╭══════════════════╮╭════════════════════╮/' "$MENU_FILE"
+sed -i 's/╰════════════════╯╰══════════════════╯╰════════════════════╯/╰════════════════╯╰══════════════════╯╰════════════════════╯/' "$MENU_FILE"
+
+echo "Update selesai"

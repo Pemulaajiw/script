@@ -1,0 +1,265 @@
+#!/bin/bash
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW="$(cat /etc/rmbl/theme/$colornow | grep -w "BG" | cut -d: -f2|sed 's/ //g')"
+BLUE="$(cat /etc/rmbl/theme/$colornow | grep -w "TEXT" | cut -d: -f2|sed 's/ //g')"
+PURPLE='\033[0;35m'
+CYAN="$(cat /etc/rmbl/warnafont/$colorfont | grep -w "WARNAF" | cut -d: -f2|sed 's/ //g')"
+NC='\033[0m' # No Color
+
+# Server IP
+SERVER_IP=$(curl -s ifconfig.me)
+
+# Animation characters
+SPINNER=('⣾' '⣽' '⣻' '⢿' '⡿' '⣟' '⣯' '⣷')
+
+function show_banner() {
+  clear
+  echo -e "${PURPLE}"
+  echo " ███████╗░█████╗░███╗░░██╗░██████╗████████╗░█████╗░ ┳━━━┳━━━┓"
+  echo " ██╔════╝██╔══██╗████╗░██║██╔════╝╚══██╔══╝██╔══██╗ ┃┏━┓┃┏━━┛"
+  echo " █████╗░░███████║██╔██╗██║╚█████╗░░░░██║░░░██║░░██║ ┃┗━┛┃┗━━┓"
+  echo " ██╔══╝░░██╔══██║██║╚████║░╚═══██╗░░░██║░░░██║░░██║ ┃┏┓┏┫┏━━┛"
+  echo " ██║░░░░░██║░░██║██║░╚███║██████╔╝░░░██║░░░╚█████╔╝ ┃┃┃┗┫┗━━┓"
+  echo " ╚═╝░░░░░╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░░░░╚═╝░░░░╚════╝░ ┻┛┗━┻━━━┛"
+  echo -e " ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝${NC}"
+  echo -e "${CYAN}===================================================${NC}"
+  echo -e "${YELLOW}               VPN MANAGEMENT SYSTEM${NC}"
+  echo -e "${CYAN}===================================================${NC}"
+  echo -e "${BLUE}Server IP: ${GREEN}$SERVER_IP${NC}"
+  echo ""
+}
+
+function status_service() {
+  local name=$1
+  local service=$2
+  if systemctl is-active --quiet "$service"; then
+    echo -e "  ${GREEN}◉ $name: RUNNING${NC}"
+  else
+    echo -e "  ${RED}◉ $name: NOT RUNNING${NC}"
+  fi
+}
+
+function spinner() {
+  local pid=$1
+  local delay=0.1
+  while kill -0 $pid 2>/dev/null; do
+    for i in "${SPINNER[@]}"; do
+      echo -ne "\r  ${BLUE}$i${NC} $2"
+      sleep $delay
+    done
+  done
+  echo -ne "\r"
+}
+
+function add_pptp_user() {
+  echo -e "\n${YELLOW}╒══════════════════════════════╕"
+  echo -e "│ ${BLUE}ADD PPTP USER${NC}${YELLOW}                  │"
+  echo -e "╘══════════════════════════════╛${NC}"
+  
+  echo -ne "  ${CYAN}» Username: ${NC}"
+  read username
+  echo -ne "  ${CYAN}» Password: ${NC}"
+  read password
+  
+  (echo "$username pptpd $password *" >> /etc/ppp/chap-secrets) &
+  spinner $! "Adding user..."
+  
+  echo -e "\n${GREEN}  ✓ User PPTP $username added successfully!${NC}"
+  echo ""
+  echo -e "${YELLOW}  ═══ PPTP Connection Details ═══${NC}"
+  echo -e "  ${CYAN}Server:${NC} $SERVER_IP"
+  echo -e "  ${CYAN}Username:${NC} $username"
+  echo -e "  ${CYAN}Password:${NC} $password"
+  echo -e "  ${CYAN}Encryption:${NC} MPPE 128-bit"
+  echo -e "${YELLOW}  ════════════════════════════${NC}"
+  echo ""
+  
+  (systemctl restart pptpd) &
+  spinner $! "Restarting PPTP service..."
+}
+
+function add_l2tp_user() {
+  echo -e "\n${YELLOW}╒══════════════════════════════╕"
+  echo -e "│ ${BLUE}ADD L2TP USER${NC}${YELLOW}                  │"
+  echo -e "╘══════════════════════════════╛${NC}"
+  
+  echo -ne "  ${CYAN}» Username: ${NC}"
+  read username
+  echo -ne "  ${CYAN}» Password: ${NC}"
+  read password
+  echo -ne "  ${CYAN}» Pre-Shared Key (blank for default): ${NC}"
+  read psk
+  
+  if [ -z "$psk" ]; then
+    psk=$(grep -oP '(?<=: PSK ")[^"]+' /etc/ipsec.secrets 2>/dev/null || echo "myvpnkey")
+  fi
+  
+  (echo "$username * $password *" >> /etc/ppp/chap-secrets) &
+  spinner $! "Adding user..."
+  
+  echo -e "\n${GREEN}  ✓ User L2TP $username added successfully!${NC}"
+  echo ""
+  echo -e "${YELLOW}  ═══ L2TP/IPSec Connection Details ═══${NC}"
+  echo -e "  ${CYAN}Server:${NC} $SERVER_IP"
+  echo -e "  ${CYAN}Username:${NC} $username"
+  echo -e "  ${CYAN}Password:${NC} $password"
+  echo -e "  ${CYAN}Pre-Shared Key:${NC} $psk"
+  echo -e "  ${CYAN}Type:${NC} L2TP/IPSec PSK"
+  echo -e "${YELLOW}  ═══════════════════════════════════${NC}"
+  echo ""
+  
+  (systemctl restart xl2tpd && systemctl restart strongswan-starter) &
+  spinner $! "Restarting L2TP services..."
+}
+
+function list_users() {
+  echo -e "\n${YELLOW}╒══════════════════════════════╕"
+  echo -e "│ ${BLUE}USER LIST${NC}${YELLOW}                      │"
+  echo -e "╘══════════════════════════════╛${NC}"
+  
+  echo -e "${CYAN}  ═══ PPTP Users ═══${NC}"
+  echo -e "  ${BLUE}Username        Password${NC}"
+  echo -e "  ${BLUE}--------        --------${NC}"
+  grep pptpd /etc/ppp/chap-secrets | awk '{print "  " $1 "\t\t" $3}'
+  
+  echo -e "\n${CYAN}  ═══ L2TP Users ═══${NC}"
+  echo -e "  ${BLUE}Username        Password${NC}"
+  echo -e "  ${BLUE}--------        --------${NC}"
+  grep -v pptpd /etc/ppp/chap-secrets | awk '{print "  " $1 "\t\t" $3}'
+
+  echo -e "\n${CYAN}  ═══ WIREGUARD Users ═══${NC}"
+  echo -e "  ${BLUE}Username        Password${NC}"
+  echo -e "  ${BLUE}--------        --------${NC}"
+  grep PublicKey etc/wireguard/wg0.conf | awk '{ print "  " $1 "\t\t" $3}'
+  
+  echo -e "\n${YELLOW}  ═══ Connection Info ═══${NC}"
+  echo -e "  ${CYAN}Server IP:${NC} $SERVER_IP"
+  echo -e "  ${CYAN}L2TP PSK:${NC} $(grep -oP '(?<=: PSK ")[^"]+' /etc/ipsec.secrets 2>/dev/null || echo 'myvpnkey')"
+  echo -e "${YELLOW}  ════════════════════════${NC}"
+}
+
+function delete_user() {
+  echo -e "\n${YELLOW}╒══════════════════════════════╕"
+  echo -e "│ ${BLUE}DELETE USER${NC}${YELLOW}                   │"
+  echo -e "╘══════════════════════════════╛${NC}"
+  
+  echo -ne "  ${CYAN}» Username to delete: ${NC}"
+  read username
+  
+  if sed -i "/^$username /d" /etc/ppp/chap-secrets; then
+    echo -e "\n${GREEN}  ✓ User $username deleted successfully!${NC}"
+    (systemctl restart pptpd && systemctl restart xl2tpd) &
+    spinner $! "Restarting services..."
+  else
+    echo -e "\n${RED}  ✗ Failed to delete user $username${NC}"
+  fi
+}
+
+function show_status() {
+  echo -e "\n${YELLOW}╒══════════════════════════════╕"
+  echo -e "│ ${BLUE}SERVICE STATUS${NC}${YELLOW}                │"
+  echo -e "╘══════════════════════════════╛${NC}"
+  
+  status_service "PPTP Service" "pptpd"
+  status_service "L2TP/IPSec (strongSwan)" "strongswan-starter"
+  status_service "L2TP (xl2tpd)" "xl2tpd"
+  
+  echo -e "\n${YELLOW}  ═══ Connection Info ═══${NC}"
+  echo -e "  ${CYAN}Server IP:${NC} $SERVER_IP"
+  echo -e "  ${CYAN}L2TP PSK:${NC} $(grep -oP '(?<=: PSK ")[^"]+' /etc/ipsec.secrets 2>/dev/null || echo 'myvpnkey')"
+  echo -e "${YELLOW}  ════════════════════════${NC}"
+}
+
+function connection_guide() {
+  echo -e "\n${YELLOW}╒══════════════════════════════╕"
+  echo -e "│ ${BLUE}CONNECTION GUIDE${NC}${YELLOW}              │"
+  echo -e "╘══════════════════════════════╛${NC}"
+  
+  echo -e "\n${GREEN}  ═══ PPTP Connection Guide ═══${NC}"
+  echo -e "  ${CYAN}Windows:${NC}"
+  echo -e "    1. Network Settings > VPN > Add VPN"
+  echo -e "    2. Select PPTP"
+  echo -e "    3. Server: $SERVER_IP"
+  echo -e "    4. Username/Password: See user list"
+  echo -e "    5. Encryption: Automatic"
+  
+  echo -e "\n  ${CYAN}Android:${NC}"
+  echo -e "    1. Settings > Network > VPN > Add VPN"
+  echo -e "    2. Select PPTP and enter details"
+  
+  echo -e "\n${GREEN}  ═══ L2TP/IPSec Connection Guide ═══${NC}"
+  echo -e "  ${CYAN}Windows:${NC}"
+  echo -e "    1. Network Settings > VPN > Add VPN"
+  echo -e "    2. Select L2TP/IPSec"
+  echo -e "    3. Server: $SERVER_IP"
+  echo -e "    4. Username/Password: See user list"
+  echo -e "    5. Pre-shared key: $(grep -oP '(?<=: PSK ")[^"]+' /etc/ipsec.secrets 2>/dev/null || echo 'myvpnkey')"
+  
+  echo -e "\n  ${CYAN}Android:${NC}"
+  echo -e "    1. Settings > Network > VPN > Add VPN"
+  echo -e "    2. Select L2TP/IPSec PSK and enter details"
+  
+  echo -e "\n${YELLOW}  ══════════════════════════════════${NC}"
+  echo -e "  ${RED}Note:${NC} Ensure VPN services are running before connecting"
+  echo -e "  ${RED}Note:${NC} Use strong passwords for security"
+  echo -e "${YELLOW}  ══════════════════════════════════${NC}"
+}
+
+function main_menu() {
+  show_banner
+  echo -e "${BLUE}  ╭──────────────────────────────╮"
+  echo -e "  │ ${YELLOW}MAIN MENU${BLUE}                        │"
+  echo -e "  ├──────────────────────────────┤"
+  echo -e "  │ ${CYAN}1) Add PPTP User              ${BLUE}│"
+  echo -e "  │ ${CYAN}2) Add L2TP User              ${BLUE}│"
+  echo -e "  │ ${CYAN}3) Add WIREGUARD User         ${BLUE}│"
+  echo -e "  │ ${CYAN}4) Check Users Login L2TP/PPTP${BLUE}│"
+  echo -e "  │ ${CYAN}5) Check Users Login WIREGUARD${BLUE}│"
+  echo -e "  │ ${CYAN}6) View ALLVPN User List      ${BLUE}│"
+  echo -e "  │ ${CYAN}7) Delete User L2TP/PPTP      ${BLUE}│"
+  echo -e "  │ ${CYAN}8) Delete User WIREGUARD      ${BLUE}│"
+  echo -e "  │ ${CYAN}9) Service Status L2TP/PPTP   ${BLUE}│"
+  echo -e "  │${CYAN}10) Connection Guide L2TP/PPTP ${BLUE}│"
+  echo -e "  │${CYAN}11) Rennew PPTP User           ${BLUE}│"
+  echo -e "  │${CYAN}12) Rennew L2TP User           ${BLUE}│"
+  echo -e "  │${CYAN}13) Rennew WIREGUARD User      ${BLUE}│"
+  echo -e "  │${RED}99) Exit                        ${BLUE}│"
+  echo -e "  │${RED}0X) MENU                        ${BLUE}│"
+  echo -e "  ╰──────────────────────────────╯${NC}"
+  echo -ne "${YELLOW}  » Select option [1-7]: ${NC}"
+  read pilihan
+  
+  case $pilihan in
+    1) add_pptp_user ;;
+    2) add_l2tp_user ;;
+    3) add-wg ;;
+    4) cek-pptp ;;
+    5) cek-wg ;;
+    6) list_users ;;
+    7) delete_user ;;
+    8) del-wg ;;
+    9) show_status ;;
+   10) connection_guide ;;
+   11) renew-pptp ;;
+   12) renew-l2tp ;;
+   13) renew-wg ;;
+   0X) menu ;;
+   99) echo -e "\n${GREEN}Exiting...${NC}"; exit 0 ;;
+    *) echo -e "\n${RED}Invalid selection!${NC}" ;;
+  esac
+  
+  echo -e "\n${YELLOW}Press ENTER to return to menu...${NC}"
+  read -p ""
+  main_menu
+}
+
+# Check root
+if [ "$(id -u)" != "0" ]; then
+  echo -e "${RED}This script must be run as root${NC}" 1>&2
+  exit 1
+fi
+
+main_menu
