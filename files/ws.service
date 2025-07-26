@@ -1,5 +1,5 @@
 [Unit]
-Description=WebSocket
+Description=WebSocket E-Pro V2.2 By Fan StoreFT
 Documentation=https://github.com/Pemulaajiw
 After=syslog.target network-online.target
 
@@ -9,8 +9,8 @@ NoNewPrivileges=true
 ExecStart=/usr/bin/ws -f /usr/bin/tun.conf
 Restart=on-failure
 RestartPreventExitStatus=23
-LimitNPROC=10000
-LimitNOFILE=1000000
+LimitNPROC=65535
+LimitNOFILE=65535
 
 [Install]
 WantedBy=multi-user.target
