@@ -12,11 +12,8 @@ Auto Script Install All VPN Service By FanVpn
 </p>
 
 ### FILTUR 🔥
-![alt text](https://github.com/Pemulaajiw/permission/blob/main/install.jpg?raw=true)
-
-## Warning!!!
-Minimal Kalo Mau Pake Sewa Lah Script Nya Jangan Nyomot Aja Taunya
-Yang Nyomot Gw Sumpahin Berak Batu Kerikil Ampe Mampus🗿
+![alt text](https://github.com/Pemulaajiw/permission/blob/main/install.jpg?raw=true) 
+Silakan Yang mau edit script nya silakan😀.
 
 ## Sewa Autoscript
 ```html
