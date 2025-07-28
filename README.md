@@ -78,17 +78,20 @@ rm port.sh
 cd
 rm port.sh
 ```
-  Lalu Install Script seperti biasa, setelah install enter & jalankan perintah dibawah untuk reboot vps
-  - KELUAR ATAU LOGOUT DARI REMOTE DENGAN MENGETIKAN "exit"
-  - Buka/Masuk Kembali REMOTE NYA DAN MASUK DENGAN
-  - KETIK
+  - **KELUAR ATAU LOGOUT DARI REMOTE DENGAN MENGETIKAN** "exit"
+  - **Buka/Masuk Kembali REMOTE NYA DAN MASUK DENGAN**
+  - **KETIK**
   ```
   lxc exec ubuntu20 -- bash
   ```
-  - Ketikan " welcome "
-   UNTUK MEMBUKA KE FILE SCRIPT SSH-XRAY-HAPROXY-VPN
+  **Lalu Install Script seperti biasa, setelah install enter & jalankan perintah dibawah untuk reboot vps**
+  - **Setelah reboot tunggu 3-5 menit, lalu buka kembali**
+  - **dengan Ketik** " lxc exec ubuntu20 -- bash "
+   **Lalu, UNTUK MEMBUKA KE FILE SCRIPT SSH-XRAY-HAPROXY-VPN**
+   **KETIK** " welcome "
 
-  SCRIPT SIAP DI GUNAKAN
+  **SCRIPT SIAP DI GUNAKAN**
+  
 ## UPDATE SCRIPT
 Masukkan perintah dibawah jika terdapat informasi pembaruan Script untuk versi yang akan datang
 ```
