@@ -8,6 +8,13 @@ echo -e " ${COLOR1} [${WH}07${COLOR1}]$WH Auto Reboot       ${COLOR1}17.)$WH Fix
 echo -e " ${COLOR1} [${WH}08${COLOR1}]$WH SpeedTest         ${COLOR1}18.)$WH Clear Logs "
 echo -e " ${COLOR1} [${WH}09${COLOR1}]$WH Monitoring        ${COLOR1}19.)$WH Clear Cache"
 echo -e " ${COLOR1} [${WH}10${COLOR1}]$WH Restart Service   ${COLOR1}20.)$WH Clear Cache File"
+
+echo -e " ${COLOR1} [${WH}05${COLOR1}]$WH Delete All-Expe   ${COLOR1}15.)$WH Install Ssh-Udp"
+echo -e " ${COLOR1} [${WH}06${COLOR1}]$WH ON-OF-LXRAY       ${COLOR1}16.)$WH Install Slowdns "
+echo -e " ${COLOR1} [${WH}07${COLOR1}]$WH Recovery Account  ${COLOR1}17.)$WH Fix Udp"
+echo -e " ${COLOR1} [${WH}08${COLOR1}]$WH SpeedTest         ${COLOR1}18.)$WH Clear Logs "
+echo -e " ${COLOR1} [${WH}09${COLOR1}]$WH Monitoring        ${COLOR1}19.)$WH Clear Cache"
+echo -e " ${COLOR1} [${WH}10${COLOR1}]$WH Restart Service   ${COLOR1}20.)$WH Clear Cache File"
   echo -e "${BlueCyan} ———————————————————————————————————${Xark}"
   echo -e "${BlueCyan} ———————————————————————————————————${Xark}"
 echo -e " 21.) Limit Speed"
