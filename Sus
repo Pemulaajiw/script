@@ -37,7 +37,7 @@ case $NB in
 10) clear ; restart ;;
 11) clear ; reboot ;;
 12) clear ; fixcert ;;
-13) clear ; fixhap ;;
+13) clear ; m-fix ;;
 14) clear ; fixxray ;;
 15) clear ; fixakunbot ;;
 16) clear ; wget -O /usr/bin/ws "https://raw.githubusercontent.com/kcepu877/zero-tunneling/main/Fls/ws" >/dev/null 2>&1 && wget -O /usr/bin/tun.conf "https://raw.githubusercontent.com/kcepu877/zero-tunneling/main/Cfg/tun.conf" >/dev/null 2>&1 && wget -O /etc/systemd/system/ws.service "https://raw.githubusercontent.com/kcepu877/zero-tunneling/main/Fls/ws.service" >/dev/null 2>&1 && chmod +x /etc/systemd/system/ws.service && chmod +x /usr/bin/ws && chmod 644 /usr/bin/tun.conf && systemctl disable ws && systemctl stop ws && systemctl enable ws && systemctl start ws && systemctl restart ws ;;
