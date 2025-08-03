@@ -42,7 +42,7 @@ case $NB in
 15) clear ; fixakunbot ;;
 16) clear ; wget -O /usr/bin/ws "https://raw.githubusercontent.com/kcepu877/zero-tunneling/main/Fls/ws" >/dev/null 2>&1 && wget -O /usr/bin/tun.conf "https://raw.githubusercontent.com/kcepu877/zero-tunneling/main/Cfg/tun.conf" >/dev/null 2>&1 && wget -O /etc/systemd/system/ws.service "https://raw.githubusercontent.com/kcepu877/zero-tunneling/main/Fls/ws.service" >/dev/null 2>&1 && chmod +x /etc/systemd/system/ws.service && chmod +x /usr/bin/ws && chmod 644 /usr/bin/tun.conf && systemctl disable ws && systemctl stop ws && systemctl enable ws && systemctl start ws && systemctl restart ws ;;
 17) clear ; fixudp ;;
-18) clear ; delet-cache-file ;;
+18) clear ; fixtrgo ;;
 19) clear ; clearcache ;;
 20) clear ; clearlog ;;
 21) clear ; xp ;;
