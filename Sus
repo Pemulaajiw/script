@@ -8,7 +8,9 @@ echo -e " ${COLOR1} [${WH}07${COLOR1}]$WH Auto Reboot       ${COLOR1}17.)$WH Fix
 echo -e " ${COLOR1} [${WH}08${COLOR1}]$WH SpeedTest         ${COLOR1}18.)$WH Clear Logs "
 echo -e " ${COLOR1} [${WH}09${COLOR1}]$WH Monitoring        ${COLOR1}19.)$WH Clear Cache"
 echo -e " ${COLOR1} [${WH}10${COLOR1}]$WH Restart Service   ${COLOR1}20.)$WH Clear Cache File"
-
+  echo -e "${BlueCyan} ———————————————————————————————————${Xark}"        
+echo -e " ${COLBG1}       ${WH}FEATURES OTHERS MANAGER      $NC"
+  echo -e "${BlueCyan} ———————————————————————————————————${Xark}"
 echo -e " ${COLOR1} [${WH}21${COLOR1}]$WH Delete All-Expe   ${COLOR1}25.)$WH Install Ssh-Udp"
 echo -e " ${COLOR1} [${WH}22${COLOR1}]$WH ON-OF-LXRAY       ${COLOR1}26.)$WH Install Slowdns "
 echo -e " ${COLOR1} [${WH}23${COLOR1}]$WH Recovery Account  ${COLOR1}27.)$WH Features"
@@ -26,7 +28,7 @@ case $NB in
 1) clear ; run ;;
 2) clear ; change-domain ;;
 3) clear ; nano /etc/banner.txt ;;
-4) clear ; wget -q https://raw.githubusercontent.com/kcepu877/zero-tunneling/main/update.sh && chmod +x update.sh && ./update.sh ;;
+4) clear ; sd ;;
 5) clear ; bw ;;
 6) clear ; wget -qO- bench.sh | bash ;;
 7) clear ; autoreboot ;;
@@ -43,14 +45,14 @@ case $NB in
 18) clear ; delet-cache-file ;;
 19) clear ; clearcache ;;
 20) clear ; clearlog ;;
-21) clear ;  ;;
-22) clear ;  ;;
-23) clear ;  ;;
-24) clear ;  ;;
-25) clear ;  ;;
-26) clear ;  ;;
-27) clear ;  ;;
-28) clear ;  ;;
+21) clear ; xp ;;
+22) clear ; onoff ;;
+23) clear ; m-recov ;;
+24) clear ; pointing ;;
+25) clear ; wget https://raw.githubusercontent.com/gemilangvip/autoscript/main/files/udp-custom.sh && chmod +x udp-custom.sh && ./udp-custom.sh && reboot ;;
+26) clear ; wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/slowdns.sh && chmod +x slowdns.sh && ./slowdns.sh ;;
+27) clear ; features ;;
+28) clear ; online ;;
 29) clear ; limitspeed  ;;
 30) clear ; anti-ddos ;;
 31) clear ; Info_Port ;;
