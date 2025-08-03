@@ -26,15 +26,15 @@ echo -e "  0.) Back to Menu"
 
 case $NB in
 1) clear ; run ;;
-2) clear ; change-domain ;;
-3) clear ; nano /etc/banner.txt ;;
+2) clear ; addhost ;;
+3) clear ; nano /etc/kyt.txt ;;
 4) clear ; sd ;;
 5) clear ; bw ;;
 6) clear ; wget -qO- bench.sh | bash ;;
 7) clear ; autoreboot ;;
 8) clear ; speedtest ;;
 9) clear ; gotop ;; 
-10) clear ; reset ;;
+10) clear ; restart ;;
 11) clear ; reboot ;;
 12) clear ; fixcert ;;
 13) clear ; fixhap ;;
