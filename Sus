@@ -43,6 +43,14 @@ case $NB in
 18) clear ; delet-cache-file ;;
 19) clear ; clearcache ;;
 20) clear ; clearlog ;;
+21) clear ;  ;;
+22) clear ;  ;;
+23) clear ;  ;;
+24) clear ;  ;;
+25) clear ;  ;;
+26) clear ;  ;;
+27) clear ;  ;;
+28) clear ;  ;;
 29) clear ; limitspeed  ;;
 30) clear ; anti-ddos ;;
 31) clear ; Info_Port ;;
