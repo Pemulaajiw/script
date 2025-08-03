@@ -21,7 +21,7 @@ echo -e " 29.) Limit Speed"
 echo -e " 30.) Enable Anti Ddos "  
 echo -e " 31.) Info Port Payload  "
 echo -e " 32.) Developer Script "
-echo -e " 33.) Menu Bot Simple Only "
+echo -e " 33.) Menu Admin Bot Simple "
 echo -e "  0.) Back to Menu"
 
 case $NB in
@@ -57,7 +57,7 @@ case $NB in
 30) clear ; anti-ddos ;;
 31) clear ; Info_Port ;;
 32) clear ; about ;;
-33) clear ; m-adm ;;
+33) clear ; m-admin ;;
 0) clear ; menu ;;
 *) clear ; menu ;;
 esac
