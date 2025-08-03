@@ -5,7 +5,7 @@ echo -e " ${COLOR1} [${WH}04${COLOR1}]$WH Create Slowdns    ${COLOR1}14.)$WH Fix
 echo -e " ${COLOR1} [${WH}05${COLOR1}]$WH Check Bandwidth   ${COLOR1}15.)$WH Fix Bot Tele"
 echo -e " ${COLOR1} [${WH}06${COLOR1}]$WH Spesifikasi VPS   ${COLOR1}16.)$WH Fix Epro "
 echo -e " ${COLOR1} [${WH}07${COLOR1}]$WH Auto Reboot       ${COLOR1}17.)$WH Fix Udp"
-echo -e " ${COLOR1} [${WH}08${COLOR1}]$WH SpeedTest         ${COLOR1}18.)$WH Clear Logs "
+echo -e " ${COLOR1} [${WH}08${COLOR1}]$WH SpeedTest         ${COLOR1}18.)$WH Fix Trgo "
 echo -e " ${COLOR1} [${WH}09${COLOR1}]$WH Monitoring        ${COLOR1}19.)$WH Clear Cache"
 echo -e " ${COLOR1} [${WH}10${COLOR1}]$WH Restart Service   ${COLOR1}20.)$WH Clear Cache File"
   echo -e "${BlueCyan} ———————————————————————————————————${Xark}"        
