@@ -39,6 +39,10 @@ Masukkan perintah dibawah untuk menginstall Autoscript Premium
 ```
 screen -S fnstvt-session bash -c "wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/setup.sh && chmod +x setup.sh && ./setup.sh; read -p 'Tekan enter untuk keluar...'"
 ```
+## MELANJUTKAN STUCK KETIKA INSTALL DIAWAL
+```
+screen -r -d fnstvt
+```
 ==========================================================================================
 
 
