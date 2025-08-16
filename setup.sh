@@ -778,6 +778,15 @@ print_success "NOOBZVPN"
 }
 
 function ins_trgo(){
+cd
+wget -q --no-check-certificate -O ins-trgo.sh "https://raw.githubusercontent.com/hidessh99/auto2025/refs/heads/main/ssh/ins-trgo.sh && chmod +x ins-trgo.sh && ./ins-trgo.sh" >/dev/null 2>&1
+bash install.sh >> /dev/null 2>&1
+cd
+systemctl restart noobzvpns >> /dev/null 2>&1
+rm -rf /root/noobzvpns.zip >> /dev/null 2>&1
+rm -rf /root/noobzvpns >> /dev/null 2>&1
+clear
+
 clear
 cd
 print_install "Memasang TrojanGo"
