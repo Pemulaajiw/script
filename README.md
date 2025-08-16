@@ -26,21 +26,18 @@ Lifetime 5 IP : 100.000
 ```
 # free add ip ke domain < off proxies>
 https://sub.irawancandra2303.workers.dev/
-## UPGRADE FOR DEBIAN
-Masukkan perintah dibawah jika anda menggunakan OS Debian Version 9 atau 10
+## UPGRADE FOR OS
 ```
-apt update -y && apt upgrade -y && apt dist-upgrade -y && reboot
+echo -e "net.ipv6.conf.all.disable_ipv6 = 1\nnet.ipv6.conf.default.disable_ipv6 = 1\nnet.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf && sysctl -p
 ```
 
-##  UPGRADE FOR UBUNTU
-Masukkan perintah dibawah jika anda menggunakan OS Ubuntu Version 18 atau 20
 ```
-apt update && apt upgrade -y && update-grub && sleep 2 && reboot
+apt update -y && apt upgrade -y --fix-missing && apt install -y xxd bzip2 wget curl sudo build-essential bsdmainutils screen dos2unix && update-grub && apt dist-upgrade -y && sleep 2 && reboot
 ```
 ## INSTALL SCRIPT 
 Masukkan perintah dibawah untuk menginstall Autoscript Premium
 ```
-apt install -y && apt update -y && apt upgrade -y && wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/setup.sh && chmod +x setup.sh && ./setup.sh
+screen -S fnstvt-session bash -c "wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/setup.sh && chmod +x setup.sh && ./setup.sh; read -p 'Tekan enter untuk keluar...'"
 ```
 ==========================================================================================
 
