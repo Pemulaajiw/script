@@ -762,6 +762,64 @@ apt autoremove -y >/dev/null 2>&1
 print_success "ePro WebSocket Proxy"
 }
 
+function udp-custom(){
+print_install "Menginstall UDP-CUSTOM"
+cd
+rm -rf /root/udp
+mkdir -p /root/udp
+
+# install udp-custom
+echo downloading udp-custom
+wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8" -O /root/udp/udp-custom && rm -rf /tmp/cookies.txt
+chmod +x /root/udp/udp-custom
+
+echo downloading default config
+wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM" -O /root/udp/config.json && rm -rf /tmp/cookies.txt
+chmod 644 /root/udp/config.json
+
+if [ -z "$1" ]; then
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Team
+
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=default.target
+EOF
+else
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Team
+
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server -exclude $1
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=default.target
+EOF
+fi
+
+echo start service udp-custom
+systemctl start udp-custom &>/dev/null
+
+echo enable service udp-custom
+systemctl enable udp-custom &>/dev/null
+clear
+print_success "UDP-CUSTOM BY FAN STORE VPN"
+}
+
 function noobzvpn(){
 clear
 cd
@@ -773,12 +831,17 @@ cd noobzvpns
 bash install.sh
 cd
 rm -rf noobzvpns.zip
-systemctl restart noobzvpns
+echo start service noobzvpns
+systemctl start noobzvpns &>/dev/null
+
+echo enable service noobzvpns
+systemctl enable noobzvpns &>/dev/null
 print_success "NOOBZVPN"
 }
 
 function ins_trgo(){
 cd
+print_install "Memasang TrojanGo"
 wget "https://raw.githubusercontent.com/king-vpn/autoscript-vip/main/install/ins-trgo.sh && chmod +x ins-trgo.sh && ./ins-trgo.sh" >/dev/null 2>&1
 clear
 print_success "TROJANGO"
@@ -808,6 +871,8 @@ systemctl restart haproxy
     systemctl enable --now netfilter-persistent
     systemctl enable --now ws
     systemctl enable --now fail2ban
+	systemctl enable --now udp-custom
+    systemctl enable --NOW noobzvpns
 history -c
 echo "unset HISTFILE" >> /etc/profile
 
@@ -1035,6 +1100,7 @@ clear
     ins_swab
     ins_Fail2ban
     ins_epro
+	udp-custom
     noobzvpn
     ins_trgo
     ins_restart
