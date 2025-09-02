@@ -21,7 +21,17 @@ GRAY="\e[1;30m"
 NC='\e[0m'
 red='\e[1;31m'
 green='\e[0;32m'
-
+# Informasi sistem
+timezone="Asia/Jakarta"
+city=$(curl -s ipinfo.io/city)
+isp=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
+ip=$(wget -qO- ipinfo.io/ip)
+nginx_key_url="https://nginx.org/keys/nginx_signing.key"
+dropbear_init_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear"
+dropbear_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/examples/dropbear"
+dropbear_dss_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear_dss_host_key"
+xray_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/xray.conf"
+nginx_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/nginx.conf"
 clear
 # // Exporint IP AddressInformation
 export IP=$( curl -sS icanhazip.com )
@@ -52,13 +62,12 @@ else
 fi
 
 # // Checking System
-if [[ $( cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g' ) == "ubuntu" ]]; then
-    echo -e "${OK} Your OS Is Supported ( ${green}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' )${NC} )"
-elif [[ $( cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g' ) == "debian" ]]; then
-    echo -e "${OK} Your OS Is Supported ( ${green}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' )${NC} )"
-else
-    echo -e "${EROR} Your OS Is Not Supported ( ${YELLOW}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' )${NC} )"
-    exit 1
+os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
+os_version=$(grep -w VERSION_ID /etc/os-release | head -n1 | sed 's/VERSION_ID=//g' | sed 's/"//g')
+echo "OS: $os_id, Version: $os_version"
+if [ "$EUID" -ne 0 ]; then
+echo -e "${red}This script must be run as root${neutral}"
+exit 1
 fi
 
 # // IP Address Validating
@@ -133,7 +142,103 @@ function is_root() {
     fi
 
 }
-
+if ! apt update -y; then
+echo -e "${red}Failed to update${neutral}"
+fi
+if ! dpkg -s sudo >/dev/null 2>&1; then
+if ! apt install sudo -y; then
+echo -e "${red}Failed to install sudo${neutral}"
+fi
+else
+echo -e "${green}sudo is already installed, skipping...${neutral}"
+fi
+if ! dpkg -s software-properties-common debconf-utils >/dev/null 2>&1; then
+if ! apt install -y --no-install-recommends software-properties-common debconf-utils; then
+echo -e "${red}Failed to install basic packages${neutral}"
+fi
+else
+echo -e "${green}software-properties-common and debconf-utils are already installed, skipping...${neutral}"
+fi
+if dpkg -s exim4 >/dev/null 2>&1; then
+if ! apt remove --purge -y exim4; then
+echo -e "${red}Failed to remove exim4${neutral}"
+else
+echo -e "${green}exim4 removed successfully${neutral}"
+fi
+else
+echo -e "${green}exim4 is not installed, skipping...${neutral}"
+fi
+if dpkg -s ufw >/dev/null 2>&1; then
+if ! apt remove --purge -y ufw; then
+echo -e "${red}Failed to remove ufw${neutral}"
+else
+echo -e "${green}ufw removed successfully${neutral}"
+fi
+else
+echo -e "${green}ufw is not installed, skipping...${neutral}"
+fi
+if dpkg -s firewalld >/dev/null 2>&1; then
+if ! apt remove --purge -y firewalld; then
+echo -e "${red}Failed to remove firewalld${neutral}"
+else
+echo -e "${green}firewalld removed successfully${neutral}"
+fi
+else
+echo -e "${green}firewalld is not installed, skipping...${neutral}"
+fi
+if ! echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections; then
+echo -e "${red}Failed to configure iptables-persistent v4${neutral}"
+fi
+if ! echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections; then
+echo -e "${red}Failed to configure iptables-persistent v6${neutral}"
+fi
+if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layout select English"; then
+echo -e "${red}Failed to configure keyboard layout${neutral}"
+fi
+if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variant select English"; then
+echo -e "${red}Failed to configure keyboard variant${neutral}"
+fi
+export DEBIAN_FRONTEND=noninteractive
+if ! apt update -y; then
+echo -e "${red}Failed to update${neutral}"
+fi
+if ! apt-get upgrade -y; then
+echo -e "${red}Failed to upgrade${neutral}"
+else
+echo -e "${green}System upgraded successfully${neutral}"
+fi
+if ! apt dist-upgrade -y; then
+echo -e "${red}Failed to dist-upgrade${neutral}"
+else
+echo -e "${green}System dist-upgraded successfully${neutral}"
+fi
+function base_package() {
+print_install "Menginstall Packet Yang Dibutuhkan"
+packages=(
+libnss3-dev liblzo2-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev
+libcap-ng-utils libselinux1-dev flex bison make libnss3-tools libevent-dev bc
+rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential
+gcc g++ htop lsof tar wget curl ruby zip unzip p7zip-full libc6 util-linux
+ca-certificates iptables iptables-persistent netfilter-persistent
+net-tools openssl gnupg gnupg2 lsb-release shc cmake git whois
+screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq
+tmux python3 python3-pip lsb-release gawk
+libncursesw5-dev libgdbm-dev tk-dev libffi-dev libbz2-dev checkinstall
+openvpn easy-rsa dropbear
+)
+for package in "${packages[@]}"; do
+if ! dpkg -s "$package" >/dev/null 2>&1; then
+if ! apt-get update -y; then
+echo -e "${red}Failed to update${neutral}"
+fi
+if ! apt-get install -y "$package"; then
+echo -e "${red}Failed to install $package${neutral}"
+fi
+else
+echo -e "${green}$package is already installed, skipping...${neutral}"
+fi
+done
+}
 # Buat direktori xray
 print_install "Membuat direktori xray"
     mkdir -p /etc/xray
@@ -169,24 +274,90 @@ function first_setup(){
     echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
     echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
     print_success "Directory Xray"
-    if [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" ]]; then
-    echo "Setup Dependencies $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-    sudo apt update -y
-    apt-get install --no-install-recommends software-properties-common
-    add-apt-repository ppa:vbernat/haproxy-2.0 -y
-    apt-get -y install haproxy=2.0.\*
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" ]]; then
-    echo "Setup Dependencies For OS Is $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-    curl https://haproxy.debian.net/bernat.debian.org.gpg |
-        gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg
-    echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
-        http://haproxy.debian.net buster-backports-1.8 main \
-        >/etc/apt/sources.list.d/haproxy.list
-    sudo apt-get update
-    apt-get -y install haproxy=1.8.\*
+    ln -fs /usr/share/zoneinfo/$timezone /etc/localtime
+    os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
+if [[ $os_id == "ubuntu" ]]; then
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+if ! dpkg -s software-properties-common >/dev/null 2>&1; then
+apt-get install --no-install-recommends software-properties-common || echo -e "${red}Failed to install software-properties-common${neutral}"
 else
-    echo -e " Your OS Is Not Supported ($(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') )"
-    exit 1
+echo -e "${green}software-properties-common is already installed, skipping...${neutral}"
+fi
+rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
+if ! dpkg -s ubuntu-keyring >/dev/null 2>&1; then
+apt install -y ubuntu-keyring || echo -e "${red}Failed to install ubuntu-keyring${neutral}"
+else
+echo -e "${green}ubuntu-keyring is already installed, skipping...${neutral}"
+fi
+curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
+echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
+if ! dpkg -s nginx >/dev/null 2>&1; then
+if ! apt install -y nginx; then
+echo -e "${red}Failed to install nginx${neutral}"
+fi
+else
+echo -e "${green}nginx is already installed, skipping...${neutral}"
+fi
+if [ -f /etc/nginx/conf.d/default.conf ]; then
+rm /etc/nginx/conf.d/default.conf || echo -e "${red}Failed to delete /etc/nginx/conf.d/default.conf${neutral}"
+else
+echo -e "${yellow}/etc/nginx/conf.d/default.conf does not exist, skipping deletion${neutral}"
+fi
+elif [[ $os_id == "debian" ]]; then
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
+if ! dpkg -s debian-archive-keyring >/dev/null 2>&1; then
+apt install -y debian-archive-keyring || echo -e "${red}Failed to install debian-archive-keyring${neutral}"
+else
+echo -e "${green}debian-archive-keyring is already installed, skipping...${neutral}"
+fi
+curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
+echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
+if ! dpkg -s nginx >/dev/null 2>&1; then
+apt install -y nginx || echo -e "${red}Failed to install nginx${neutral}"
+else
+echo -e "${green}nginx is already installed, skipping...${neutral}"
+fi
+else
+echo -e "${red}Unsupported OS. Exiting.${neutral}"
+exit 1
+fi
+if [[ $os_id == "ubuntu" && $os_version == "18.04" ]]; then
+add-apt-repository -y ppa:vbernat/haproxy-2.6 || echo -e "${red}Failed to add haproxy repository${neutral}"
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+apt-get install -y haproxy=2.6.\* || echo -e "${red}Failed to install haproxy${neutral}"
+elif [[ $os_id == "ubuntu" && $os_version == "20.04" ]]; then
+add-apt-repository -y ppa:vbernat/haproxy-2.9 || echo -e "${red}Failed to add haproxy repository${neutral}"
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+apt-get install -y haproxy=2.9.\* || echo -e "${red}Failed to install haproxy${neutral}"
+elif [[ $os_id == "ubuntu" && $os_version == "22.04" ]]; then
+add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
+elif [[ $os_id == "ubuntu" && $os_version == "24.04" ]]; then
+add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
+elif [[ $os_id == "debian" && $os_version == "10" ]]; then
+curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
+echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" http://haproxy.debian.net buster-backports-2.6 main >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+apt-get install -y haproxy=2.6.\* || echo -e "${red}Failed to install haproxy${neutral}"
+elif [[ $os_id == "debian" && $os_version == "11" ]]; then
+curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
+echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" http://haproxy.debian.net bullseye-backports-3.0 main >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
+elif [[ $os_id == "debian" && $os_version == "12" ]]; then
+curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
+echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" http://haproxy.debian.net bookworm-backports-3.0 main >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
+sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
+else
+echo -e "${red}Unsupported OS. Exiting.${neutral}"
+exit 1
 fi
 }
 
@@ -208,36 +379,6 @@ function nginx_install() {
 }
 
 # Update and remove packages
-function base_package() {
-    clear
-    ########
-    print_install "Menginstall Packet Yang Dibutuhkan"
-    apt install zip pwgen openssl netcat socat cron bash-completion -y
-    apt install figlet -y
-    apt update -y
-    apt upgrade -y
-    apt dist-upgrade -y
-    systemctl enable chronyd
-    systemctl restart chronyd
-    systemctl enable chrony
-    systemctl restart chrony
-    chronyc sourcestats -v
-    chronyc tracking -v
-    apt install ntpdate -y
-    ntpdate pool.ntp.org
-    apt install sudo -y
-    sudo apt-get clean all
-    sudo apt-get autoremove -y
-    sudo apt-get install -y debconf-utils
-    sudo apt-get remove --purge exim4 -y
-    sudo apt-get remove --purge ufw firewalld -y
-    sudo apt-get install -y --no-install-recommends software-properties-common
-    echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
-    echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
-    sudo apt-get install -y speedtest-cli vnstat libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev bc rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential gcc g++ python htop lsof tar wget curl ruby zip unzip p7zip-full python3-pip libc6 util-linux build-essential msmtp-mta ca-certificates bsd-mailx iptables iptables-persistent netfilter-persistent net-tools openssl ca-certificates gnupg gnupg2 ca-certificates lsb-release gcc shc make cmake git screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq openvpn easy-rsa
-    print_success "Packet Yang Dibutuhkan"
-    
-}
 clear
 # Fungsi input domain
 function pasang_domain() {
@@ -341,24 +482,63 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
 # Pasang SSL
 function pasang_ssl() {
-clear
-print_install "Memasang SSL Pada Domain"
-    rm -rf /etc/xray/xray.key
-    rm -rf /etc/xray/xray.crt
-    domain=$(cat /root/domain)
-    STOPWEBSERVER=$(lsof -i:80 | cut -d' ' -f1 | awk 'NR==2 {print $1}')
+    clear
+    print_install "Memasang SSL Pada Domain"
+
+    # Pastikan lsof tersedia
+    if ! command -v lsof &> /dev/null; then
+        apt-get update -y
+        apt-get install lsof -y
+    fi
+
+    # Hapus cert lama
+    rm -f /etc/xray/xray.key /etc/xray/xray.crt
+
+    # Baca domain
+    if [[ -f /root/domain ]]; then
+        domain=$(cat /root/domain)
+    else
+        echo "❌ Domain tidak ditemukan di /root/domain"
+        exit 1
+    fi
+
+    # Hentikan semua service di port 80 (apapun itu)
+    if lsof -t -i:80 >/dev/null 2>&1; then
+        STOPPID=$(lsof -t -i:80)
+        echo "🔴 Menutup proses di port 80 (PID: $STOPPID)"
+        kill -9 $STOPPID
+    fi
+
+    # Hentikan nginx kalau ada
+    if systemctl list-unit-files | grep -qw nginx.service; then
+        systemctl stop nginx
+    fi
+
+    # Siapkan direktori acme.sh
     rm -rf /root/.acme.sh
-    mkdir /root/.acme.sh
-    systemctl stop $STOPWEBSERVER
-    systemctl stop nginx
-    curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+    mkdir -p /root/.acme.sh
+
+    # Download acme.sh universal
+    curl -s https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
     chmod +x /root/.acme.sh/acme.sh
+
+    # Install / upgrade acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+
+    # Issue cert
     /root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
-    ~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
-    chmod 777 /etc/xray/xray.key
-    print_success "SSL Certificate"
+
+    # Install cert ke jalur xray
+    /root/.acme.sh/acme.sh --install-cert -d $domain \
+        --fullchainpath /etc/xray/xray.crt \
+        --keypath /etc/xray/xray.key \
+        --ecc
+
+    chmod 600 /etc/xray/xray.key
+    chmod 644 /etc/xray/xray.crt
+
+    print_success "✅ SSL Certificate berhasil dipasang untuk domain: $domain"
 }
 
 function make_folder_xray() {
@@ -592,11 +772,16 @@ function ins_dropbear(){
 clear
 print_install "Menginstall Dropbear"
 # // Installing Dropbear
-apt-get install dropbear -y > /dev/null 2>&1
-wget -q -O /etc/default/dropbear "${REPO}config/dropbear.conf"
-chmod +x /etc/default/dropbear
-/etc/init.d/dropbear restart
-/etc/init.d/dropbear status
+if [ -n "$dropbear_conf_url" ]; then
+[ -f /etc/default/dropbear ] && rm /etc/default/dropbear
+wget -q -O /etc/default/dropbear $dropbear_conf_url >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear.conf${neutral}"
+[ -f /etc/init.d/dropbear ] && rm /etc/init.d/dropbear
+wget -q -O /etc/init.d/dropbear $dropbear_init_url && chmod +x /etc/init.d/dropbear >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear.init${neutral}"
+[ -f /etc/dropbear/dropbear_dss_host_key ] && rm /etc/dropbear/dropbear_dss_host_key
+wget -q -O /etc/dropbear/dropbear_dss_host_key $dropbear_dss_url && chmod +x /etc/dropbear/dropbear_dss_host_key >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear_dss_host_key${neutral}"
+else
+echo -e "${yellow}dropbear_conf_url is not set, skipping download of dropbear_dss_host_key${neutral}"
+fi
 print_success "Dropbear"
 }
 
