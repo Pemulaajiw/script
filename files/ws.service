@@ -1,41 +1,16 @@
 [Unit]
-Description=WebSocket LITE (ws)
-Documentation=https://github.com/Pemulaajiw
-Wants=network-online.target
-After=network-online.target nss-lookup.target
+Description=WebSocket
+Documentation=https://github.com/jaka1m
+After=syslog.target network-online.target
 
 [Service]
-Type=simple
 User=root
-Group=root
-
-ExecStart=/usr/local/bin/ws -f /usr/bin/tun.conf
-
-Restart=on-failure
-RestartSec=2s
-RestartPreventExitStatus=23
-
-LimitNOFILE=1000000
-LimitNPROC=10000
-
-AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_ADMIN
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_ADMIN
 NoNewPrivileges=true
-
-PrivateTmp=true
-ProtectSystem=full
-ProtectHome=true
-ProtectClock=true
-ProtectKernelLogs=true
-ProtectKernelModules=true
-ProtectKernelTunables=true
-RestrictSUIDSGID=true
-LockPersonality=true
-ProtectControlGroups=true
-SystemCallArchitectures=native
-UMask=027
-
-SyslogIdentifier=ws
+ExecStart=/usr/bin/ws -f /usr/bin/tun.conf
+Restart=on-failure
+RestartPreventExitStatus=23
+LimitNPROC=10000
+LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
