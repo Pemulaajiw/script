@@ -28,7 +28,7 @@ isp=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
 ip=$(wget -qO- ipinfo.io/ip)
 nginx_key_url="https://nginx.org/keys/nginx_signing.key"
 dropbear_init_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear"
-dropbear_conf_url="https://raw.githubusercontent.com/Pemulaajiw/script/main/config/dropbear.conf"
+dropbear_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/examples/dropbear"
 dropbear_dss_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear_dss_host_key"
 xray_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/xray.conf"
 nginx_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/nginx.conf"
@@ -1349,5 +1349,4 @@ echo -e "\e[94;1m╚════════════════════
 echo -e ""
 echo ""
 read -p "[ Enter ]  TO REBOOT"
-
 reboot
