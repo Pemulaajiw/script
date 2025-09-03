@@ -1,1316 +1,92 @@
 #!/bin/bash
-# â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
-# System Request : Debian 9+/Ubuntu 18.04+/20+
-# Develovers Â» FanVPN-Store
-# Email      Â» HurufKapital58@gmail.com
-# telegram   Â» https://t.me/AJW29
-# whatsapp   Â» wa.me/+6287812264674
-# â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
-# FanVPN-Store
-
-Green="\e[92;1m"
-RED="\033[31m"
-YELLOW="\033[33m"
-BLUE="\033[36m"
-FONT="\033[0m"
-GREENBG="\033[42;37m"
-REDBG="\033[41;37m"
-OK="${Green}  Â»${FONT}"
-ERROR="${RED}[ERROR]${FONT}"
-GRAY="\e[1;30m"
-NC='\e[0m'
-red='\e[1;31m'
-green='\e[0;32m'
-# Informasi sistem
-timezone="Asia/Jakarta"
-city=$(curl -s ipinfo.io/city)
-isp=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
-ip=$(wget -qO- ipinfo.io/ip)
-nginx_key_url="https://nginx.org/keys/nginx_signing.key"
-dropbear_init_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear"
-dropbear_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/examples/dropbear"
-dropbear_dss_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear_dss_host_key"
-xray_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/xray.conf"
-nginx_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/nginx.conf"
-clear
-# // Exporint IP AddressInformation
-export IP=$( curl -sS icanhazip.com )
-
-# // Clear Data
-clear
-clear && clear && clear
-clear;clear;clear
-
-# // Banner
-echo -e "${YELLOW}â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”${NC}"
-echo -e "\033[92;1m              ğ—ªğ—˜ğ—Ÿğ—–ğ—¢ğ— ğ—˜ ğ—§ğ—¢ ğ—¦ğ—–ğ—¥ğ—œğ—£ğ—§ ğ—™ğ—”ğ—¡ğ—¡ğ—§ğ—¨ğ—¡ğ—˜ğ—Ÿ              \033[0m"
-echo -e "  Developer Â» Klmpkğ—™ğ—¡VPN Tunneling{YELLOW}(${NC}${green} Stable Edition ${NC}${YELLOW})${NC}"
-echo -e "  Â» This Will Quick Setup VPN Server On Your Server"
-echo -e "  Pembuat : ${green}ğ—™ğ—”ğ—¡uzijww ${NC}"
-echo -e "  Recode By My Self NZNXAJW VPN STORE ${YELLOW}(${NC} 2024 ${YELLOW})${NC}"
-echo -e "${YELLOW}â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”${NC}"
-echo ""
-sleep 2
-###### IZIN SC 
-
-# // Checking Os Architecture
-if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
-    echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
+# +------------------------------------------------------+
+# | Author: Diwayaa                                          |
+# | Region: Indonesia                                        |
+# | Chanel: https://t.me/tunnelstores / Admin  @diwayaa  |
+# +------------------------------------------------------+
+skip=56
+tab='	'
+nl='
+'
+IFS=" "
+#This script was encrypted by @diwayaa, if you experience an error please report IT
+USER=${USER:-$(id -u -n)}
+HOME="${HOME:-$(getent passwd $USER 2>/dev/null | cut -d: -f6)}"
+HOME="${HOME:-$(eval echo ~$USER)}"
+#This script was encrypted by @diwayaa, if you experience an error please report it, for anyone who describes it please tag me, the code was created by myself with the help of the internet, not taken from someone else.
+umask=`umask`
+umask 77
+shctmpdir=
+trap 'res=$?
+  test -n "$shctmpdir" && rm -fr "$shctmpdir"
+  (exit $res); exit $res
+' 0 1 2 3 5 10 13 15
+case $TMPDIR in
+  / | */tmp/) test -d "$TMPDIR" && test -w "$TMPDIR" && test -x "$TMPDIR" || TMPDIR=$HOME/.cache/; test -d "$HOME/.cache" && test -w "$HOME/.cache" && test -x "$HOME/.cache" || mkdir "$HOME/.cache";;
+  */tmp) TMPDIR=$TMPDIR/; test -d "$TMPDIR" && test -w "$TMPDIR" && test -x "$TMPDIR" || TMPDIR=$HOME/.cache/; test -d "$HOME/.cache" && test -w "$HOME/.cache" && test -x "$HOME/.cache" || mkdir "$HOME/.cache";;
+  *:* | *) TMPDIR=$HOME/.cache/; test -d "$HOME/.cache" && test -w "$HOME/.cache" && test -x "$HOME/.cache" || mkdir "$HOME/.cache";;
+esac
+if type mktemp >/dev/null 2>&1; then
+  shctmpdir=`mktemp -d "${TMPDIR}shctmpXXXXXXXXX"`
 else
-    echo -e "${EROR} Your Architecture Is Not Supported ( ${YELLOW}$( uname -m )${NC} )"
-    exit 1
-fi
+  shctmpdir=${TMPDIR}shctmp$$; mkdir $shctmpdir
+fi || { (exit 127); exit 127; }
 
-# // Checking System
-os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
-os_version=$(grep -w VERSION_ID /etc/os-release | head -n1 | sed 's/VERSION_ID=//g' | sed 's/"//g')
-echo "OS: $os_id, Version: $os_version"
-if [ "$EUID" -ne 0 ]; then
-echo -e "${red}This script must be run as root${neutral}"
-exit 1
-fi
+shctmp=$shctmpdir/$(basename "$0").decrypted
+case $0 in
+-* | */*'
+') mkdir -p "$shctmp" && rm -r "$shctmp";;
+*/*) shctmp=$shctmpdir/`basename "$0"`.decrypted;;
+esac || { (exit 127); exit 127; }
 
-# // IP Address Validating
-if [[ $IP == "" ]]; then
-    echo -e "${EROR} IP Address ( ${YELLOW}Not Detected${NC} )"
+case `printf 'X\n' | tail -n +1 2>/dev/null` in
+X) tail_n=-n;;
+*) tail_n=;;
+esac
+if tail $tail_n +$skip <"$0" | gpg -q --decrypt --batch --passphrase "diwayaa project | 73::4y::2u::e5::4l::nX::8H::wT::Fe::0s::cR::wW::NU::i5::DX::zu::3f::7T::mt::xd::Qo::So::BF::jC::zZ::uE::jQ::sG::md::Kr::gX::70::bf::Ij::mJ::jm::1X::hF::3q::Pg::lX::vw::zY::hH::rG::zX::Vz::bA::SI::AS::bz::Bv::xJ::Si::lu::4W::yv::aF::Qf::bD::uc::dr::Lc::zz::HS::x0::Rm::Mb::R8::XM::cy::MH::nW::LB::hl::j7::vM::lb::Yt::vw::PM::lR::bz::W5::3M::ap::XH::uY::2w::KG::XG::SH::E3::Hk::Wv::Q2::Wc::ZD::VF::iL::D3::Wx::XE::kC::6z::dm::ll::Dg::Nq::V7::5z::Oi::id::Rh::zu::Qm::8g::ry::sY::6p::Tk::Di::29::xo::rm::qs::6g::bV::FL::8a::Oj::Ly::vV::0e::ko::V6::3W::Ed::le::o7::tj::PN::hP::EJ::tW::H5::jB::Vg::vd::Ha::GU::M5::Gx::fI::Wh::03::f3::4Q::k1::MC::zq::D2::9W::Sp::jo::AI::U1::a4::oC::rc::9P::Hb::u2::kI::ZZ::F7::Oq::fw::np::gP::5t::I3::k3::96::37::N7::7h::Li::m3::PG::iY::4B::4g::78::l0::Ru::fC::hF::Ow::w6::5a::HF::TL::zm::H4::do::ns::NX::gQ::7Y::q9::gp::I7::bV::gi::o9::pL::D5::zJ::YZ::sg::ZG::1l::DS::n2::Ck::Qy::e5::OO::jx::4v::MB::jk::Mm::pf::CZ::TR::bp::Wf::MG::HL::d7::Yl::Og::7E::ed::in::Lh::Ew::79::7P::gI::8P::y5::pw::fL::SJ::YL::6I::6E::rp::7k::FG::VL::CG::r6::dZ::Ue::KP::ud::Vb::62::Wi::YS::Es::dN::gW::mO::ax::59::5s::eq::KS::hq::4t::7O::Hi::Iy::Qm::qk::JX::dn::Lu::J6::16::uv::aF::S2::oX::K3::x6::4A::z8::3h::OH::SW::me::bV::3M::HU::Hw::NU::Rf::k2::9c::if::bi::xa::Y2::21::gk::XP::jU::pi::RF::BY::JW::Ed::eP::WB::ul::p5::mO::k1::Vv::4R::je::1Y::V9::3e::bp::I4::xO::F3::E2::yO::p1::XM::Cr::OB::YY::qF::63::et::Fw::6A::ci::I1::8x::EC::2D::Hl::fU::0c::hy::nK::zn::tu::O7::v2::bj::s8::y9::R4::vQ::3w::tV::m4::ky::SO::dt::I6::n1::FG::9o::mc::tc::Ka::Aj::B3::b4::7U::cV::8m::ME::Uc::50::5N::6O::lw::0T::go::uJ::rW::3A::2C::Bh::FZ::gt::2q::4O::uC::w6::8r::Uz::44::aL::Z4::IL::lJ::uk::uw::FL::B1::QJ::qh::gP::0R::sn::Kx::LG::mp::MW::QZ::hD::yD::0s::so::Xa::wm::F8::Wz::Up::0t::Vj::Mt::Uc::vr::Rb::NR::mw::y7::X4::Z4::aJ::Rb::PL::WY::iE::Vq::jY::Jz::AG::Ue::8o::Dq::R9::J4::a5::Uy::XU::La::Dd::WV::A2::gK::pO::gD::9v::Yq::3j::ZX::Lx::3G::db::rU::Iu::zo::uq::YH::cq::7v::8u::xs::jB::MZ::uM::3D::9i::U9::9f::mO::Hp::Ty::mV::lI::cG::BB::KX::3q::nz::4H::8o::iB::Uk::TD::vY::da::Uf::EW::fh::ha::Hz::k8::m5::YH::HT::7o::zY::h9::BT::GU::lK::e6::bR::rY::rE::VH::Ul::n8::8R::IT::vb::iv::gZ::vS::v0::NS::cs::3s::zl::zJ::ZN::Ib::nU::LG::Wq::ai::9Q::TV::NG::y1::pC::c9::D9::5U::nP::Wd::Cy::n5::xj::fE::uY::xK::uk::I5::we::Gz::1V::3k::WO::qJ::HR::JR::0S::m4::Uv::6N::5b::Qh::vE::6V::8D::da::wY::Z3::He::lX::im::eb::mg::Ip::1B::dI::Ji::1k::MD::zk::GI::Nf::3S::Jz::2n::qn::9G::SR::BR::hU::3Y::pJ::my::TO::Or::HV::U8::6x::h2::0z::mO::6k::34::bt::ZI::DA::5C::jx::Z8::Hg::8F::FG::YH::1w::AZ::ZW::Rp::rQ::B6::Y0::MV::w0::4d::PN::JC::Mi::jC::h3::mk::lF::nI::St::8l::Rn::WE::OX::y7::AL::8l::5X::9h::3l::8p::24::bW::vu::pU::il::pt::1A::DT::Jr::QH::xE::Kh::wZ::UR::jA::Yk::Ar::bS::F8::Yk::qL::cM::kB::7a::Ko::YF::6m::YX::Ox::AF::PG::2j::6e::7c::KL::eO::GW::fD::QZ::zX::79::n9::AB::WB::yO::DD::Tt::Mf::Kb::tj::EH::Vn::t5::LV::sM::wR::ZR::rj::br::L5::h6::x7::wM::PT::Y2::r7::ry::Hz::QH::Md::kG::d4::Fp::uo::lA::RI::vr::ck::rY::pr::Pi::5L::ek::kB::IY::cO::um::wp::DK::z6::pd::Q5::8k::qQ::cy::8b::T3::DL::ZE::KF::04::S3::EQ::xK::bV::0p::rr::Od::fY::pg::lT::YS::Pp::Tr::Jf::Wp::Aw::jk::sG::oc::KY::iG::rj::Z8::ZY::om::z5::nn::Qz::zB::hE::Im::qY::jD::ku::Qj::cX::ON::uj::wm::Yq::WE::Wb::c0::mm::I9::z7::w1::A5::w7::wT::Lw::LR::m9::jr::AJ::3x::QS::f6::O0::Rp::md::LZ::zu::kP::tQ::1E::11::6n::c5::AS::1f::sU::yJ::sz::RZ::In::PF::GM::sj::oG::dA::kL::3F::CY::Db::IF::m7::ZI::jc::kc::EM::XN::XY::6Y::zi::G0::t9::TN::OQ::f6::kn::vi::Pd::ve::mK::M2::bz::vE::a2::3T::6B::bv::PA::02::DX::QB::CY::aG::Py::PO::W4::6z::Be::3J::c5::1n::xg::zS::8X::A5::JW::Y0::sR::Oc::wy::fI::CR::t1::Hh::Fn::wx::8u::gc::tn::vx::ts::x5::GW::3k::jh::FX::Ju::c2::AK::1b::hP::IU::y7::QD::Cr::dB::Qk::o3::Wa::Gk::kw::VT::mH::dI::fM::jI::w9::ln::KJ::J0::eA::Pl::hw::71::ew::cs::7o::xL::pb::Bx::kY::KK::O8::Wk::nJ::Mi::fY::eQ::or::uv::hX::2V::qF::rF::Sj::st::tb::ju::VR::mE::YT::IA::49::6o::m9::y5::We::Rx::gT::ep::I3::9l::hS::aj::kf::1I::E9::eZ::UY::pK::vQ::JJ::qf::2Y::OD::qk::Fz::SX::Qg::0f::Mt::pz::A1::W1::lO::zX::1C::zp::ap::6h::lq::R3::j7::c5::rG::jW::Zi::yj::IO::ND::1L::u1::yG::E9::v4::rj::id::yQ::5t::4S::tP::RR::49::A4::LH::mv::wN::IV::06::SP::cu::jO::pU::FZ::y4::Y5::sF::UU::mG::ly::RD::Pg::R6::3W::3Q::85::3n::qD::bz::pB::Yn::PH::J5::Cq::0C::tN::Lu::QL::L7::BL::OE::5i::Uq::mZ::MS::2Z::Tj::FG::4w::oG::FC::wt::IF::sR::Wv::p7::kq::YK::xc::0o::4P::sY::50::sB::Hq::no::a7::tz::qC::NG::yD::XY::dZ::AK::z5::K6::Bh::hp::kV::vA::rP::uY::Pf::v8::LY::W9::GW::yq::8o::6R::LM::6G::Gl::Dj::Lf::9G::eP::0R::mc::n9::hI::1j::2a::FP::ZT::vq::YK::Vb::Ln::y6::nM::dA::IQ::bJ::jN::C2::gZ::7c::OB::kB::NS::Gi::hu::3t::Z5::WW::cS::yE::zg::Hk::Jl::4j::0e::bj::rI::vn::g7::li::9R::XN::qq::bp::NL::S6::Ok::pC::fL::XZ::sC::t1::ib::Hj::MD::yA::fA::ym::re::qz::jq::Ti::e7::qD::l5::Zf::zs::nv::gy::Tb::kg::eq::wp::fk::wQ::ej::lN::5n::cA::UJ::Kr::yg::11::fG::jT::8h::bH::Uc::6H::bU::Kd::8n::el::CI::c0::7e::kQ::7F::8K::CR::i9::Xi::i5::g2::bm::p7::On::IM::iC::Jh::LP::BB::Xf::Pf::ZU::0O::CJ::Eq::52::7e::46::U7::F0::qK::ZY::bW::S9::Uw::CG::HG::Gn::SZ::Jc::aO::Ot::ov::E7::XY::4A::xC::tC::Oh::8q::sP::S5::Zx::qU::PD::cB::YX::UD::h4::aT::jC::4g::98::xY::9j::TP::td::gM::LP::Df::33::qm::fn::FL::q4::i9::Bq::cN::o3::Zm::NZ::FW::cr::Xv::mO::al::JE::KE::US::6O::5v::z1::1r::aa::Ow::qL::XZ::L7::WD::Ir::Qq::YJ::ro::US::Ao::8R::pn::I4::Dk::7Q::B8::IT::6w::pf::86::Uq::2u::JA::9i::4M::W9::6N::OL::85::tN::Uq::FC::C1::E5::aP::mt::4o::Ze::Az::Qq::i0::QS::Xd::5O::d3::ml::1q::q3::Kv::MD::H3::CD::Mx::qM::XL::qy::Z6::yl::pN::z5::V2::FQ::ny::1r::Je::M8::6Q::LH::42::70::mx::XF::nR::i4::uH::hK::jW::mZ::AF::L5::tk::ls::Hg::GQ::7S::gE::QH::BO::i5::MN::vN::vm::wx::7L::Fc::2o::TH::nW::Ak::tf::lZ::BX::Gy::gb::Sn::ST::xV::vQ::Qh::2E::zX::br::b6::o3::Cn::Zi::Y0::Xk::Uo::oL::sy::P9::2c::W5::mD::by::Ga::wg::k2::rY::K6::zZ::IQ::Ah::Kk::CU::H2::mf::L9::93::XE::hj::O1::hq::KK::hS::MV::5K::6o::vT::ge::bg::W3::3v::vm::LQ::am::Va::tZ::cW::Vt::D3::31::r7::Yw::Zf::BG::40::ru::xl::9E::nQ::mI::qd::yt::Wm::0m::oK::pL::Az::yj::TL::9Y::Kw::WQ::6M::mt::T2::rs::WS::9c::sp::OX::iz::Vq::X8::B1::MU::nM::le::ca::dv::wC::P3::eS::A9::OJ::X6::Wz::vp::qc::r9::yL::17::0S::Uv::Rr::Za::yt::xD::DW::j2::vW::Uu::KR::9t::E8::gn::xt::q3::2c::lq::mK::Dq::VC::Oa::sZ::gd::QV::yD::RR::T7::D0::Xf::Md::pb::Jv::S8::Kc::r5::M2::ir::Zu::vG::SQ::gB::QI::vi::uV::Vz::a6::nJ::gV::cV::Fi::SW::wt::GI::bw::HK::zT::5p::lj::nP::6A::jw::IP::En::8A::9l::Hd::5r::gB::BP::Pb::GH::Zh::zN::RE::3D::2l::6f::Su::tu::bK::44::CG::h7::EX::Bv::Jt::4h::GA::NJ::J6::AX::b8::hv::Xj::Xv::bK::m2::aa::ek::Uv::Ig::YY::y7::B5::y9::Rn::OC::9F::uN::zV::79::B0::aL::lv::zl::7M::p8::9O::Fv::9b::M4::mP::AR::S0::4l::BH::NA::zp::ln::fH::s0::mh::Rc::R1::NL::5O::PB::Oc::S8::hY::NE::sE::bF::L1::4q::fZ::pS::Eu::V1::zP::VI::7a::zG::Fw::b7::CT::Fx::DH::0Y::bT::f5::43::hG::Cb::KV::M3::3L::4I::l6::aK::Xi::1X::BE::63::CS::2G::vl::0V::4w::Fj::Z5::zA::9A::e0::BM::FS::Rw::RL::TY::wu::Fd::3w::t8::Nm::cx::DG::Et::Q9::YX::bb::vL::lF::KM::6l::ak::g8::Lv::MH::LB::Gr::Cp::iY::yS::96::6X::O7::NN::Cf::Xh::dc::g3::J0::Jx::eV::TI::v7::9u::mO::8s::hy::YT::ji::Y9::dZ::rk::Mh::Ar::1C::jo::I2::qR::bf::7L::3p::9F::cP::Vp::NR::E9::st::Zy::wz::SL::aq::bV::dX::pU::iW::Zw::5s::dv::Ns::Oe::aT::Y3::wE::eL::ow::gM::Zq::Cp::c0::wX::S7::UU::O1::nd::uz::XE::kN::UB::ra::Wc::DN::Bb::Lo::7i::wT::Wr::dC::Xq::FD::L0::N8::88::3P::Fp::d0::BK::8d::gI::b4::rv::z5::AR::gF::Or::Yt::Xb::Kt::lW::P9::Zw::HU::AE::l3::Oe::Cp::Fi::e8::u6::Tt::YN::rR::Jj::Jy::MR::pq::No::64::ZX::fQ::JV::hv::1H::52::4x::mE::fj::OZ::3a::VV::nx::xq::mL::dw::h4::Rl::e3::5m::P0::NP::2h::xf::EG::w1::5S::wT::Wr::R4::vC::8b::G8::lK::3w::Oj::yI::tm::c6::C3::om::r9::iA::9R::Hs::d0::gQ::4r::GZ::wX::IT::MQ::N1::QR::wO::43::pe::ib::YR::UP::3A::4q::fm::F8::CE::Jt::Ak::nb::Fx::rC::zW::Df::mt::CA::Jx::rc::yW::Ko::MJ::52::Xk::tc::DN::1U::N9::MV::Q7::p4::O7::Nu::xN::Nl::ib::W2::BZ::DM::ps::F8::BG::Tx::Vl::i4::fP::7t::Cr::RI::Di::Cr::6n::97::2J::pL::ZK::bk::wz::EO::ZN::Hl::3g::Ii::EX::ju::IX::EG::JR::pL::E1::gA::Yd::t5::mm::3N::hO::7s::v4::G5::rl::JA::s4::JV::mC::6k::0y::L2::bn::kN::IG::E0::kE::Te::ka::IY::iw::1N::pi::vy::xW::rX::IG::9g::Me::9E::b5::9o::Al::k0::HT::VM::cR::IO::Lh::LR::Ef::ec::dU::uy::Ne::zI::nT::GK::mG::Fr::qh::zF::zY::IQ::jw::A9::G9::z7::nx::sx::rJ::04::QF::zu::Wr::hq::N7::Fx::fY::qV::LC::qJ::HB::8E::BD::7n::WN::8r::W8::ZK::pE::0o::Xx::sk::c7::US::yo::Os::3n::pG::1c::qI::b8::rs::P6::FI::R8::WF::H2::pm::QM::Qu::Mm::Gh::uf::JO::N6::Pd::JQ::yC::V0::Dm::Ve::WK::bn::kr::YP::VC::pL::BI::27::ct::C3::bf::kQ::ou::Y0::e4::77::20::Xq::Ey::HV::Sd::0L::c3::XJ::ok::JO::rS::4L::cM::rX::tN::uv::FG::fk::08::Qf::z2::mW::Ji::IZ::Dl::0a::6A::fm::ZU::NE::QR::pQ::vZ::Zq::qT::h3::z3::T1::i4::fk::lD::4I::ow::47::pJ::WR::h0::ru::OV::9q::GN::5v::qk::HB::mP::sE::fJ::fw::xu::be::fx::WR::zd::6l::e8::Z7::0W::BC::xD::yN::0O::ej::s8::6A::HY::E5::DY::4G::Ev::JI::c0::if::gl::IM::NM::l0::Wh::D0::nY::Hp::w1::Mw::qB::mt::SL::vQ::X2::1S::WJ::IZ::xY::pj::uS::Q1::Vw::eY::Ej::44::xP::qe::J4::1Y::1G::Tj::Mm::vJ::8H::JK::6D::9y::IS::RL::mA::l7::hc::5n::t7::6e::UI::6k::RS::oX::gN::1g::Ed::OV::Ac::mf::6L::RG::hW::JO::jt::lc::Jd::BY::ZM::nV::yx::Gg::sh::u3::sv::4Q::13::fJ::3A::x0::bH::Ib::Go::D8::rY::Kv::j4::tZ::Ur::8H::eu::wY::54::cJ::Ti::if::gv::Cy::Nc::fT::w1::R4::JT::SR::Tk::PS::Bb::LS::P6::F3::pX::mY::b8::0q::2g::U0::Cl::vA::JD::kg::TE::f0::Sh::U0::7V::zx::Sk::Qx::KI::3f::sR::TD::OB::7Z::Ys::Ud::Gc::XS::Rv::5b::Km::S8::7F::MJ::GO::wX::n3::b8::x7::wC::eB::9s::HT::z9::MU::a8::Ph::Gm::4b::fS::Dl::Ub::Z3::y0::0T::nQ::mf::K2::Hj::df::uZ::lV::ZM::tt::wg::0z::0O::mR::Ol::h8::JZ::f3::3d::le::ta::aB::l5::eM::IA::p4::2j::dP::FO::9H::vE::V9::Oq::XV::fU::9r::OG::kz::ym::rn::A5::sn::GL::WF::6m::wq::dE::0Y::7j::IW::5h::wv::C6::6E::bZ::aP::e1::E6::0x::H7::0g::vk::2k::Z2::9X::xA::6o::7I::k3::f1::rp::K8::i8::bb::BJ::6z::jK::ZW::ya::a6::LE::ph::lC::6e::Rc::jd::F4::6p::Tl::re::65::ZO::n6::i2::SP::tQ::vM::2P::5a::ob::QA::o5::5B::Gf::7e::0G::xs::iB::O2::2p::PN::7k::Fc::Jw::eN::89::Iy::RD::82::rl::Ww::6v::to::jG::rH::9S::nD::fI::Ms::Df::Q6::jH::LZ::oW::mq::Je::nJ::ZX::wS::8N::fT::o7::6J::Ay::IG::D7::Fb::8j::xC::Si::yk::DU::U0::xg::Rg::PV::Ny::6e::Za::uj::Ew::Uk::0J::9e::b6::fR::rB::0i::QU::sT::99::FW::L4::O1::RS::jX::95::CY::FD::aO::q0::30::ev::aG::Ku::WI::yY::hQ::j7::wC::T7::yx::cm::GT::ot::0S::r5::tM::yo::Hs::Nu::uS::Qf::Wn::dJ::uP::23::P7::vm::aJ::H8::a9::Do::Vm::Zg::Wd::4J::xa::eW::jW::ix::qE::cv::vJ::p4::Fl::8j::Pf::4R::b5::ZM::ot::gt::us::J1::Y8::xQ::yZ::73::NU::V8::2x::Ko::bZ::RL::rH::Zm::tW::iN::Wi::kC::Jn::3l::DO::wx::w9::BV::lc::jV::aL::PT::kv::DV::ND::Xh::ew::zo::F9::gc::xP::15::3r::FJ::bo::zd::YI::I6::iV::yJ::5L::VA::pu::MY::Oz::kX::ZO::YQ::BK::XQ::BL::3c::1O::xG::rY::YU::8N::hP::MU::SX::NI::ZK::sA::EY::sf::cH::3y::4w::1u::02::qU::42::AE::CI::Uh::fh::5E::Em::A6::xs::6W::z2::3T::AQ::3a::eJ::2W::lK::yH::he::Zi::uu::mF::Oa::Le::QR::q3::NM::yo::TL::xv::qA::b4::mI::rW::Ik::Yd::U9::aq::EL::Ax::DW::V2::E4::8R::LP::41::sx::pY::Oc::ai::Bf::Qi::ix::wp::ky::OQ::O7::ii::rY::SZ::k5::Gw::K3::JN::JN::6o::b2::RB::1w::1D::Sf::oQ::IH::rt::w0::k1::6p::TJ::Dh::qf::Qm::sC::SW::hY::kE::Ik::Kv::Tq::fM::sw::81::Sh::kH::vT::BF::eD::Od::4D::75::ws::q5::Cb::1z::Fp::YT::Wq::JB::r4::no::mp::OW::Ay::3A::gP::oN::xX::q4::6T::99::A8::EN::Ti::gv::ec::Tu::Gy::Zt::RI::4n::FX::HB::YL::gx::Af::TV::of::gr::ax::jb::YL::Cs::wm::RO::Hc::4b::Xu::bD::zn::j0::D2::x7::Cy::Sa::Nb::z8::V0::M4::pd::F7::BB::7r::3p::BA::e7::dI::qd::xK::lE::2h::YO::a8::bf::XF::Fm::dX::Br::qN::85::3t::YA::Up::3o::KD::Iw::d1::6R::2m::hJ::gc::th::0s::Q9::LA::Hr::lS::Ku::Jy::WU::qk::P1::Cj::gm::0t::mJ::rT::u5::MV::Zi::oJ::P6::SJ::NL::MC::q3::7O::wI::uH::4v::TM::GN::UN::ck::gF::1A::hK::e7::Ib::bw::fN::19::qf::Px::Xu::pN::Pp::Dq::o9::lW::oF::I1::gh::yc::V4::oR::ef::sG::OC::sd::TV::Go::G8::mO::yD::Ez::EH::1I::1y::DN::Tx::j2::MW::oS::l2::lU::9b::Qs::6l::XH::ud::3I::Pa::2z::2P::vg::LH::cL::IR::5D::8B::Eb::uP::sX::oM::is::Pa::wP::hM::Vr::A5::3q::iu::ES::qL::R9::H2::nI::A5::rQ::YQ::HS::H6::HY::Qa::JG::Nj::O8::GY::Dv::oG::TR::bC::3U::Hw::EJ::85::qw::D1::K1::Es::O2::ZU::y6::iZ::R7::vj::Ph::bh::z5::jY::uk::Br::T8::i5::m5::Q5::vz::Eq::Nb::hd::GV::vq::Q3::iF::CX::fV::oj::GN::8B::F1::zQ::vL::fm::Xz::QN::5Z::9u::28::8T::zb::Yq::Qp::5G::7f::9r::10::jq::0u::iB::Bs::Lj::J8::QM::P9::9T::Ie::kf::JX::rO::Wd::S9::KC::OP::iC::5U::9J::cS::HF::dz::QO::u3::IH::mG::Fg::tu::JZ::ag::nc::2Z::eS::MB::05::R5::J4::jm::Ub::Tn::f3::Pk::b9::rj::qr::wu::Zk::PW::jd::8H::Sz::Gv::3Z::eP::55::Sm::dv::3Y::wt::mH::I6::mw::eC::DS::7C::tE::uf::jW::nB::LQ::KQ::zg::LB::A4::QE::I6::DJ::RS::ou::F5::kN::b1::x9::Zh::QL::5s::XS::dm::fb::k9::LT::Ht::pm::jK::g7::M7::PT::RA::2J::qH::0D::6L::Yx::oC::K3::t3::YH::c0::VC::Uk::Vq::Nh::Z4::ji::VX::KS::yH::6W::sB::mr::5B::zZ::8V::fO::cT::zz::wE::xH::t5::Nv::KQ::mQ::iR::zh::4k::dB::pj::WQ::QE::hS::Ja::Nk::g5::zb::4j::Ur::Ai::bb::dt::AE::gw::MY::7N::Ms::2f::sS::zY::v2::D9::mt::NT::7i::ts::QJ::K8::mH::FZ::6B::QY::yh::4I::Kl::fp::Tl::uv::2P::fx::zv::cC::b3::eY::ZZ::wY::h4::SF::PP::Pp::DZ::hh::gl::V9::eX::Zr::sL::NE::XI::do::pV::Ru::RQ::hQ::gs::jz::jm::4d::w3::mj::7P::5k::4r::Am::4f::I8::In::05::M4::9X::xS::Gn::Vq::mF::IO::Qv::oB::nU::Qa::F8::K1::KA::Qm::us::wq::wr::ac::tJ::bL::to::kt::Vl::sK::3O::ao::HS::Jx::Wu::Ew::92::Ce::dO::xV::28::9m::45::pI::Wc::Eg::ls::5X::KS::28::RV::jA::9U::47::J5::7w::YH::Ta::fj::MG::cJ::1J::lO::j8::Gj::BR::7P::Ut::Aq::VY::ZR::3m::ML::TN::6S::zR::YH::yk::Xp::8Q::0b::CG::wt::zm::Wi::Mo::E4::aF::TY::u8::Ar::73::Q1::4m::15::3l::zb::uq::7l::4T::a2::Ab::p3::1K::av::Qc::st::5f::3a::XP::RM::5d::8t::8H::W4::Fz::CU::BJ::O7::Rq::Js::7F::WX::Ov::Fn::Xs::Ca::Uz::9T::zy::c7::NM::Js::XS::7m::ij::CX::zS::WX::aI::XZ::Re::wx::Ro::c2::Zf::yK::im::6h::A2::Eg::Py::uD::mC::bk::s5::z2::qB::fB::vz::mg::iM::oS::GX::KC::tP::Fw::jQ::1F::uB::dT::az::fD::aY::nU::zc::MU::3F::1X::sV::KS::l5::Ib::5w::6P::PB::Rn::T1::sj::Aj::uw::0j::b6::kL::mo::Px::mU::Bl::gk::Sr::Dz::3i::pt::7H::Wd::qH::MF::eG::gW::hi::3p::EH::wm::0Z::nv::sM::2u::Mg::SE::Qq::Qb::yt::DZ::3a::XP::dR::T9::y1::J8::Ih::5F::eF::Lk::ja::bc::S4::J0::AG::yL::EU::4K::2Q::6m::a5::2Z::6D::0V::C4::v6::EA::Yv::8q::hN::RL::uK::lA::r2::Zv::Pc::Vl::qD::UM::8c::uP::2U::tV::h4::UR::Qi::lw::S8::Hw::7R::Ux::tH::ev::tf::Om::UI::4n::Bo::lh::nh::eG::DR::Jq::lp::Mu::6j::Kp::qN::RL::pN::gS::nm::ka::oo::dz::Yx::e0::Dx::zB::wx::Ld::Zz::Ou::lp::50::6l::cJ::nF::7D::FZ::8p::jV::dS::6R::pU::HC::LH::T7::kd::sT::fO::1K::qr::ll::XC::xf::2c::Q6::4u::Wl::Rz::Fc::ZA::iB::VG::og::7m::XA::Uj::BL::oo::wF::Zy::X2::oq::39::yo::MV::rG::qs::FV::p4::9A::J1::vd::k6::Bx::ga::1V::fd::Qt::WH::ED::1R::Ep::sI::KN::Zp::Jb::sF::7i::Tl::nQ::py::Xj::lp::4o::Ki::6S::ip::8z::yd::js::r4::Bi::a9::OJ::g4::lW::qi::nV::D8::6h::bA::vg::Pc::qn::jk::1U::Do::Vj::qq::mK::gN::RF::ap::NQ::I0::1Q::80::iX::3R::5H::sD::lF::qZ::dL::FS::79::tP::XK::RH::Q8::2i::Qr::GO::r0::bu::uv::QP::cb::Uy::6y::0Y::8n::XR::eL::K4::sW::uW::Di::m5::o6::w2::ma::Lp::OY::rG::n0::IM::wU::UT::Li::lN::4f::sW::HU::WY::Ac::cS::aB::ou::qS::RH::8A::zh::hx::as::3o::sX::Ku::da::Iv::R0::k1::a4::Fb::we::EF::gC::yO::qN::Z5::XQ::tO::Is::bD::wD::st::Cm::Pc::YT::tN::1I::BB::b6::Xa::nL::8c::ZZ::jM::be::dM::SA::1b::mL::sv::tr::gK::vI::eL::df::zc::2b::iq::Yn::G3::vA::kU::jg::Jv::8O::Ne::R5::dZ::uY::mK::jr::uk::Rz::2v::jl::0m::Yk::qI::PX::wr::B4::Md::rL::gi::Uw::RM::hS::oQ::Z0::4y::rg::tG::27::Uj::Zb::4y::uL::mS::Tr::D0::Cn::nh::HG::SP::uN::Kb::EM::Hh::Xt::Gx::Qd::tM::Oc::vt::OG::ml::eY::12::EC::dx::SH::4a::fo::Mt::gm::Mt::AD::mU::1H::aE::XL::X1::ba::9U::ty::Cc::Zf::5x::oR::mt::v0::tF::UN::8p::29::pb::j2::jI::K5::wy::GU::7E::Qa::mw::ai::mo::Lr::Fr::TD::lB::Hw::C9::hz::Mc::If::La::hg::5N::Z3::iC::0t::Qv::GJ::HZ::oe::z5::iz::9g::bt::Rf::ub::fh::IQ::QS::pT::AC::xx::Bm::9f::N1::wJ::bt::KT::cm::BB::xy::8O::ST::uq::6p::8G::Iv::iy::8s::iv::Gc::oU::GT::XR::hp::D3::nz::iB::DC::rC::LD::2I::BU::rC::X1::TM::4c::fi::bX::8J::Mn::cQ::eH::1I::od::8E::TO::YX::8p::bu::HW::NI::1K::aQ::ZG::gO::aA::Um::wo::mU::5n::Sj::Pj::ft::Ef::w2::0w::QV::Dg::aL::7i::uv::jU::2I::Vs::N9::h9::FF::03::hH::uN::Pi::NO::eN::2c::gl::Cj::lN::bE::cN::Dh::mL::lS::jI::FA::uH::69::VJ::49::f6::bM::i6::Dm::PZ::nR::Ym::8B::ah::oa::mf::iG::Se::Wm::pn::Wp::cB::D6::i1::xt::qk::1a::aB::se::sR::FS::65::FX::Lt::Ds::J6::U4::wm::gm::eb::Kd::zU::jA::S0::Hb::BY::gV::V9::DY::Hf::ml::xV::wP::Aq::sV::XQ::Id::KP::wD::2Z::sJ::TI::Zp::es::qx::UK::LS::JI::2r::Zr::FR::Nq::BG::u0::Js::LC::E3::3K::ly::kv::7M::tz::z1::jg::cq::Bo::6U::aI::Gc::VN::FC::fm::C9::aF::U1::Vi::25::nS::ZZ::BQ::O7::Rj::v8::qq::Y5::2H::IV::pE::KF::61::V6::1a::mm::F8::oc::D2::zQ::1b::t9::jm::FT::u4::MA::mH::J9::gt::Pf::6t::yy::tm::HT::hI::4v::tR::Rr::qf::lV::aB::Ea::Bi::8u::cR::Fl::1R::Jr::rV::C4::RN::Jg::3A::Fg::Mc::35::fB::Dx::QR::5o::BK::Qw::sI::vQ::zF::TR::Lp::Hw::7X::Tb::Ue::CU::SM::4U::1N::TB::kd::Hh::pA::ow::Va::pM::Ly::T7::X0::G6::5T::4G::Ml::7M::D2::d3::WV::EQ::At::DC::XH::Mh::SQ::T6::Jj::1M::kh::cB::qS::57::Jd::Jx::Wb::BM::2p::1j::7w::X1::vc::Zl::1b::29::bZ::ts::Mh::KH::zf::dz::R7::ct::4g::2U::V5::g2::MC::Ji::hU::mj::0b::J1::Kt::SB::Xg::pD::PF::0k::tq::eL::iB::yV::oE::96::GC::Q6::mC::aG::NI::n4::Cp::ui::n7::8C::Ql::5d::RG::wo::W5::jR::RF::ON::SI::jb::bZ::Ng::cb::Xx::Wo::X3::LG::0d::VB::Cl::Gl::mf::gF::dW::yS::jI::5H::2i::4T::gZ::hM::EW::n0::ne::YN::m4::BL::tK::H1::7K::rD::3W::K1::o9::46::cb::AV::D9::fj::Cw::Cf::r2::O2::Fl::o3::Ko::Hw::Iy::HV::lU::kw::Ec::Av::ap::dk::Fu::EX::Hr::JX::2k::Et::mX::SN::VS::va::pK::gE::Q2::BH::pY::PE::Dc::HF::79::tZ::zz::O3::3v::j2::AB::iu::eF::HA::4Q::Ns::8m::h1::iq::MY::IH::a7::TS::iv::5I::kp::PP::eG::bX::qW::2X::2N::5u::d4::Ob::Ka::nz::xr::LS::19::dQ::NR::6s::CM::xy::wf::Gx::Jp::Wg::BO::D5::VL::Wb::cq::2P::e6::Jc::bk::sI::JF::1L::gf::TA::7H::jg::Ct::w2::gf::yz::mx::aL::Oa::2w::hm::Am::B4::ao::dB::qY::Nq::uL::gX::CU::K4::vz::7u::BS::tS::we::NR::fx::hb::Wq::ri::7R::Hu::yL::sP::q1::NR::nj::fl::Zo::oD::dR::Xo::v6::ei::9Y::IU::iW::8U::QQ::cI::Be::Ua::Yi::jW::hb::Yt::Ip::Fx::my::Ay::IE::D3::SP::jr::OH::v8::hr::QW::DD::qK::Ub::fB::D6::eO::uY::zg::an::84::c3::C6::4H::A3::Bu::SW::B5::oX::aW::NG::6J::dz::kq::mO::p9::ks::NZ::Vk::3d::qF::Cj::DH::Nj::Ay::AV::NS::Np::nZ::Na::Pi::sS::Lo::6Y::2p::c0::no::MR::4H::9L::Wa::br::x0::Dz::LM::oA::3j::Uq::Um::S2::SV::ah::gx::KU::OL::ZT::pg::6W::dY::uw::SQ::nf::Hj::FQ::nE::9u::7M::No::8M::Lr::6l::vl::qU::2h::8m::VJ::Qu::Et::bd::W2::dB::jG::F6::1a::3S::8m::KL::5k::Mn::aM::23::0K::8e::ZO::ZX::g0::iH::N0::qe::uy::p5::Tu::3f::fd::Gk::Ae::RV::es::uE::pC::Xh::Jp::9m::S4::Bh::8a::oK::Hk::nv::xK::0V::9K::SF::OW::fS::jy::5c::fN::t9::CH::CZ::oJ::AZ::jU::8f::Zn::ri::Fc::D9::Gr::T1::Ke::f1::qK::ld::H0::1s::Fk::IN::eL::A7::dI::j0::Ys::XA::Nd::c3::7t::ZV::9o::56::Bp::UU::Xs::BG::Nr::WX::2I::4y::Mr::cu::Fd::81::Pw::n1::Np::3J::LC::UU::Y1::PQ::Da::7l::iE::lX::Lo::To::Ap::Oe::Ye::gM::oJ::zT::Ty::rL::eO::8s::V8::80::T6::lD::ev::xe::QA::Fy::R4::rb::YX::W1::0x::vU::jb::EO::od::bb::hW::ly::Ln::9S::de::gJ::yN::C3::Ze::ts::pO::F1::09::y6::kR::6T::ef::4W::3B::Ph::Gz::W4::Ox::Ri::x0::zs::k9::30::6l::jp::2X::Ah::gg::vP::KM::S1::bk::z2::ZM::A9::fz::r5::Gv::EI::yo::Y5::aP::lc::Vj::Nl::0d::S9::Xf::sN::Z3::4v::TQ::IG::8A::QO::wI::f9::wi::sI::Cd::Jl::jh::C7::xZ::QT::uZ::7s::U1::iF::SS::FW::a7::Sg::2d::80::DB::T7::o3::x9::iX::vV::Lz::jL::w1::pI::gf::FQ::V3::xA::8C::NG::ur::Hd::Hh::A6::3J::4t::5p::QZ::fk::fy::4A::xB::bf::9F::GM::vS::EC::Na::4L::54::VW::wF::Ek::ns::l9::Ev::ni::8f::pn::JG::c9::VW::oU::Tv::CS::5x::YH::7p::lg::Q1::gw::Ld::91::6Y::De::4l::E5::3P::kc::Kc::UW::5z::oq::Wg::2B::T4::QJ::xS::jk::Nv::3z::fy::QJ::vx::9K::2G::45::Ev::jN::rA::RT::Zo::ru::c2::K8::Qu::HX::l7::9Z::FJ::kI::gx::SU::rz::Vq::DF::Zr::wN::A4::Fl::Yg::Wv::sp::be::r8::Vs::TY::id::LM::cD::q1::7W::u4::y1::8X::CY::po::na::8f::c2::86::np::bp::hL::IV::Ad::vw::sW::jY::fP::Bm::OS::ka::i0::1O::q5::Bk::FY::Rj::V8::SJ::ux::2W::0S::KU::uQ::ff::N2::B1::D6::no::ce::e2::Du::7F::R8::wC::Fv::wS::zD::Yf::w7::9P::pa::EU::yr::v7::8f::GC::1f::Am::V7::wh::t1::2V::pu::VZ::hM::GZ::G4::0U::mq::Vr::iK::6Z::9E::xj::AI::1K::4D::PR::57::O8::L1::8e::MX::zk::dm::T1::QO::Xt::Bv::JJ::OW::z9::Cw::wk::EW::g7::tH::kT::h9::Tx::pB::KN::mW::cM::ey::rQ::Xq::s1::3D::bW::FC::RE::tw::2W::8l:: | export" > "$shctmp"; then
+  umask $umask
+  chmod 700 "$shctmp"
+  (sleep 5; rm -fr "$shctmpdir") 2>/dev/null &
+  "$shctmp" ${1+"$@"}; res=$?
 else
-    echo -e "${OK} IP Address ( ${green}$IP${NC} )"
+  printf >&2 '%s\n%s\n' "Cannot decompress ${0##*/}" "Report bugs to <t.me/tunnelstores>."
+  (exit 127); res=127
 fi
-
-# // Validate Successfull
-echo ""
-read -p "$( echo -e "Press ${GRAY}[ ${NC}${green}Enter${NC} ${GRAY}]${NC} For Starting Installation") "
-echo ""
-clear
-if [ "${EUID}" -ne 0 ]; then
-		echo "You need to run this script as root"
-		exit 1
-fi
-if [ "$(systemd-detect-virt)" == "openvz" ]; then
-		echo "OpenVZ is not supported"
-		exit 1
-fi
-red='\e[1;31m'
-green='\e[0;32m'
-NC='\e[0m'
-#IZIN SCRIPT
-MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m"
-clear
-apt install ruby -y
-gem install lolcat
-apt install wondershaper -y
-clear
-# REPO    
-    REPO="https://raw.githubusercontent.com/Pemulaajiw/script/main/"
-
-####
-start=$(date +%s)
-secs_to_human() {
-    echo "Installation time : $((${1} / 3600)) hours $(((${1} / 60) % 60)) minute's $((${1} % 60)) seconds"
-}
-### Status
-function print_ok() {
-    echo -e "${OK} ${BLUE} $1 ${FONT}"
-}
-function print_install() {
-	echo -e "${green} â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â” ${FONT}"
-    echo -e "${YELLOW} Â» $1 ${FONT}"
-	echo -e "${green} â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â” ${FONT}"
-    sleep 1
-}
-
-function print_error() {
-    echo -e "${ERROR} ${REDBG} $1 ${FONT}"
-}
-
-function print_success() {
-    if [[ 0 -eq $? ]]; then
-		echo -e "${green} â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â” ${FONT}"
-        echo -e "${Green} Â» $1 berhasil dipasang"
-		echo -e "${green} â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â” ${FONT}"
-        sleep 2
-    fi
-}
-
-### Cek root
-function is_root() {
-    if [[ 0 == "$UID" ]]; then
-        print_ok "Root user Start installation process"
-    else
-        print_error "The current user is not the root user, please switch to the root user and run the script again"
-    fi
-
-}
-if ! apt update -y; then
-echo -e "${red}Failed to update${neutral}"
-fi
-if ! dpkg -s sudo >/dev/null 2>&1; then
-if ! apt install sudo -y; then
-echo -e "${red}Failed to install sudo${neutral}"
-fi
-else
-echo -e "${green}sudo is already installed, skipping...${neutral}"
-fi
-if ! dpkg -s software-properties-common debconf-utils >/dev/null 2>&1; then
-if ! apt install -y --no-install-recommends software-properties-common debconf-utils; then
-echo -e "${red}Failed to install basic packages${neutral}"
-fi
-else
-echo -e "${green}software-properties-common and debconf-utils are already installed, skipping...${neutral}"
-fi
-if dpkg -s exim4 >/dev/null 2>&1; then
-if ! apt remove --purge -y exim4; then
-echo -e "${red}Failed to remove exim4${neutral}"
-else
-echo -e "${green}exim4 removed successfully${neutral}"
-fi
-else
-echo -e "${green}exim4 is not installed, skipping...${neutral}"
-fi
-if dpkg -s ufw >/dev/null 2>&1; then
-if ! apt remove --purge -y ufw; then
-echo -e "${red}Failed to remove ufw${neutral}"
-else
-echo -e "${green}ufw removed successfully${neutral}"
-fi
-else
-echo -e "${green}ufw is not installed, skipping...${neutral}"
-fi
-if dpkg -s firewalld >/dev/null 2>&1; then
-if ! apt remove --purge -y firewalld; then
-echo -e "${red}Failed to remove firewalld${neutral}"
-else
-echo -e "${green}firewalld removed successfully${neutral}"
-fi
-else
-echo -e "${green}firewalld is not installed, skipping...${neutral}"
-fi
-if ! echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections; then
-echo -e "${red}Failed to configure iptables-persistent v4${neutral}"
-fi
-if ! echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections; then
-echo -e "${red}Failed to configure iptables-persistent v6${neutral}"
-fi
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layout select English"; then
-echo -e "${red}Failed to configure keyboard layout${neutral}"
-fi
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variant select English"; then
-echo -e "${red}Failed to configure keyboard variant${neutral}"
-fi
-export DEBIAN_FRONTEND=noninteractive
-if ! apt update -y; then
-echo -e "${red}Failed to update${neutral}"
-fi
-if ! apt-get upgrade -y; then
-echo -e "${red}Failed to upgrade${neutral}"
-else
-echo -e "${green}System upgraded successfully${neutral}"
-fi
-if ! apt dist-upgrade -y; then
-echo -e "${red}Failed to dist-upgrade${neutral}"
-else
-echo -e "${green}System dist-upgraded successfully${neutral}"
-fi
-function base_package() {
-print_install "Menginstall Packet Yang Dibutuhkan"
-packages=(
-libnss3-dev liblzo2-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev
-libcap-ng-utils libselinux1-dev flex bison make libnss3-tools libevent-dev bc
-rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential
-gcc g++ htop lsof tar wget curl ruby zip unzip p7zip-full libc6 util-linux
-ca-certificates iptables iptables-persistent netfilter-persistent
-net-tools openssl gnupg gnupg2 lsb-release shc cmake git whois
-screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq
-tmux python3 python3-pip lsb-release gawk
-libncursesw5-dev libgdbm-dev tk-dev libffi-dev libbz2-dev checkinstall
-openvpn easy-rsa dropbear
-)
-for package in "${packages[@]}"; do
-if ! dpkg -s "$package" >/dev/null 2>&1; then
-if ! apt-get update -y; then
-echo -e "${red}Failed to update${neutral}"
-fi
-if ! apt-get install -y "$package"; then
-echo -e "${red}Failed to install $package${neutral}"
-fi
-else
-echo -e "${green}$package is already installed, skipping...${neutral}"
-fi
-done
-}
-# Buat direktori xray
-print_install "Membuat direktori xray"
-    mkdir -p /etc/xray
-    curl -s ifconfig.me > /etc/xray/ipvps
-    touch /etc/xray/domain
-    mkdir -p /var/log/xray
-    chown www-data.www-data /var/log/xray
-    chmod +x /var/log/xray
-    touch /var/log/xray/access.log
-    touch /var/log/xray/error.log
-    mkdir -p /var/lib/kyt >/dev/null 2>&1
-    # // Ram Information
-    while IFS=":" read -r a b; do
-    case $a in
-        "MemTotal") ((mem_used+=${b/kB})); mem_total="${b/kB}" ;;
-        "Shmem") ((mem_used+=${b/kB}))  ;;
-        "MemFree" | "Buffers" | "Cached" | "SReclaimable")
-        mem_used="$((mem_used-=${b/kB}))"
-    ;;
-    esac
-    done < /proc/meminfo
-    Ram_Usage="$((mem_used / 1024))"
-    Ram_Total="$((mem_total / 1024))"
-    export tanggal=`date -d "0 days" +"%d-%m-%Y - %X" `
-    export OS_Name=$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/PRETTY_NAME//g' | sed 's/=//g' | sed 's/"//g' )
-    export Kernel=$( uname -r )
-    export Arch=$( uname -m )
-    export IP=$( curl -s https://ipinfo.io/ip/ )
-
-# Change Environment System
-function first_setup(){
-    timedatectl set-timezone Asia/Jakarta
-    echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
-    echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
-    print_success "Directory Xray"
-    ln -fs /usr/share/zoneinfo/$timezone /etc/localtime
-    os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
-if [[ $os_id == "ubuntu" ]]; then
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-if ! dpkg -s software-properties-common >/dev/null 2>&1; then
-apt-get install --no-install-recommends software-properties-common || echo -e "${red}Failed to install software-properties-common${neutral}"
-else
-echo -e "${green}software-properties-common is already installed, skipping...${neutral}"
-fi
-rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
-if ! dpkg -s ubuntu-keyring >/dev/null 2>&1; then
-apt install -y ubuntu-keyring || echo -e "${red}Failed to install ubuntu-keyring${neutral}"
-else
-echo -e "${green}ubuntu-keyring is already installed, skipping...${neutral}"
-fi
-curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
-echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
-if ! dpkg -s nginx >/dev/null 2>&1; then
-if ! apt install -y nginx; then
-echo -e "${red}Failed to install nginx${neutral}"
-fi
-else
-echo -e "${green}nginx is already installed, skipping...${neutral}"
-fi
-if [ -f /etc/nginx/conf.d/default.conf ]; then
-rm /etc/nginx/conf.d/default.conf || echo -e "${red}Failed to delete /etc/nginx/conf.d/default.conf${neutral}"
-else
-echo -e "${yellow}/etc/nginx/conf.d/default.conf does not exist, skipping deletion${neutral}"
-fi
-elif [[ $os_id == "debian" ]]; then
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
-if ! dpkg -s debian-archive-keyring >/dev/null 2>&1; then
-apt install -y debian-archive-keyring || echo -e "${red}Failed to install debian-archive-keyring${neutral}"
-else
-echo -e "${green}debian-archive-keyring is already installed, skipping...${neutral}"
-fi
-curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
-echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
-if ! dpkg -s nginx >/dev/null 2>&1; then
-apt install -y nginx || echo -e "${red}Failed to install nginx${neutral}"
-else
-echo -e "${green}nginx is already installed, skipping...${neutral}"
-fi
-else
-echo -e "${red}Unsupported OS. Exiting.${neutral}"
-exit 1
-fi
-if [[ $os_id == "ubuntu" && $os_version == "18.04" ]]; then
-add-apt-repository -y ppa:vbernat/haproxy-2.6 || echo -e "${red}Failed to add haproxy repository${neutral}"
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-apt-get install -y haproxy=2.6.\* || echo -e "${red}Failed to install haproxy${neutral}"
-elif [[ $os_id == "ubuntu" && $os_version == "20.04" ]]; then
-add-apt-repository -y ppa:vbernat/haproxy-2.9 || echo -e "${red}Failed to add haproxy repository${neutral}"
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-apt-get install -y haproxy=2.9.\* || echo -e "${red}Failed to install haproxy${neutral}"
-elif [[ $os_id == "ubuntu" && $os_version == "22.04" ]]; then
-add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
-elif [[ $os_id == "ubuntu" && $os_version == "24.04" ]]; then
-add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
-elif [[ $os_id == "debian" && $os_version == "10" ]]; then
-curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" http://haproxy.debian.net buster-backports-2.6 main >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-apt-get install -y haproxy=2.6.\* || echo -e "${red}Failed to install haproxy${neutral}"
-elif [[ $os_id == "debian" && $os_version == "11" ]]; then
-curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" http://haproxy.debian.net bullseye-backports-3.0 main >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
-elif [[ $os_id == "debian" && $os_version == "12" ]]; then
-curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" http://haproxy.debian.net bookworm-backports-3.0 main >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-apt-get install -y haproxy=3.0.\* || echo -e "${red}Failed to install haproxy${neutral}"
-else
-echo -e "${red}Unsupported OS. Exiting.${neutral}"
-exit 1
-fi
-}
-
-# GEO PROJECT
-clear
-function nginx_install() {
-    # // Checking System
-    if [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" ]]; then
-        print_install "Setup nginx For OS Is $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-        # // sudo add-apt-repository ppa:nginx/stable -y 
-        sudo apt-get install nginx -y 
-    elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" ]]; then
-        print_success "Setup nginx For OS Is $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-        apt -y install nginx 
-    else
-        echo -e " Your OS Is Not Supported ( ${YELLOW}$(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')${FONT} )"
-        # // exit 1
-    fi
-}
-
-# Update and remove packages
-clear
-# Fungsi input domain
-function pasang_domain() {
-echo -e ""
-clear
-echo -e " â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”"
-echo -e " \e[1;32mPlease Select a Domain Type Below \e[0m"
-echo -e " â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”"
-echo -e " \e[1;32m1)\e[0m Menggunakan Domain Sendiri ( Recommendation )"
-echo -e " \e[1;32m2)\e[0m Menggunakan Domain script"
-echo -e " â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”"
-read -p " Please select numbers 1-2 or Any Button(Random) : " host
-echo ""
-if [[ $host == "1" ]]; then
-echo -e " \e[1;32mPlease Enter Your Subdomain $NC"
-echo -e " â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\033[0m"
-echo -e ""
-read -p " Masukan Domain : " host1
-echo -e ""
-echo -e " â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\033[0m"
-echo "IP=" >> /var/lib/kyt/ipvps.conf
-echo $host1 > /etc/xray/domain
-echo $host1 > /root/domain
-echo ""
-elif [[ $host == "2" ]]; then
-#install cf
-wget ${REPO}files/cf.sh && chmod +x cf.sh && ./cf.sh
-rm -f /root/cf.sh
-clear
-else
-print_install "Random Subdomain/Domain is Used"
-clear
-    fi
-}
-clear
-#GANTI PASSWORD DEFAULT
-restart_system(){
-#IZIN SCRIPT
-MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m" 
-clear
-izinsc="https://raw.githubusercontent.com/Pemulaajiw/script/main/register"
-# USERNAME
-rm -f /usr/bin/user
-username=$(curl $izinsc | grep $MYIP | awk '{print $2}')
-echo "$username" >/usr/bin/user
-expx=$(curl $izinsc | grep $MYIP | awk '{print $3}')
-echo "$expx" >/usr/bin/e
-# DETAIL ORDER
-username=$(cat /usr/bin/user)
-oid=$(cat /usr/bin/ver)
-exp=$(cat /usr/bin/e)
-clear
-# CERTIFICATE STATUS
-d1=$(date -d "$valid" +%s)
-d2=$(date -d "$today" +%s)
-certifacate=$(((d1 - d2) / 86400))
-# VPS Information
-DATE=$(date +'%Y-%m-%d')
-datediff() {
-    d1=$(date -d "$1" +%s)
-    d2=$(date -d "$2" +%s)
-    echo -e "$COLOR1 $NC Expiry In   : $(( (d1 - d2) / 86400 )) Days"
-}
-mai="datediff "$Exp" "$DATE""
-
-ISP=$(curl -s ipinfo.io/org | cut -d " " -f 2-10 )
-# Status Expired Active
-Info="(${green}Active${NC})"
-Error="(${RED}ExpiRED${NC})"
-today=`date -d "0 days" +"%Y-%m-%d"`
-Exp1=$(curl $izinsc | grep $MYIP | awk '{print $4}')
-if [[ $today < $Exp1 ]]; then
-sts="${Info}"
-else
-sts="${Error}"
-fi
-TIMES="10"
-CHATID="6197482164"
-KEY="7257456294:AAF_EwHS4dMkbnnRdlR3TLJu7eK225Lbb3Y"
-URL="https://api.telegram.org/bot$KEY/sendMessage"
-    TIMEZONE=$(printf '%(%H:%M:%S)T')
-    TEXT="
-<code>â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”</code>
-<b>PREMIUM AUTOSCRIPT</b>
-<code>â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”</code>
-<code>User     :</code><code>$username</code>
-<code>Domain   :</code><code>$domain</code>
-<code>IPVPS    :</code><code>$MYIP</code>
-<code>ISP      :</code><code>$ISP</code>
-<code>DATE     :</code><code>$DATE</code>
-<code>Time     :</code><code>$TIMEZONE</code>
-<code>Exp Sc.  :</code><code>$exp</code>
-<code>â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”</code>
-<b>FAN VPN STORE</b>
-<code>â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”</code>
-<i>Automatic Notifikasi Installer Script...</i>
-"'&reply_markup={"inline_keyboard":[[{"text":"á´Ê€á´…á´‡Ê€","url":"https://t.me/AJW29"},{"text":"Contack","url":"https://wa.me/6287812264674"}]]}'
-    curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
-}
-clear
-# Pasang SSL
-function pasang_ssl() {
-    clear
-    print_install "Memasang SSL Pada Domain"
-
-    if [ ! -d "/root/.acme.sh" ]; then
-mkdir /root/.acme.sh
-fi
-systemctl daemon-reload
-systemctl stop haproxy
-systemctl stop nginx
-if [ ! -f "/root/.acme.sh/acme.sh" ]; then
-curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
-chmod +x /root/.acme.sh/acme.sh
-fi
-domain=$(cat /etc/xray/domain)
-/root/.acme.sh/acme.sh --upgrade --auto-upgrade
-/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-/root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
-/root/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
-cat /etc/xray/xray.crt /etc/xray/xray.key | tee /etc/haproxy/udud.pem
-chown www-data:www-data /etc/xray/xray.key
-chown www-data:www-data /etc/xray/xray.crt
-print_success "SSL Certificate"
-}
-function make_folder_xray() {
-rm -rf /etc/vmess/.vmess.db
-    rm -rf /etc/vless/.vless.db
-    rm -rf /etc/trojan/.trojan.db
-    rm -rf /etc/shadowsocks/.shadowsocks.db
-    rm -rf /etc/ssh/.ssh.db
-    rm -rf /etc/bot/.bot.db
-    rm -rf /etc/user-create/user.log
-    mkdir -p /etc/bot
-    mkdir -p /etc/xray
-    mkdir -p /etc/vmess
-    mkdir -p /etc/vless
-    mkdir -p /etc/trojan
-    mkdir -p /etc/shadowsocks
-    mkdir -p /etc/ssh
-    mkdir -p /usr/bin/xray/
-    mkdir -p /var/log/xray/
-    mkdir -p /var/www/html
-    mkdir -p /etc/kyt/limit/vmess/ip
-    mkdir -p /etc/kyt/limit/vless/ip
-    mkdir -p /etc/kyt/limit/trojan/ip
-    mkdir -p /etc/kyt/limit/ssh/ip
-    mkdir -p /etc/limit/vmess
-    mkdir -p /etc/limit/vless
-    mkdir -p /etc/limit/trojan
-    mkdir -p /etc/limit/ssh
-    mkdir -p /etc/user-create
-    chmod +x /var/log/xray
-    touch /etc/xray/domain
-    touch /var/log/xray/access.log
-    touch /var/log/xray/error.log
-    touch /etc/vmess/.vmess.db
-    touch /etc/vless/.vless.db
-    touch /etc/trojan/.trojan.db
-    touch /etc/shadowsocks/.shadowsocks.db
-    touch /etc/ssh/.ssh.db
-    touch /etc/bot/.bot.db
-    echo "& plughin Account" >>/etc/vmess/.vmess.db
-    echo "& plughin Account" >>/etc/vless/.vless.db
-    echo "& plughin Account" >>/etc/trojan/.trojan.db
-    echo "& plughin Account" >>/etc/shadowsocks/.shadowsocks.db
-    echo "& plughin Account" >>/etc/ssh/.ssh.db
-    echo "echo -e 'Vps Config User Account'" >> /etc/user-create/user.log
-    }
-#Instal Xray
-function install_xray() {
-clear
-    print_install "Core Xray 1.8.1 Latest Version"
-    domainSock_dir="/run/xray";! [ -d $domainSock_dir ] && mkdir  $domainSock_dir
-    chown www-data.www-data $domainSock_dir
-    
-    # / / Ambil Xray Core Version Terbaru
-latest_version="$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
-bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u www-data --version $latest_version
- 
-    # // Ambil Config Server
-    wget -O /etc/xray/config.json "${REPO}config/config.json" >/dev/null 2>&1
-    wget -O /etc/systemd/system/runn.service "${REPO}files/runn.service" >/dev/null 2>&1
-    #chmod +x /usr/local/bin/xray
-    domain=$(cat /etc/xray/domain)
-    IPVS=$(cat /etc/xray/ipvps)
-    print_success "Core Xray 1.8.1 Latest Version"
-    
-    # Settings UP Nginix Server
-    clear
-    curl -s ipinfo.io/city >>/etc/xray/city
-    curl -s ipinfo.io/org | cut -d " " -f 2-10 >>/etc/xray/isp
-    print_install "Memasang Konfigurasi Packet"
-    wget -O /etc/haproxy/haproxy.cfg "https://raw.githubusercontent.com/joytun21/schaya/main/other/haproxy.cfg" >/dev/null 2>&1
-    wget -O /etc/nginx/conf.d/xray.conf "https://raw.githubusercontent.com/joytun21/scjoy/main/ssh/xray.conf" >/dev/null 2>&1
-    sed -i "s/xxx/${domain}/g" /etc/haproxy/haproxy.cfg
-    sed -i "s/xxx/${domain}/g" /etc/nginx/conf.d/xray.conf
-    curl ${REPO}config/nginx.conf > /etc/nginx/nginx.conf
-    
-    cat /etc/xray/xray.crt /etc/xray/xray.key | tee /etc/haproxy/hap.pem
-
-    # > Set Permission
-    chmod +x /etc/systemd/system/runn.service
-
-    # > Create Service
-    rm -rf /etc/systemd/system/xray.service.d
-    cat >/etc/systemd/system/xray.service <<EOF
-Description=Xray Service
-Documentation=https://github.com
-After=network.target nss-lookup.target
-
-[Service]
-User=www-data
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-NoNewPrivileges=true
-ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
-LimitNPROC=10000
-LimitNOFILE=1000000
-
-[Install]
-WantedBy=multi-user.target
-
-EOF
-print_success "Konfigurasi Packet"
-}
-
-function ssh(){
-clear
-print_install "Memasang Password SSH"
-wget -O /etc/pam.d/common-password "${REPO}files/password"
-chmod +x /etc/pam.d/common-password
-
-    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure keyboard-configuration
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/altgr select The default for the keyboard layout"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/compose select No compose key"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/ctrl_alt_bksp boolean false"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layoutcode string de"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layout select English"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/modelcode string pc105"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/model select Generic 105-key (Intl) PC"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/optionscode string "
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/store_defaults_in_debconf_db boolean true"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/switch select No temporary switch"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/toggle select No toggling"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/unsupported_config_layout boolean true"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/unsupported_config_options boolean true"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/unsupported_layout boolean true"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/unsupported_options boolean true"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variantcode string "
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variant select English"
-    debconf-set-selections <<<"keyboard-configuration keyboard-configuration/xkb-keymap select "
-
-# go to root
-cd
-
-# Edit file /etc/systemd/system/rc-local.service
-cat > /etc/systemd/system/rc-local.service <<-END
-[Unit]
-Description=/etc/rc.local
-ConditionPathExists=/etc/rc.local
-[Service]
-Type=forking
-ExecStart=/etc/rc.local start
-TimeoutSec=0
-StandardOutput=tty
-RemainAfterExit=yes
-SysVStartPriority=99
-[Install]
-WantedBy=multi-user.target
-END
-
-# nano /etc/rc.local
-cat > /etc/rc.local <<-END
-#!/bin/sh -e
-# rc.local
-# By default this script does nothing.
-exit 0
-END
-
-# Ubah izin akses
-chmod +x /etc/rc.local
-
-# enable rc local
-systemctl enable rc-local
-systemctl start rc-local.service
-
-# disable ipv6
-echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
-sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
-
-#update
-# set time GMT +7
-ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-
-# set locale
-sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
-print_success "Password SSH"
-}
-
-function udp_mini(){
-clear
-print_install "Memasang Service Limit IP & Quota"
-wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/config/fv-tunnel && chmod +x fv-tunnel && ./fv-tunnel
-
-# // Installing UDP Mini
-mkdir -p /usr/local/kyt/
-wget -q -O /usr/local/kyt/udp-mini "${REPO}files/udp-mini"
-chmod +x /usr/local/kyt/udp-mini
-wget -q -O /etc/systemd/system/udp-mini-1.service "${REPO}files/udp-mini-1.service"
-wget -q -O /etc/systemd/system/udp-mini-2.service "${REPO}files/udp-mini-2.service"
-wget -q -O /etc/systemd/system/udp-mini-3.service "${REPO}files/udp-mini-3.service"
-systemctl disable udp-mini-1
-systemctl stop udp-mini-1
-systemctl enable udp-mini-1
-systemctl start udp-mini-1
-systemctl disable udp-mini-2
-systemctl stop udp-mini-2
-systemctl enable udp-mini-2
-systemctl start udp-mini-2
-systemctl disable udp-mini-3
-systemctl stop udp-mini-3
-systemctl enable udp-mini-3
-systemctl start udp-mini-3
-print_success "Limit IP Service"
-}
-
-function ssh_slow(){
-clear
-# // Installing UDP Mini
-print_install "Memasang modul SlowDNS Server"
-    wget -q -O /tmp/nameserver "${REPO}files/nameserver" >/dev/null 2>&1
-    chmod +x /tmp/nameserver
-    bash /tmp/nameserver | tee /root/install.log
- print_success "SlowDNS"
-}
-
-clear
-function ins_SSHD(){
-clear
-print_install "Memasang SSHD"
-wget -q -O /etc/ssh/sshd_config "${REPO}files/sshd" >/dev/null 2>&1
-chmod 700 /etc/ssh/sshd_config
-/etc/init.d/ssh restart
-systemctl restart ssh
-/etc/init.d/ssh status
-print_success "SSHD"
-}
-
-clear
-function ins_dropbear(){
-clear
-print_install "Menginstall Dropbear"
-# // Installing Dropbear
-if [ -n "$dropbear_conf_url" ]; then
-[ -f /etc/default/dropbear ] && rm /etc/default/dropbear
-wget -q -O /etc/default/dropbear $dropbear_conf_url >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear.conf${neutral}"
-[ -f /etc/init.d/dropbear ] && rm /etc/init.d/dropbear
-wget -q -O /etc/init.d/dropbear $dropbear_init_url && chmod +x /etc/init.d/dropbear >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear.init${neutral}"
-[ -f /etc/dropbear/dropbear_dss_host_key ] && rm /etc/dropbear/dropbear_dss_host_key
-wget -q -O /etc/dropbear/dropbear_dss_host_key $dropbear_dss_url && chmod +x /etc/dropbear/dropbear_dss_host_key >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear_dss_host_key${neutral}"
-else
-echo -e "${yellow}dropbear_conf_url is not set, skipping download of dropbear_dss_host_key${neutral}"
-fi
-print_success "Dropbear"
-}
-
-clear
-function ins_vnstat(){
-clear
-print_install "Menginstall Vnstat"
-# setting vnstat
-apt -y install vnstat > /dev/null 2>&1
-/etc/init.d/vnstat restart
-apt -y install libsqlite3-dev > /dev/null 2>&1
-wget https://humdi.net/vnstat/vnstat-2.6.tar.gz
-tar zxvf vnstat-2.6.tar.gz
-cd vnstat-2.6
-./configure --prefix=/usr --sysconfdir=/etc && make && make install
-cd
-vnstat -u -i $NET
-sed -i 's/Interface "'""eth0""'"/Interface "'""$NET""'"/g' /etc/vnstat.conf
-chown vnstat:vnstat /var/lib/vnstat -R
-systemctl enable vnstat
-/etc/init.d/vnstat restart
-/etc/init.d/vnstat status
-rm -f /root/vnstat-2.6.tar.gz
-rm -rf /root/vnstat-2.6
-print_success "Vnstat"
-}
-
-function ins_openvpn(){
-clear
-print_install "Menginstall OpenVPN"
-#OpenVPN
-wget ${REPO}files/openvpn &&  chmod +x openvpn && ./openvpn
-/etc/init.d/openvpn restart
-print_success "OpenVPN"
-}
-
-function ins_backup(){
-clear
-print_install "Memasang Backup Server"
-#BackupOption
-apt install rclone -y
-printf "q\n" | rclone config
-wget -O /root/.config/rclone/rclone.conf "${REPO}config/rclone.conf"
-#Install Wondershaper
-cd /bin
-git clone  https://github.com/magnific0/wondershaper.git
-cd wondershaper
-sudo make install
-cd
-rm -rf wondershaper
-echo > /home/limit
-apt install msmtp-mta ca-certificates bsd-mailx -y
-cat<<EOF>>/etc/msmtprc
-defaults
-tls on
-tls_starttls on
-tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
-account default
-host smtp.gmail.com
-port 587
-auth on
-user oceantestdigital@gmail.com
-from oceantestdigital@gmail.com
-password jokerman77 
-logfile ~/.msmtp.log
-EOF
-chown -R www-data:www-data /etc/msmtprc
-wget -q -O /etc/ipserver "${REPO}files/ipserver" && bash /etc/ipserver
-print_success "Backup Server"
-}
-
-clear
-function ins_swab(){
-clear
-print_install "Memasang Swap 1 G"
-gotop_latest="$(curl -s https://api.github.com/repos/xxxserxxx/gotop/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
-    gotop_link="https://github.com/xxxserxxx/gotop/releases/download/v$gotop_latest/gotop_v"$gotop_latest"_linux_amd64.deb"
-    curl -sL "$gotop_link" -o /tmp/gotop.deb
-    dpkg -i /tmp/gotop.deb >/dev/null 2>&1
-    
-    # > Buat swap sebesar 1G
-    dd if=/dev/zero of=/swapfile bs=1024 count=1048576
-    mkswap /swapfile
-    chown root:root /swapfile
-    chmod 0600 /swapfile >/dev/null 2>&1
-    swapon /swapfile >/dev/null 2>&1
-    sed -i '$ i\/swapfile      swap swap   defaults    0 0' /etc/fstab
-
-    # > Singkronisasi jam
-    chronyd -q 'server 0.id.pool.ntp.org iburst'
-    chronyc sourcestats -v
-    chronyc tracking -v
-    
-    wget ${REPO}files/bbr.sh &&  chmod +x bbr.sh && ./bbr.sh
-    print_success "Swap 1 G"
-}
-
-function ins_Fail2ban(){
-clear
-print_install "Menginstall Fail2ban"
-#apt -y install fail2ban > /dev/null 2>&1
-#sudo systemctl enable --now fail2ban
-#/etc/init.d/fail2ban restart
-#/etc/init.d/fail2ban status
-
-# Instal DDOS Flate
-if [ -d '/usr/local/ddos' ]; then
-	echo; echo; echo "Please un-install the previous version first"
-	exit 0
-else
-	mkdir /usr/local/ddos
-fi
-
-clear
-# banner
-echo "Banner /etc/kyt.txt" >>/etc/ssh/sshd_config
-sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/kyt.txt"@g' /etc/default/dropbear
-
-# Ganti Banner
-wget -O /etc/kyt.txt "${REPO}files/issue.net"
-print_success "Fail2ban"
-}
-
-function ins_epro(){
-clear
-print_install "Menginstall ePro WebSocket Proxy"
-    wget -O /usr/bin/ws "${REPO}files/ws" >/dev/null 2>&1
-    wget -O /usr/bin/tun.conf "${REPO}config/tun.conf" >/dev/null 2>&1
-    wget -O /etc/systemd/system/ws.service "${REPO}files/ws.service" >/dev/null 2>&1
-    chmod +x /etc/systemd/system/ws.service
-    chmod +x /usr/bin/ws
-    chmod 644 /usr/bin/tun.conf
-systemctl disable ws
-systemctl stop ws
-systemctl enable ws
-systemctl start ws
-systemctl restart ws
-wget -q -O /usr/local/share/xray/geosite.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat" >/dev/null 2>&1
-wget -q -O /usr/local/share/xray/geoip.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" >/dev/null 2>&1
-wget -O /usr/sbin/ftvpn "${REPO}files/ftvpn" >/dev/null 2>&1
-chmod +x /usr/sbin/ftvpn
-iptables -A FORWARD -m string --string "get_peers" --algo bm -j DROP
-iptables -A FORWARD -m string --string "announce_peer" --algo bm -j DROP
-iptables -A FORWARD -m string --string "find_node" --algo bm -j DROP
-iptables -A FORWARD -m string --algo bm --string "BitTorrent" -j DROP
-iptables -A FORWARD -m string --algo bm --string "BitTorrent protocol" -j DROP
-iptables -A FORWARD -m string --algo bm --string "peer_id=" -j DROP
-iptables -A FORWARD -m string --algo bm --string ".torrent" -j DROP
-iptables -A FORWARD -m string --algo bm --string "announce.php?passkey=" -j DROP
-iptables -A FORWARD -m string --algo bm --string "torrent" -j DROP
-iptables -A FORWARD -m string --algo bm --string "announce" -j DROP
-iptables -A FORWARD -m string --algo bm --string "info_hash" -j DROP
-iptables-save > /etc/iptables.up.rules
-iptables-restore -t < /etc/iptables.up.rules
-netfilter-persistent save
-netfilter-persistent reload
-
-# remove unnecessary files
-cd
-apt autoclean -y >/dev/null 2>&1
-apt autoremove -y >/dev/null 2>&1
-print_success "ePro WebSocket Proxy"
-}
-
-function udp-custom(){
-print_install "Menginstall UDP-CUSTOM"
-cd
-rm -rf /root/udp
-mkdir -p /root/udp
-
-# install udp-custom
-echo downloading udp-custom
-wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8" -O /root/udp/udp-custom && rm -rf /tmp/cookies.txt
-chmod +x /root/udp/udp-custom
-
-echo downloading default config
-wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM" -O /root/udp/config.json && rm -rf /tmp/cookies.txt
-chmod 644 /root/udp/config.json
-
-if [ -z "$1" ]; then
-cat <<EOF > /etc/systemd/system/udp-custom.service
-[Unit]
-Description=UDP Custom by ePro Dev. Team
-
-[Service]
-User=root
-Type=simple
-ExecStart=/root/udp/udp-custom server
-WorkingDirectory=/root/udp/
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=default.target
-EOF
-else
-cat <<EOF > /etc/systemd/system/udp-custom.service
-[Unit]
-Description=UDP Custom by ePro Dev. Team
-
-[Service]
-User=root
-Type=simple
-ExecStart=/root/udp/udp-custom server -exclude $1
-WorkingDirectory=/root/udp/
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=default.target
-EOF
-fi
-
-echo start service udp-custom
-systemctl start udp-custom &>/dev/null
-
-echo enable service udp-custom
-systemctl enable udp-custom &>/dev/null
-clear
-print_success "UDP-CUSTOM BY FAN STORE VPN"
-}
-
-function noobzvpn(){
-clear
-cd
-print_install "Memasang Noobzvpn"
-wget "${REPO}noobzvpns.zip"
-unzip noobzvpns.zip
-chmod +x noobzvpns/*
-cd noobzvpns
-bash install.sh
-cd
-rm -rf noobzvpns.zip
-echo start service noobzvpns
-systemctl start noobzvpns &>/dev/null
-
-echo enable service noobzvpns
-systemctl enable noobzvpns &>/dev/null
-print_success "NOOBZVPN"
-}
-
-function ins_trgo(){
-cd
-print_install "Memasang TrojanGo"
-wget "https://raw.githubusercontent.com/king-vpn/autoscript-vip/main/install/ins-trgo.sh && chmod +x ins-trgo.sh && ./ins-trgo.sh" >/dev/null 2>&1
-clear
-print_success "TROJANGO"
-}
-
-function ins_restart(){
-clear
-cd
-print_install "Restarting  All Packet"
-/etc/init.d/nginx restart
-/etc/init.d/openvpn restart
-/etc/init.d/ssh restart
-/etc/init.d/dropbear restart
-/etc/init.d/fail2ban restart
-/etc/init.d/vnstat restart
-systemctl restart haproxy
-/etc/init.d/cron restart
-    systemctl daemon-reload
-    systemctl start netfilter-persistent
-    systemctl enable --now nginx
-    systemctl enable --now xray
-    systemctl enable --now rc-local
-    systemctl enable --now dropbear
-    systemctl enable --now openvpn
-    systemctl enable --now cron
-    systemctl enable --now haproxy
-    systemctl enable --now netfilter-persistent
-    systemctl enable --now ws
-    systemctl enable --now fail2ban
-	systemctl enable --now udp-custom
-    systemctl enable --NOW noobzvpns
-history -c
-echo "unset HISTFILE" >> /etc/profile
-
-cd
-rm -f /root/openvpn
-rm -f /root/key.pem
-rm -f /root/cert.pem
-print_success "All Packet"
-}
-
-#Instal Menu
-function menu(){
-clear
-mkdir -p /etc/rmbl/theme
-cat <<EOF>> /etc/rmbl/theme/green
-BG : \E[40;1;42m
-TEXT : \033[0;32m
-EOF
-cat <<EOF>> /etc/rmbl/theme/yellow
-BG : \E[40;1;43m
-TEXT : \033[0;33m
-EOF
-cat <<EOF>> /etc/rmbl/theme/red
-BG : \E[40;1;41m
-TEXT : \033[0;31m
-EOF
-cat <<EOF>> /etc/rmbl/theme/blue
-BG : \E[40;1;44m
-TEXT : \033[0;34m
-EOF
-cat <<EOF>> /etc/rmbl/theme/magenta
-BG : \E[40;1;45m
-TEXT : \033[0;35m
-EOF
-cat <<EOF>> /etc/rmbl/theme/cyan
-BG : \E[40;1;46m
-TEXT : \033[0;36m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightgray
-BG : \E[40;1;47m
-TEXT : \033[0;37m
-EOF
-cat <<EOF>> /etc/rmbl/theme/darkgray
-BG : \E[40;1;100m
-TEXT : \033[0;90m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightred
-BG : \E[40;1;101m
-TEXT : \033[0;91m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightgreen
-BG : \E[40;1;102m
-TEXT : \033[0;92m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightyellow
-BG : \E[40;1;103m
-TEXT : \033[0;93m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightblue
-BG : \E[40;1;104m
-TEXT : \033[0;94m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightmagenta
-BG : \E[40;1;105m
-TEXT : \033[0;95m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightcyan
-BG : \E[40;1;106m
-TEXT : \033[0;96m
-EOF
-cat <<EOF>> /etc/rmbl/theme/color.conf
-lightcyan
-EOF
-
-mkdir -p /etc/rmbl/warnafont
-cat <<EOF>> /etc/rmbl/warnafont/fontgren
-WARNAF : \033[1;92m
-EOF
-cat <<EOF>> /etc/rmbl/warnafont/fontcyan
-WARNAF : \033[1;96m
-EOF
-cat <<EOF>> /etc/rmbl/warnafont/fontlight
-WARNAF : \033[1;37m
-EOF
-cat <<EOF>> /etc/rmbl/warnafont/warnaf.conf
-fontlight
-EOF
-
-cd
-
-    clear
-    print_install "Memasang Menu Packet"
-    wget ${REPO}menu/menu.zip
-    7z x -pFanVpnID0311 menu.zip
-    chmod +x menu/*
-    mv menu/* /usr/local/sbin
-    rm -rf menu
-    rm -rf menu.zip
-}
-
-# Membaut Default Menu 
-function profile(){
-clear
-    cat >/root/.profile <<EOF
-# ~/.profile: executed by Bourne-compatible login shells.
-if [ "$BASH" ]; then
-    if [ -f ~/.bashrc ]; then
-        . ~/.bashrc
-    fi
-fi
-mesg n || true
-welcome
-EOF
-
-cat >/etc/cron.d/xp_all <<-END
-		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		2 0 * * * root /usr/local/sbin/xp
-	END
-	cat >/etc/cron.d/logclean <<-END
-		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		*/20 * * * * root /usr/local/sbin/clearlog
-		END
-    chmod 644 /root/.profile
-	
-    cat >/etc/cron.d/daily_reboot <<-END
-		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		0 5 * * * root /sbin/reboot
-	END
-    cat >/etc/cron.d/limit_ip <<-END
-		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		*/2 * * * * root /usr/local/sbin/limit-ip
-	END
-    cat >/etc/cron.d/limit_ip2 <<-END
-		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		*/2 * * * * root /usr/bin/limit-ip
-	END
-    echo "*/1 * * * * root echo -n > /var/log/nginx/access.log" >/etc/cron.d/log.nginx
-    echo "*/1 * * * * root echo -n > /var/log/xray/access.log" >>/etc/cron.d/log.xray
-    service cron restart
-    cat >/home/daily_reboot <<-END
-		5
-	END
-
-cat >/etc/systemd/system/rc-local.service <<EOF
-[Unit]
-Description=/etc/rc.local
-ConditionPathExists=/etc/rc.local
-[Service]
-Type=forking
-ExecStart=/etc/rc.local start
-TimeoutSec=0
-StandardOutput=tty
-RemainAfterExit=yes
-SysVStartPriority=99
-[Install]
-WantedBy=multi-user.target
-EOF
-
-echo "/bin/false" >>/etc/shells
-echo "/usr/sbin/nologin" >>/etc/shells
-cat >/etc/rc.local <<EOF
-#!/bin/sh -e
-# rc.local
-# By default this script does nothing.
-iptables -I INPUT -p udp --dport 5300 -j ACCEPT
-iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300
-systemctl restart netfilter-persistent
-exit 0
-EOF
-
-    chmod +x /etc/rc.local
-    
-    AUTOREB=$(cat /home/daily_reboot)
-    SETT=11
-    if [ $AUTOREB -gt $SETT ]; then
-        TIME_DATE="PM"
-    else
-        TIME_DATE="AM"
-    fi
-print_success "Menu Packet"
-}
-
-# Restart layanan after install
-function enable_services(){
-clear
-print_install "Enable Service"
-    systemctl daemon-reload
-    systemctl start netfilter-persistent
-    systemctl enable --now rc-local
-    systemctl enable --now cron
-    systemctl enable --now netfilter-persistent
-    systemctl restart nginx
-    systemctl restart xray
-    systemctl restart cron
-    systemctl restart haproxy
-    print_success "Enable Service"
-    clear
-}
-
-# Fingsi Install Script
-function instal(){
-clear
-    first_setup
-    nginx_install
-    base_package
-    make_folder_xray
-    pasang_domain
-    password_default
-    pasang_ssl
-    install_xray
-    ssh
-    udp_mini
-    ssh_slow
-    ins_udpSSH
-    ins_SSHD
-    ins_dropbear
-    ins_vnstat
-    ins_openvpn
-    ins_backup
-    ins_swab
-    ins_Fail2ban
-    ins_epro
-	udp-custom
-    noobzvpn
-    ins_trgo
-    ins_restart
-    menu
-    profile
-    enable_services
-    restart_system
-}
-instal
-echo ""
-history -c
-rm -rf /root/menu
-rm -rf /root/*.zip
-rm -rf /root/*.sh
-rm -rf /root/LICENSE
-rm -rf /root/README.md
-rm -rf /root/domain
-rm -rf /etc/noobz
-mkdir -p /etc/noobz
-echo "" > /etc/xray/noob
-#sudo hostnamectl set-hostname $user
-secs_to_human "$(($(date +%s) - ${start}))"
-sudo hostnamectl set-hostname $username
-echo ""echo -e "\e[94;1mâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—\e[0m"
-echo -e "\e[96;1m          -[ FANSAJA TUNNELING PROJECT ]-                 \e[0m"
-echo -e "\e[94;1mâ•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\e[0m"
-echo -e ""
-echo -e "\e[94;1mâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—\e[0m"
-echo -e "\e[92;1m            ----[ PORT SERVICE ]----                   \e[0m"
-echo -e "\e[94;1mâ•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\e[0m"
-echo -e "\033[0;32mâ”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”"
-echo -e "\033[0;32mâ”‚       >>> Service & Port                    â”‚"
-echo -e "\033[0;32mâ”‚   - Open SSH                : 443, 80, 22   â”‚"
-echo -e "\033[0;32mâ”‚   - Dropbear                : 443, 109, 143 â”‚"
-echo -e "\033[0;32mâ”‚   - SSH Websocket SSL       : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - SSH Websocket           : 80            â”‚"
-echo -e "\033[0;32mâ”‚   - SSH UDP                 : 1-65535       â”‚"
-echo -e "\033[0;32mâ”‚   - NOOBZ VPN Websocket     : 8080          â”‚"
-echo -e "\033[0;32mâ”‚   - NOOBZ VPN SSL           : 8443          â”‚"
-echo -e "\033[0;32mâ”‚   - OpenVPN Websocket SSL   : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - OpenVPN TCP             : 443, 1194     â”‚"
-echo -e "\033[0;32mâ”‚   - OpenVPN UDP             : 2200          â”‚"
-echo -e "\033[0;32mâ”‚   - OpenVPN Websocket SSL   : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - XRAY Vmess TLS          : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - XRAY Vmess gRPC         : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - XRAY Vmess None TLS     : 80            â”‚"
-echo -e "\033[0;32mâ”‚   - XRAY Vless TLS          : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - XRAY Vless gRPC         : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - XRAY Vless None TLS     : 80            â”‚"
-echo -e "\033[0;32mâ”‚   - Trojan gRPC             : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - Trojan WS               : 443           â”‚"
-echo -e "\033[0;32mâ”‚   - Trojan GO               : 2087          â”‚"
-echo -e "\033[0;32mâ”‚   - Shadowsocks WS          : 443           â”‚"
-echo -e "\033[0;32mâ””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜"
-echo -e "\e[94;1mâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—\e[0m"
-echo -e "\e[92;1m               [ TERIMAKASIH ]                      \e[0m"
-echo -e "\e[94;1mâ•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\e[0m"
-echo -e " t.me/Fauziii09"
-echo -e " TERIMAKASIH SUDAH MENGGUNAKAN LAYANAN SC FAN PREMIUM"
-echo -e "\e[94;1mâ•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\e[0m"
-echo -e ""
-echo ""
-read -p "[ Enter ]  TO REBOOT"
-reboot
+exit $res
+Œ	
+–è}'OÿÒê„é¨»Ø>n­O…Ó?ÛW=ÂÌèåŞ´·Èo™Ph7¥uyªBéS%~ãw8ÎvŠí8i0cNLÌ²lº¦Æà±ÿ4±0pÎezÉ4WoªÂ-²N?0CaCÒL¹eU®=v5	äÿŞb¹7õA<­=’G{w¹L”ª×yÌ™-ÌæÑT‚œŞF†ôgŒWÈÛÈ•¹·´ha§…¡E­´g<ë2\%TŸÚNzå½®e˜"ÜJ+»Pµp$ŸN“?ÌK¦2´`!_è!ì_£è†‹c:]^kğ÷¾ëuµ!>uú¦<ÚÅä/+c7QIk’)~L“(»Àå«ÛiêâóÍÿ¯K„ƒİgó$N‚?’(˜¼ÈšBà õÓÓ}ÈU¾µñÆëËÍìËVDkY½uÃÊkD¸ÉÓ‹C4ùåÔÎpçhéChîás„y"ìG²ÁuA\í´F+òW%YYı©cµïÂ½ïsäÖo @Uj×¨Êøu É³;¹ô‡koÉSŸÖv8úJÁpii°Zcëş*_l¬Ã¨¥;ìi=NX‘Ò[…ÏgË<=³V=®X{DêÍÈjÌ÷¢ ê¦û]§¢ZàÈòj‘”®šlÕF…X_ÀÚoîØ%q¤%¾¦ç¬£*|ÇkB^sW³Z&§]±Ì8p6vğõ ÅcWÁÏ	¯«l}´‚Å±Èİ¹ujØ.Qï^$}My ¶˜“ÑíEI¤èæùµÙÆwc·r^M ìfÈ/ÏhöÊæ£5¦QóãtL,Èû1áù×è¡ªÓ$Äl;4£ÓIaÅÎ©6µÇ³·+óiåÈ©¸æ-BqXÕ±ÄÉ"p<}<!»Æû’¾GøLĞ™¢ønô> oZi|Ç/GÌ•OÏ»k·÷ŸüÏk«æpcowØ•ôÑw• Q¹NÚlÍ>yÑ¼­Iø ¢nÉïTÌÁ‡•_sö5êŠ|å4p¼ =l®üuŠÅ¤K„äî%Wå±ª"W¢E0Ezó.òëëû½–Ò#ùlı·ı\›ã—ëet@iÆügBˆ›Ê¢] òåÅ AS`õhÙÍqİ#fš­+WR¾Ó†³oP¼áx•½á¦…R ¹LQGY-éíÉ[›E36Kğ‹ÇúÄ-•­ªµspèò÷•áñ›ò%Ö8¯½(œ`‚ 8^ÿ»\ÿâaGe>Êv?àÌãFÑ„­›îé(Óä˜uQã¯ıÆŸ2H[<|u¦‘OĞ.Š£îş]âB_9<»R4]7NºX£ÃÅİ€QúW{w=å’ìAGW1AIt¼¸Ü&(õ=çêŠ‹çÅôM”5z^fØõ’iîJ4¡šÑD5	kî05”êk”Á“_ !J¡™"4*Û1dˆŸNœí£÷Á“¥F%u¦wÊÛë?×„˜§Bì}äôŠñéÂøTÁóÜÇÓÕ{…‹C7‡ú¿§ÙÍ™pËÉ#4p†;@ÍŞÅ“TjKDóY&#
+â¥­Õ5¥Í¸O#<~>ÛÓò_dFõ›aiñp¢PoJÇ‚‰wûEÔÔOà İ¥{å=HFÁ`»næïK<Y‰M Úö#ÕUuâ•Cœ?ÅÌQ¡">¶éĞ$R	]VòíŒÈe‡Q«ïciCã
+™î0PßÎ2iTsåÀh›É:’ò¯o³:”¼¼÷xT“¤ò‚6³”
+¹ôQfıØÙXªÇ5Ò+1É÷øúS"+ÑõÕ$§ÊU“hÁ[Ìì0¯ÿ”°ùXÚôLl¥Ì}LŒO«úÌMgçÎĞ‡¿Î"„£)}1™êsZv$[Ş ¥Ø„úcW´G¢~|98‡Ù]rSé©Ùğ	C¸ŠoÛFA¨çoáÇ¾D^Ú›©y´É.{ß‚&Æî*c[$ÆSãm1B)÷“e­ö˜ØŞß»J¤,3Pd6“ëtËUTê0§3Ò¹Š £ïŸ,ïWoÍeîÀ¬çhø=!K‰ÀA›9%Òø]Ou/H‰¦,`v\çæm¥`Û‘ZTDiãhl÷wV ØÃ»"…9Ç
+¢Âr=yxUmmsd²”Xİ-öÌ3¥85¦éÚHËşw›L*¢¡æ;7ò{ä(a¡ò5 ¾şyëbİtâ¯·›§ï}ôD2ƒü†·O£³ïX¿1·Qçb¯qÈ/ 8¹·‰[Ù:…
+Şx¸r+Rö1ĞÜò¤©‹jLs%4?í:ÛŞ½R´û•çËØ´®“÷Ó€¢0h:Wß>‹Ÿp6ªÂ;W4'"B °^B›†j6Şüù`Û«Ø•À·zœ:tŠ¸Š¿›ı£ßMŒÜæŒü:.Éh¢D;Ğ ‘}©®¼Ù°”Î»Y–‡2êâ ÃY÷Œ3™»»ñÏÎa3¿+ıqı?Ëm9nyZÀuŒ¯”Yî0¬Ñìª_Z	^„'xèpÿéF¤~ÆÉƒqÂI	¶vÃa 8çFÈjÂ*SòVé^ì¨İVécjİ®ä6Ô"m±±ó&>\øÑ°|0/îÂßéof­w])ü§ŞWğòHœ’bšZ‰¡Ú3 ÉÈd#c]Ìr³ôöP<T[a]‹‹ J‘ÇËĞ®=„½Ğ‹<ŒPÍ“[õ:Á¿@ŠáÀÌì%4ºÎ>?ßD=åñş~á}ò×8 L“ÒúŞ‰R½† cìıNƒoë`éôøñj÷½ş÷g¼ÇPJQÒ.µê/ÆèK‹¢€ö{{=à±ùJÛ³m¡³µi`†œ.±»T¿o¡LhŠ¤ŒÇ[´­ÃfS´“1yôjPd9Z™ÁÅ}{0n>Ú•–ƒÚm›À´=îT@ŸNBö$sÖÖÕÔ	÷^Ä‘İu3.¦ñM%ø°`ÏÉıÖ¢v_©´PêÒ-0ü€³ˆ!…>™my0˜ª1
+®‚•DZ8×şú‚ÏuöozÄ%’R°[.j–Döy•DÆ$¨à@ïkŞ¥jö4O*’q‹QBf|EÙÎ´\»o@å0'7ùÉ ,Ûx4y$NWQ+2èšÿÎöoa[ZÁñO¼øÌ6ĞvôfWN4–2?Ÿ`wXÕtóz-#½[¬ÓYçAGqòÿ¼$×nWaŠêš<Õ»WKU¤¯D—;Û<`)7¦Ù1‘Ï1bßT]V-Ò>Ú0‡nÇ*¡›¿³u.[#~R­&:a,CàÅq>²p‰D¢÷š`#˜Ã¶Q´ø_S‰Äù—N‹óÙS¬NŒñ¯O:eÕZır¤°%Âªû¹ğnâo‹ôët‹Uşµ~WîÓ=¼‹>X‘Â*/ocj üJ0ü§ã·¹ ç°Ö&6”2k`‰±fv/éTi2£n¹ Ç©áe$ùK¤88Ê«FK¾ŸãéÖ¶@Ÿ%€ù{Å†kŒe^*ä¢<õSÓåãı[âKöwéß>äA=VÌ¦âv³›RŠ¤Oµ¸ØR‚4ƒLüı–eVæ4â—¤á÷ÜáäRG	BìÊÉóæØmÈ/BSõÖ¡
+¹C[•Ú;L\YAÌ±b‡)ÒÜ·^mzIT¯ø”§Ù!jÍ£OÓ2oüää0IS§ñòmcB¿W[úëG¼ÜÿÄã€»êÄi:¿Yáì–›Ùq ù@|ÖìŒÀYnK™PâWçh3úbz,ÊŞbb"æÀ¶NùŠí³Ámïµ×=/‰Á(*ûXKGéäYp¯¨®|4Ÿ=Šâqô„[^È.KTÂ€D–RiÚì×ÂÉ„düpúXU³~A9õp¶`fWÛø™{	Öü¹p] åé‡åí7¸ <p´³9WÜXİjø®N,àC`‚/{q(8#Ó&»½ˆÜ§<cœF]TÍÒb{ nhïôT!±bÉš˜y\â­=1‰w½[ğİ@Î3MğõÀP`å²‹FVs^hXğhú€î_:Ër[9<ù5·"³rk„f¦Ã$iı…êj{Dat`;áì-ºH ÀßtTuÄX+,ŞbÅöIª ™æ]ç(Ğ¦„FÄ¦÷ÂÒD]›½À×>àO&aÁ¢Zd@ÃƒÀ^¶ŸŠT6³Us^-L¿ ¿µÅ®Ò“?]ïŠĞ8n»ÄM¡ÎŸñ”jZÓÖDûZ>VPï^™‰05­¥´÷´aÅks‚\IÀØd}ufÜW<(‘c†ìHš. m¢EÑßE?›ğ"·œsXH·ÒTÂf¹É\ì^ÏĞSùÖ~Çtá£˜x½È&µşfÛÁ^|ÿ%[è–!ÁÊ.eyH¶Tö:)!ÁMñ1Â‹Ïğ¦Ú>à¬rõ¸à®Âb² ÿ9ÿÁEúòÕ79±úÙâ…îKT§ S7­Z>½Ï-Î)¼`5Q§Dh7èÁMn' »³>ÓejÈ­ÊxîĞµyvUŞ:­4¶²õ³pô‘·,^2(f¥·I'—"ş&"ÿBiN› u2¸Í€t@·mÌ"ºïÓñÿö+f’´½âÉ Œ›-–şÈ!Élİ8é‹*.¿UÌu/¹]Ğkïa«]v
+áßØÌ;ˆ“!,İ]cD{Ç
+{¶;µ+¶¦§¨>òA8n]N÷y&mÈEéâİ6 Ï˜M²maGÑIà?Pq„>çœæZ”`ˆV SÒÊ'¿?ş LU±Ù¢ï?şôO¹v¿½9lX,Ú™¯Ùø¡–eõ„¥…:%Ô‡ã‘¸JÊzWjnÆ(O
+çREŠ{œh”·.ˆK)”È¹‰_tëÛc‚ìL–† ÷wxÁPÕ@˜ğË–øfqT_ÊëãO"
+Í}ÖiÕ¯u%?½àF§—¶Îfx…;…^RcÁ³›3JÏAŞwåö|`^2.øş.‡]y0Ó¸Zyp…â Ş5·Sï†¸ØÏHK÷§[Z‚ƒ-|éNõ&·ß¤o14Ö&¢ö?»²Bf¢±N‘xŒâ]ç(±û§¬X	>ˆSès”÷°¦Dà
+jó×ñ7(k²)™Ğë£}Şbƒšé¸uH‰çÜ¥Š±Ñ¢dpb+w$È­òà&é£E7®H&wìĞ¯88y;“{íÒ4—B»ÏÛÖD&Xå{·M²Adû¿G¾%Õè\«|T'J9Š€RÓÙUs@f6Š/šß]Yà!/˜E"oG-á¤¥é(<¡äòí"ï·h)¶*(øf®Äª‚Ÿt:®Ò¬` v AšÓ¨èH³º•«X„q©Ÿ_!/Yã»âz$?.Æ0¶˜o´tÛEuüÆ‹J+	ÄM‹è—“±hó»²³'ÖF‰—hçIk’j¢^²MŞ(ÕXü°´è	á[„Wœ$ÆC—h è—ğØåOşËõ¸7<5ÍU\¾7ş=fvÇW4ÔLeÍÁ('ÑJá¥BSŠ¦Ô—Ió€2r©c<Y¨KŠ È©HMóÂ €8&¨xŒéO…Äm¾IJX­äbvèˆQæË6Òşÿá"“…z¹ Tè‡ÜpîXWÑ_OÀÿÁ”ìã‰Ÿ×ëùK`)pò¶e:WÆmú§€MŞ®Í†šB+AFŞúÿ$lj3US¼Uûe>÷Ë™ø‘õ¡
+y'ş])­ï|´³€é`GÄÛ‘¨~p#1›Fì°¦Å3+„.Ş³Å§Úì øhè+/:Á@K$1ìrâ²°¹EÒ)Å’…`k‡ÑWïbONXY½T3ú}Óä“‘Cí\	/”Î0§aöU)ŸeÜO)“’ˆ¤(/‰º5–HäMÆÆælRê“¼ÿŠğz3A¨à\¯<µXÈ%ëœ4ğÊFm÷-Ïf„Ü{kÃÿL,«ï¿÷-÷¯:Ü¤‰­“ƒ—íQşZêÆ±†5hÉ}ô®éŞÉÂd¿.ó7
+wb0ŒPÃ‘üÆZrfªFfÔ;ÈÄíÓÇÌÖqä1ìßÎ	ø«¶ş†héÿ0œŒ ,wŸöÏ²E«åé¡S@ö•ÙCg˜ˆi\Ş“{`«Õâ?½f©ª°ß‚É¿ÛŸÜûU¦:ŒWö^8à¿œ»vüšlH¿R§éÌ‡]--±(-^U=NÌºN}ıq93Ÿ8¥ë®!˜—Q”AÄÑù†Ÿè¤ÑÛîğvå{üêvO™RÈöŸ–Fn£—•'^•ğ‡áµsKYß
+èéğÊ×¸ÌŒ*á¹9‹SÕ8eyà^¶¿';~5±‰r©-÷Û]¡´Ê9¼ü ¢T¡(Nß ‹1Yà*n©{«?2‹QŒs 1ÖaÏyh™K‹°jq‡p„'zqægXªc7µë5…# "=ºªt¨’FšŒ€ô@¶zºY±H¡Qa¼]½¥Û[H9ËšW}ãÖğÉ$5#r³±kOªDkNŞ+»«Àô0£Õ¾b´íø´úÄ/—çğÄDò«ª %.ÚµŞÿ‚ÿáÙ{ş§”ñô:#2±£^¸åuòäZÑ1\f= z~Óª’º˜M"»ñÔm=­&@Z§›#Íßtüªw¥Ifs=éÜ6 ²ïùŞËÈ©ÛtIñÍÇ	ëğKŞ,qÚ‘lƒ6^}îd¼7@İCİ¦+–,÷Ğ’¦šXÌEàìƒ½·GÔæ]şæÌğóà¤İ-ö-ü$A*°«—¡]HÂ•n«dó-#ê€À1—‡‰*çVÁÊm^Cë¸~” ÆŠ°rŠ0ï[wÜ;³%b•€ã[a8™È¥-iB(µjCäÙ•MAñ<ÿ EGÏĞ¿r>QSƒP¢¡1_Dà{S|3?ªªAJi^Ş­µb[ÿØm~·´xäèåĞ^}½§ö?ÿ¬R•Bó?–‡›M|3ôÀÔgG/Ğ­V.ÚhñæÖB°¡¯Ô¡x+hıaŞI¼î€§èH78Ù+ã:ú„ÍIÿh·¤Å›×)fÔT,_Úœ‰Lì+"fÃìÄ`Xá5AêÕpeË·A¿¶ˆÂ[a$Œ Òeƒ‹ê¿™jñ»±!~…fÛâ(2"Ë \¹‹J-X˜£Ã} ¿"×”.!ÛZş r‘¯ùeúøxûë_Ø¸õ7?gA6bÖ_Ñ®~”EE*9Cß6ÎaÍoÅ%•iuq®I§UıÖXÖÉ¦'ŞÌ2CÒ½™QŠ¯'³Øbİå?ÿÅËîguˆ"šDõRkHyÄ›Ü Îr1ÎªN\OÕ˜¸‡äh:’¤Ï­û—}àôW;Ü‹ÜeòFÀw3¼ÁaˆI6xïE[+aôíÛex /f:¢É)‘ÚÀ/õn1ñøYô°’á¹˜oÃÏÜceÄ Şæ©BâîlVï#¢„È‘[zÂ²kf·$ÙzoöÑC×§Ï…}‚­”CaUÓÒú€W³UïjĞJ¾\Wî0ç|Ü50³Ár÷©°_§Faòñƒa1 9O!®ä	5‡‘E)µÍZGÁ¥5©-œø6ı›ˆûòØT¢şğ£»ıøyğ5™ç_÷>üÀÍBÌL¿è\n›v³ay:"t	l€‘Êú¨,\Aì/nÅO«œ˜¤ÍÕ” ï¥>AvN¾r¸Á_ø±b'§ =rıûÙ~îU…‘Œ?T¹<NùÙ'êQbâVÅqÛïW7koÑl?gÁº*ËïÂˆ6$şOYŒ œıL3q0d]Á;)ŠTù˜YfÒ“Õ¢µM6*—ßyaœø@bfĞ–Ée*,ƒcKş´~ÃaÇ­j­•Ô`¶¡Ù-úíà¡fÀ‡hÙNÙ‹Yh~üö.Ö´úy…ÅiÃx2à0¼1	!EOÓVuº©8Él§9ÅåQõ<GbB[Êåù®¿Û’pº	¡¬æpØ¾!ñèlâàÉøÂf¹¡‘‘‚ºŒ®âßÉ/S8<5Š,vu1Â*×©EG¹Ùt-JØ¼ ¬Ş„ö|q Ò„³Úpõƒ1¼ø1;°«Ä1iJ1 ÎÍÒˆ…†'”ëÃä—ıàDJc{ÿÌüV uå°mŸßPu¨àì3«à*l7!¨Ñã‹è yÑJ÷O±pKJy4ıZ¬Nı‹3-VùÚs\ìâ§`FéÆ:ÊfBnı¢FQEôÆ¨c¥0ZCF¨¡Â…¥wşĞ›óWmš­H‹—bºhÔıw^hÄ(ğ¨×oÅ¯À,¦NÜMöÚêóÏğùqå>·AœW3¡´|2·0¾	™]³äT»YÔ{–"é¼¹ùH§p±:”q"è:6¥B"${šÿ%,TÇø<åhŞ6ÒÆøçx${øwÜVôw½¬_qJ.ù]®)X 3ä¨OÛ¡U™^±Æ»ªK#!²£€‹‘Ï0éÛhèÆ“ˆ.,~qt—»õ*Î³íN¾å×‚›{Ke8É©á¥LƒÂ¬'™ân§~¨Ñ˜«O<oƒ|‘î__e.L”£ìºw—E›ÓsâLOe¯út´ §Fºí¦kş+9±ëé…¸dÂâ4\91Í(§9®ÿi-¼qæ…Å·j<§Ö.Ú÷¤C1w|£jlb—ÑáV½,É»æk]çÓŸ©ûzÙ÷^·îhŠ¼ùşì„^E¹Üéı‘ÉÍ‘LÜ]ñ
+^yfÑ9†C‘FA%é¨öäs.<MÃ_Ç‰wõÏ÷-=gÛ/,ş¥ŸUPığ+˜9’]Z‡5õd^?«îÜ1vU[2ş¦C#¦]DH>Ël‹æ+5#píi:÷¼JÙuêÂd~:ÇiÿT·WPU<øÊêøòëğI‚% ½‡Ş8Šfê«âynyPFøÇúä°ù.$2Œ´®i¯~W¬bGõˆ{; eïHø\®ª±ì°ğğ0
+ ‹Æ£Õİá«’Qt ôbÎe÷S:RÍ–œ±êK[é1¡¢ºÈ&I›4Ô‚[ ’€8^¹œ[``.UÎ¡„â#ğÀq4·wM,õõÃÔFZ'Gñ¸â<Ü…¹“/TÜİ›	Ÿ¾#Z«N;×
+ıBñ-g –ˆãm˜eŸæ‘ÜR•†™hvˆMëïc†7Õ3äˆˆ‘S~Äw˜‚ßá¬5u€ç¤NÛ>båİ#…ô€“* à ÊÖàıazŒÛ‡NO.7\AµŒ,½=lh*í­cOXIyVà;QéŒ°¶·	[Œö¼ğ´µ—ÒLƒàµ!'/or¼Õ{{¤£¤gÇœò28sb+š„Î,-¸1Wù”ªujü‚˜ò‘I¬>Y.|…0Í†Y¶ôôp«†Q¨¸¨5­ƒMñvóæ/-êÒ~·g˜e‘Å9Ùc„Ó›ùRbt:DGË#û¥Â0·cç'B†J+1€8Í>ĞÚ¸M,ÍæG:´ï«Œ*UĞ\BÀÎµ§†õw[7Aÿ$ĞÓ[GàÕÁÕCµé²áå½.¢hùÂõ':‰8Ø³V@PÑ–™ %)Œ%èºRÁ5$QÚ»#*ø’ ïÛ<ÅL}0'Ku_K²¡¶àD`¯û^µĞÚèI) /Dìûã–UÏ¥+ÿŠSPÆ½‹ÈQå’mps¹DÆ’lKwym†Q>gºøºTİòO[5.àGmq’ø[%3Å@OY&<:
+'úB•XÛ_KUğËòvA›ÇŒIØ1árË¾Ò4˜m÷b×º¶ šÇƒRÊ!{_oà¦E3D¯ÎG4'å tDZüI¯Ì,0šş¹İ:Fçà¾X%ÿƒl@_‡&÷”¥3(+#‹böm0„Ğrğè¿Îù[b6|6ä¦$Z÷¿óøéºÒ™z”0VNf±°.ÕnZ	VwÉbßbÍ#½eÌì>Áñõğ×š[†­àÁ¿ÂË&ğlFRºe’Çƒ0Bw¼›S:|:êî'Øµ^ÿO’ÜlÄ‰LwñGÁ¬Ë´¶"Z[ıNœ…"Ñnl‡øÒÈŒà´]aÀ+,Mğ`2i;óA™4¹ø¯¤°¥ÅÉ8³†5îßñ_şá÷Â•İ¨ö±	Åg˜dÕó&b;ÆŸS‡—Wdò“œ-šgÇŞ<”¡¯é­yn'	éğ9Õì³ş©4ú‰×QQ§êv“qü~É˜]glü¢Ú²køX¿#6¢ß ¿^Às¼Ã7hpNLu/Ñg¾ÍÅ1	…¤5Ş&§»0=Œ†l	|+g H ³¯ äˆÁ€x%JãfGJY—MiuC„(8rb®ƒÂ³›t¸—IÉ!úŠV^^»ÍWÓª_ØÇ7¬ÕœL_Èº84b‚q–PO ıÙÆÙöy‹Û:xfv¯~ùÁ&P
+™š5oæoÏ¨jª¬V¡e_ô^Ë.ïí·úí¸?ÿ{ärƒ_Št­”M€îNÎ\¿’NÔzºˆçÙfÊÔ)U{	ê¬•E£pÀÚK,›;É Ø…PO•!¶åÓÎ*ÕÓ·)¸‡¹¦!œ:Ò„æIf†ö9!"íŞmX,b¶¡X1øŒ–ä£åzy.¨ºû˜Ql•¢ZÑ.X	{§±~Û<Ë
+Ò…±€ ôÁKŠ•e ï˜÷İ/–!Ü±Ò‡^6­Yd™¤íl(ò“è›êĞì.•ä éÔO3¸N¶¸Çîx 8Çé¥³Ü’p7põ{‰ü†_\O­|^Z¡˜—ÿ ”M[,ÎaRGò‚å4gî¿N ƒ“,Q–Ğù~ãzSNöÚyù6¨Å1›‚!ğZ6:¸©Ü—Îú•'^Â¢§/ û%1WÖµIa3t¤Z!ûM"
+{9A‚ŒldÊ'`µş³©·óeøpS'™pöÎR0Éi•D£zÑÌiİ>»ïï¿«ĞyPAÉ÷§WflnR«JuTïkñÛşğÜsòvg5‡)óÇ[ı1öŒ'ÅÑÕ˜Jß¢™W†ğˆ·şıE0¬İÇXeú¥6HÍ¡5˜BK!Á•„:ñN{XnªYF1loı;	S¸´ù·×ÜpC¼ı)¶«ˆ0‘ÇË.Ÿ0´ªŸÕ.b†Ê¬ëR2Í~/6ÊèºRóƒ­N‡ä¡B.R&$OD5qyİ*A&ÙİVaüø‡brænäàXÕĞ}_ˆ/ñ:2­gçÍƒöÂ¡TÍ”şçG1[şÔ³4RäuÛœ>³àDg­ÕNÓÍYÚ´l$…ÈSd-±"äv+ÛƒJO–Æ&¡xÓ½ã¡ÉO,Ù·¹)÷¶¤™¡Ê.f*úšë>©ãyGØŞ"o{ÈÀ“dd5WP+$}8çFîï§$¸×=¤ná¿¸MH$Ø|òØ ®na#Œ¥0~—á™tĞÇXü¿Ş‹Â1FrÍ2# ä—¦8ùÚTvxDò}"ÜNï4½ÿšıkB}ñeÑ5¤Æxôô¤1¥ì±»à*–AÑ
+¦¦ù¥˜Æ_jQÓûıD$BH}~”ƒ[Xõn4ë¦ORßÈ[´³CZ-nıËÀ(|X!làù†¤~ı‘ajàx÷ÿ*\®–	İï-ùt–ùKóí?JÒû*®*Æ*d×a»`ïoÎC²p %ÌTƒèÒoLÎ¼û<°çŠ™÷‡XÁg?¥î—9¥hÀá–¨Ãq±ñ¬‚VŞMZ]_LåE‘N™¾r´¥W„$‡Æ¬l­D„ ZÀ8LKWÍÙ-Ô\›ÏP|šÒÒ=„äéÏeÍ(û{íşÀ5é…ÎróÛ¿_ 9zª„pëØe§‹‚›Ûo¯:ë4kæIÙ×¸B)/­Qín?ÔğÚ6)¶i:lpÀÀÔ²E¶ãW=P¸÷’y¿Ák»L¨	˜Áºå.İè€Zaƒ¨ÇXò>S35ÆoÏ¿¡WÂ7Lí(ã¾»bm šÀPPµÙºIÇ  >ê«ÌV/ÃÁû¦W&ïÕï¦à>£¹ıê›³UVêzí†ãJÇh³Œìi•–Ÿ\ÆÃ!OkòŒêŒÕêRØ\¦îÅ:ê3»~Â´¯‚±ÉˆÀØñ)'^ùšÔT|)fÉr»	¨R-T€39}
+AÃ†9g6´£:W†:
+tÜ¬*¸9EDÙ„§.Î¥LV®¥ı|GÆz&§ˆkæq•¢l¸Ù6¤i@ûh¬­%dŸsæ(}ÀxèÉØ/f@Nf26²±Ğüğ×™Z s!<ïç!Á$^´1¼Öv/CZÒ„Ö.Òo£,šQ´ô,„1œnø $ñR€÷¢í¤¤œßø©;bÆv¢Ì
+Ní¥ÛMX­‰ß±‡DrÌaÿvÆşØu@÷ˆy°£Ä8“»3(Zkì%XÆXk2ïÛüîŞ,®ÂÆÇákè[«Qâ‰ñ¶¿æ„Í.'â’ÏnÊà¹”Èj5îß7¶?*õxDZ#[ˆÕíxİJáélg¾Û¤Ë¯ÌEÀ™DÊ#Æj\IGâá¶AÒğ/ü›·Éfw@…ÊŠI¶"«?DdîNc–Œ@ÁÜ+Z6æEêò®=ØPµuGH?ºäísS’²sõ}İÙ"_-&šé?ëJÔDe%ùguŠe0ş* /ÕêDß¯‡~E¢$gÌÚmêù¸;†©™D3Ø‰
+´]”o»æ\kZ‰¿Ô²wà+ÕŒz;ğ(_1ğˆ— Í´AL*®jr¹kv>	
+x¡"½vñ­
+Ê¬¸iÕH~ÈéÈØ_ªuÒø4V‘@ö]o-Ñc›õ¾fõtàÿqÉf(^rÆû½ÕÎı¤äŞX¨8Q,LÃq²ğ¸rêsÊ‰bŠÜÇ
+_4zF+‚ßá#ÂaÃJ™.ìİra¤¯û6AuíËİß…•JÜÎ[¤ÌJ–Õl•¦Æ ÏVÆr'ÁŸMUcj£™(Ò§ì]·©¹…ü©™zMÃ°‚„Ÿå?«€Å@$ñƒZ×wIÍÄ¿a·¸vjİ¾R@º×M¼¾–}úB¾‘Ç,áÇÕÁ]ÅšÓ‰ ¢:ÚX÷BTºŸ¬„ZâöKKiâ#¸MhÚÖjU/.§s«ñ'öİ¼ ĞN*X×“Œdæ—,í„½Ú\0É])¾+¸Uãšú‘ ¼cM£:Eˆ¶RëN>³Iõ{Š	<¢ÕPæóB X‡Oå?jÄšº,?Ò¡ñ¾^—Ñi&Í%¾*F‘gö#*Ê«îL€h4Ô@Ÿë6Dmj8(ZdãÂ¹$§Dûâ34ê$¡ÀÚ-)€¥…<[œì‰T'.´é6kêîÊe	ñ ³¨2iÃë¢{Y©VC¤n6L\Ná¡'6éÕ8ÚçüßŸ0ıy;Q¢ÙÇT(=&¬éğ•ÒëslŠè…ËˆÍ—58rëy¹£pşí5‹Å! %2¢ËÛ}
+Š¦gñší§ì[O¬¬J¼èíÊ&S|„bVŠ-1ñëÂ×]°Ç ÛlòŸZ_ÿÃrëÿÙ¥î^¼:@Âfq-ÀŒuÙŞƒ†Jò*Õì¿Ù/E"Û•^¯qXÈŞí]÷“B1¬Qƒ[i–‰qsî–Š{š¨ŞÑGJq*¼‡½ÔMÕ>vj/‰º ³¸m‚¤2£q&AÙ8nüöÄT:=?–¸:ë”Eş Ñ>úî×j^šº=›ÅÈ^­(jUÔŞ_á³ÙDõì³˜‘úv±-‘ş{}m¯lÛ9Q5UÔ@}Ä×T¹JK¡3û,·ªüI!¸"ö:±wGcH.ãğ„b­oTâÈ²¼u(|YIÖ úâü!š$€	e®İwÆ¼tçÑaevÔ%£¥±&‘ ’¨]}6˜ì²¡Ÿ08YÏk› åp¡"MÃo-ÍwÂKÖu‚.´ñ h¶¢ß%¶$!O9úípŒÙvt—±Òˆ:ÿ/`ñDêMÕ,[aã×‚¢¼~W£Ì–¼™§Ëg%ä§ĞÈãáï¯ŸlÍá; ¾>`æ€moû(¢o‹\rª]Ö|tüC€sEÃG„Oç42hú`W·õ	Åõ²<xà2§§Í/$ˆ.… F¼<y”89z‹oMlÙ?<W‹}?úá|Ñ¼i¡Ì±şî¿ÒHõì­1}ÅÕ·„”Ÿ¤½¬ùq"¢Ê»W!)°¶$PÇŸD±ü†Tpd(d®MŞÔ.u¬.İ¶^K'—ôëıMPEA|Í’	b\}]kÌgò½(únÍâ62Æ ö8²ĞÒøëSd‹õŠ?P¿6ÊÍ…şºÆ7÷S²Ú%şFáëå«£<¤CmİË…óßÌÉóĞÊ1D‚és£yˆ†øJš‹°ş@Í8pÃ±Ğ¦p¦/9göîMœ¼C‡X¬é¿4#îB·’§Š™à|k¨.ãöïÔ&Ái‚¹#G·1lÛ4eh.¸¬P[\qÀ¹şN´—qk¾ºnN«qgÏ°ú‚ôõzjH¶ÒŸ²İB¾›ßÎê©ñœ…<ßúÏÆßbñÕ™&¹´Am£¦iÿ¸èq†Èw×lº F­U¨EöºÂQ– €zŸ=#|"€–oíŠÙßoÅÕ¢…C Èòÿp»¡¤ -N·Ù5¦a4oB‹ğ<ô
+¾J$xÏq,˜Ô½ï]ØB¼µMóã–wÃğç(ğğ¸îÂ…h1{ì¸8ï£nÑN§gÙĞ¸éÆˆÿµG$µİõã»$w?‰Ş¢ü”šÔúÌ[o«…üª&÷b¯/(şŞßÛ÷?™ñ•6š–T) ¥Ğ.H±úqìë%@Ñ¥ÓˆVÒXUfìgÖğ&ƒ«c¸­2@Ç9•Â¦¤Ùïh Ï&H­$êÈ“AÍìˆ®;òo€j‚·àú:Aòà×+J|5P×ÒM`¦ÈÜŒŸ´¯'ASNˆÉå•ÿPX‹‡c†ri*R/s;Ìy½É%ÄÅ×eñ1,3í+ô)¸S¥)§F7%æ³Ö`OAÖc?ê·’Múí·vL!ÉÙÅî—hUòxkxÂ{ƒèbV¹1Cİ‘œR LBªâ¹÷3]€QÆ!^¶eDX;9¸)‰yÊ¹p0Ì³îãã,•’ˆ³ğštÛ¦~OÏ—ªd‹ 5€Y°nJ×ÑL”—Ÿ
+}ºfØ}€u¦ä­ğ}¨ f~©5½ÈÊ¯½³.$rc±èˆø€ú<tÎ¸”Ó-š„Õ´¸¿ƒ—{N•¥J]åÆºËg5l† ™İÉ‰j»W†dŒo´ÈÕ^Ê¯ÓùH8<@_¸ÑåjAš×´(Ó½éüv¼2€;oÍûé5ƒ£Ï†éXé!ë
+›}îŞz:äç¸5µTJtùÁÄà-DtÀ=¸İ ªv`#»"¨æ¼>0ò|ò-İ°ÔDh6*élDFj×c0'˜Ÿ ı³ã8B$#’ÆŞçe6÷W.‰/WÏd‡âŠå±—Í?9:®…,¦R×§&'¿kE[å‚Rå"gçô	*;>—RåE/§ÛÆ³šœ=îÿ'­G~Í¿Ãô™d/¡á<Ã‡’ûÎÛ³¿%­ğ÷GŞ&]ÁĞı­m0H¬_[gÚ?¤YÓç¨/"{®QU<ºaª«Xá¹("üiL†ğŸ…2"§u"Ú“«åßÎÀÂ‹YC‚tm×m¸VÀ4õ\å¨bRßIJoÆ³¡­³¢ZÖ ÿïì¯©~µv	ıÎ[g—?&YÀ5”Ãî.2KY4¯'Î
+(_râmÃÓ¶È[A8%’4È6g^×j-]ØYê#,û/ó%È‘˜°+rÆ'’Nœù™ä,”Ù’ä¨*¾kGˆªóŒ°®áâ#êÄt®]¬½ƒğÀác…ñnJtö·Œ®½TC™*8.=úaf©yˆ>"m¤¡9;J«~Ñ/³‹ógPg´‹x»]œÿy%w¢\ÃhÔã°÷Ú!™:Êóözø3Wt·ÖBÁ\AÙ,šS-=ÏÀ3îÂp6âò†\äŞï¥Ói1u!à„ZèÏcØH„•úÈg¦âAïä³¸îC/‰<Ï&^ÓÉÂgÒzkÛÎñH›[¾K¯‹/|ÃÛ‚~IH\â˜NÎ:ñ§½Úç±EyÿÛ_ ŠŠ)‘ú±â4Î3GÂh<•‚Ğw•z&‰”¿Æcy1…jhRÎ÷Á[Ó7QéõwCÉOXNjÁBÚícº2ÄG°âÆIuJâk”»uNIÃş)=~Fâ„Ò÷¶â6¿Uô>Ò?$¡—Õ\â/]/épÂñ@JAç¢ÉäÚO!äÈp‰K[k»ùFj<ıâåHÑ6´™‰ø%›%¥uM1«x =¡A&Lxí"|çöDoŸË^òwÅã;àQŠ¾£´½ñ0¸a‘7ˆcy²´@·İi$ÂG~çŸ;(ÍX²ªcã¹Ö4”|Tş{²á!*@Õæz»Ô¨¿'Ä õB| ÉşTZİUÁùu/…;u=#-Ëiÿ^8UŒÏ´ºÕÃgD'në#ÿS‘V½{t¯šè•â©£/c È=¶³Îu|ô}Ñ+yz–!wğl° í2
