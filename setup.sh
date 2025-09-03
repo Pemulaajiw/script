@@ -28,7 +28,7 @@ isp=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
 ip=$(wget -qO- ipinfo.io/ip)
 nginx_key_url="https://nginx.org/keys/nginx_signing.key"
 dropbear_init_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear"
-dropbear_conf_url="https://raw.githubusercontent.com/Pemulaajiw/script/main/config/dropbear.conf"
+dropbear_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/examples/dropbear"
 dropbear_dss_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear_dss_host_key"
 xray_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/xray.conf"
 nginx_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/nginx/nginx.conf"
@@ -485,62 +485,26 @@ function pasang_ssl() {
     clear
     print_install "Memasang SSL Pada Domain"
 
-    # Pastikan lsof tersedia
-    if ! command -v lsof &> /dev/null; then
-        apt-get update -y
-        apt-get install lsof -y
-    fi
-
-    # Hapus cert lama
-    rm -f /etc/xray/xray.key /etc/xray/xray.crt
-
-    # Baca domain
-    if [[ -f /root/domain ]]; then
-        domain=$(cat /root/domain)
-    else
-        echo "❌ Domain tidak ditemukan di /root/domain"
-        exit 1
-    fi
-
-    # Hentikan semua service di port 80 (apapun itu)
-    if lsof -t -i:80 >/dev/null 2>&1; then
-        STOPPID=$(lsof -t -i:80)
-        echo "🔴 Menutup proses di port 80 (PID: $STOPPID)"
-        kill -9 $STOPPID
-    fi
-
-    # Hentikan nginx kalau ada
-    if systemctl list-unit-files | grep -qw nginx.service; then
-        systemctl stop nginx
-    fi
-
-    # Siapkan direktori acme.sh
-    rm -rf /root/.acme.sh
-    mkdir -p /root/.acme.sh
-
-    # Download acme.sh universal
-    curl -s https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
-    chmod +x /root/.acme.sh/acme.sh
-
-    # Install / upgrade acme.sh
-    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
-    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-
-    # Issue cert
-    /root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
-
-    # Install cert ke jalur xray
-    /root/.acme.sh/acme.sh --install-cert -d $domain \
-        --fullchainpath /etc/xray/xray.crt \
-        --keypath /etc/xray/xray.key \
-        --ecc
-
-    chmod 600 /etc/xray/xray.key
-    chmod 644 /etc/xray/xray.crt
-
-    print_success "✅ SSL Certificate berhasil dipasang untuk domain: $domain"
+    if [ ! -d "/root/.acme.sh" ]; then
+mkdir /root/.acme.sh
+fi
+systemctl daemon-reload
+systemctl stop haproxy
+systemctl stop nginx
+if [ ! -f "/root/.acme.sh/acme.sh" ]; then
+curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+chmod +x /root/.acme.sh/acme.sh
+fi
+domain=$(cat /etc/xray/domain)
+/root/.acme.sh/acme.sh --upgrade --auto-upgrade
+/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+/root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
+/root/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
+cat /etc/xray/xray.crt /etc/xray/xray.key | tee /etc/haproxy/udud.pem
+chown www-data:www-data /etc/xray/xray.key
+chown www-data:www-data /etc/xray/xray.crt
+print_success "SSL Certificate"
 }
-
 function make_folder_xray() {
 rm -rf /etc/vmess/.vmess.db
     rm -rf /etc/vless/.vless.db
@@ -609,13 +573,13 @@ bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release
     curl -s ipinfo.io/city >>/etc/xray/city
     curl -s ipinfo.io/org | cut -d " " -f 2-10 >>/etc/xray/isp
     print_install "Memasang Konfigurasi Packet"
-    wget -O /etc/haproxy/haproxy.cfg "${REPO}config/haproxy.cfg" >/dev/null 2>&1
-    wget -O /etc/nginx/conf.d/xray.conf "${REPO}config/xray.conf" >/dev/null 2>&1
+    wget -O /etc/haproxy/haproxy.cfg "https://raw.githubusercontent.com/joytun21/schaya/main/other/haproxy.cfg" >/dev/null 2>&1
+    wget -O /etc/nginx/conf.d/xray.conf "https://raw.githubusercontent.com/joytun21/scjoy/main/ssh/xray.conf" >/dev/null 2>&1
     sed -i "s/xxx/${domain}/g" /etc/haproxy/haproxy.cfg
     sed -i "s/xxx/${domain}/g" /etc/nginx/conf.d/xray.conf
     curl ${REPO}config/nginx.conf > /etc/nginx/nginx.conf
     
-cat /etc/xray/xray.crt /etc/xray/xray.key | tee /etc/haproxy/hap.pem
+    cat /etc/xray/xray.crt /etc/xray/xray.key | tee /etc/haproxy/hap.pem
 
     # > Set Permission
     chmod +x /etc/systemd/system/runn.service
@@ -1349,5 +1313,4 @@ echo -e "\e[94;1m╚════════════════════
 echo -e ""
 echo ""
 read -p "[ Enter ]  TO REBOOT"
-
 reboot
