@@ -142,6 +142,8 @@ function is_root() {
     fi
 
 }
+function base_package() {
+print_install "Menginstall Packet Yang Dibutuhkan"
 if ! apt update -y; then
 echo -e "${red}Failed to update${neutral}"
 fi
@@ -212,8 +214,6 @@ echo -e "${red}Failed to dist-upgrade${neutral}"
 else
 echo -e "${green}System dist-upgraded successfully${neutral}"
 fi
-function base_package() {
-print_install "Menginstall Packet Yang Dibutuhkan"
 packages=(
 libnss3-dev liblzo2-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev
 libcap-ng-utils libselinux1-dev flex bison make libnss3-tools libevent-dev bc
@@ -1313,4 +1313,5 @@ echo -e "\e[94;1m╚════════════════════
 echo -e ""
 echo ""
 read -p "[ Enter ]  TO REBOOT"
+
 reboot
