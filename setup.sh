@@ -43,10 +43,10 @@ clear;clear;clear
 
 # // Banner
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "\033[92;1m              𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗦𝗖𝗥𝗜𝗣𝗧 𝗡𝗫𝗡𝗧𝗨𝗡𝗘𝗟              \033[0m"
-echo -e "  Developer » Klmpk𝗡𝗫𝗡VPN Tunneling{YELLOW}(${NC}${green} Stable Edition ${NC}${YELLOW})${NC}"
+echo -e "\033[92;1m              𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗦𝗖𝗥𝗜𝗣𝗧 𝗙𝗔𝗡𝗡𝗧𝗨𝗡𝗘𝗟              \033[0m"
+echo -e "  Developer » Klmpk𝗙𝗡VPN Tunneling{YELLOW}(${NC}${green} Stable Edition ${NC}${YELLOW})${NC}"
 echo -e "  » This Will Quick Setup VPN Server On Your Server"
-echo -e "  Pembuat : ${green}𝗡𝗫𝗡uzijww ${NC}"
+echo -e "  Pembuat : ${green}𝗙𝗔𝗡uzijww ${NC}"
 echo -e "  Recode By My Self NZNXAJW VPN STORE ${YELLOW}(${NC} 2024 ${YELLOW})${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
@@ -86,62 +86,6 @@ if [ "${EUID}" -ne 0 ]; then
 		echo "You need to run this script as root"
 		exit 1
 fi
-if [ "$(systemd-detect-virt)" == "openvz" ]; then
-		echo "OpenVZ is not supported"
-		exit 1
-fi
-red='\e[1;31m'
-green='\e[0;32m'
-NC='\e[0m'
-#IZIN SCRIPT
-MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m"
-clear
-apt install ruby -y
-gem install lolcat
-apt install wondershaper -y
-clear
-# REPO    
-    REPO="https://raw.githubusercontent.com/Pemulaajiw/script/main/"
-
-####
-start=$(date +%s)
-secs_to_human() {
-    echo "Installation time : $((${1} / 3600)) hours $(((${1} / 60) % 60)) minute's $((${1} % 60)) seconds"
-}
-### Status
-function print_ok() {
-    echo -e "${OK} ${BLUE} $1 ${FONT}"
-}
-function print_install() {
-	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-    echo -e "${YELLOW} » $1 ${FONT}"
-	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-    sleep 1
-}
-
-function print_error() {
-    echo -e "${ERROR} ${REDBG} $1 ${FONT}"
-}
-
-function print_success() {
-    if [[ 0 -eq $? ]]; then
-		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-        echo -e "${Green} » $1 berhasil dipasang"
-		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-        sleep 2
-    fi
-}
-
-### Cek root
-function is_root() {
-    if [[ 0 == "$UID" ]]; then
-        print_ok "Root user Start installation process"
-    else
-        print_error "The current user is not the root user, please switch to the root user and run the script again"
-    fi
-
-}
 if ! apt update -y; then
 echo -e "${red}Failed to update${neutral}"
 fi
@@ -212,6 +156,89 @@ echo -e "${red}Failed to dist-upgrade${neutral}"
 else
 echo -e "${green}System dist-upgraded successfully${neutral}"
 fi
+if [ "$(systemd-detect-virt)" == "openvz" ]; then
+		echo "OpenVZ is not supported"
+		exit 1
+fi
+red='\e[1;31m'
+green='\e[0;32m'
+NC='\e[0m'
+#IZIN SCRIPT
+MYIP=$(curl -sS ipv4.icanhazip.com)
+echo -e "\e[32mloading...\e[0m"
+clear
+apt install ruby -y
+gem install lolcat
+apt install wondershaper -y
+clear
+# REPO    
+    REPO="https://raw.githubusercontent.com/Pemulaajiw/script/main/"
+
+####
+start=$(date +%s)
+secs_to_human() {
+    echo "Installation time : $((${1} / 3600)) hours $(((${1} / 60) % 60)) minute's $((${1} % 60)) seconds"
+}
+### Status
+function print_ok() {
+    echo -e "${OK} ${BLUE} $1 ${FONT}"
+}
+function print_install() {
+	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+    echo -e "${YELLOW} » $1 ${FONT}"
+	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+    sleep 1
+}
+
+function print_error() {
+    echo -e "${ERROR} ${REDBG} $1 ${FONT}"
+}
+
+function print_success() {
+    if [[ 0 -eq $? ]]; then
+		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+        echo -e "${Green} » $1 berhasil dipasang"
+		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+        sleep 2
+    fi
+}
+
+### Cek root
+function is_root() {
+    if [[ 0 == "$UID" ]]; then
+        print_ok "Root user Start installation process"
+    else
+        print_error "The current user is not the root user, please switch to the root user and run the script again"
+    fi
+
+}
+function base_package() {
+print_install "Menginstall Packet Yang Dibutuhkan"
+packages=(
+libnss3-dev liblzo2-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev
+libcap-ng-utils libselinux1-dev flex bison make libnss3-tools libevent-dev bc
+rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential
+gcc g++ htop lsof tar wget curl ruby zip unzip p7zip-full libc6 util-linux
+ca-certificates iptables iptables-persistent netfilter-persistent
+net-tools openssl gnupg gnupg2 lsb-release shc cmake git whois
+screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq
+tmux python3 python3-pip lsb-release gawk
+libncursesw5-dev libgdbm-dev tk-dev libffi-dev libbz2-dev checkinstall
+openvpn easy-rsa dropbear
+)
+for package in "${packages[@]}"; do
+if ! dpkg -s "$package" >/dev/null 2>&1; then
+if ! apt-get update -y; then
+echo -e "${red}Failed to update${neutral}"
+fi
+if ! apt-get install -y "$package"; then
+echo -e "${red}Failed to install $package${neutral}"
+fi
+else
+echo -e "${green}$package is already installed, skipping...${neutral}"
+fi
+done
+}
 # Buat direktori xray
 print_install "Membuat direktori xray"
     mkdir -p /etc/xray
@@ -352,33 +379,6 @@ function nginx_install() {
 }
 
 # Update and remove packages
-function base_package() {
-print_install "Menginstall Packet Yang Dibutuhkan"
-packages=(
-libnss3-dev liblzo2-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev
-libcap-ng-utils libselinux1-dev flex bison make libnss3-tools libevent-dev bc
-rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential
-gcc g++ htop lsof tar wget curl ruby zip unzip p7zip-full libc6 util-linux
-ca-certificates iptables iptables-persistent netfilter-persistent
-net-tools openssl gnupg gnupg2 lsb-release shc cmake git whois
-screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq
-tmux python3 python3-pip lsb-release gawk
-libncursesw5-dev libgdbm-dev tk-dev libffi-dev libbz2-dev checkinstall
-openvpn easy-rsa dropbear
-)
-for package in "${packages[@]}"; do
-if ! dpkg -s "$package" >/dev/null 2>&1; then
-if ! apt-get update -y; then
-echo -e "${red}Failed to update${neutral}"
-fi
-if ! apt-get install -y "$package"; then
-echo -e "${red}Failed to install $package${neutral}"
-fi
-else
-echo -e "${green}$package is already installed, skipping...${neutral}"
-fi
-done
-}
 clear
 # Fungsi input domain
 function pasang_domain() {
@@ -473,10 +473,11 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 <code>Time     :</code><code>$TIMEZONE</code>
 <code>Exp Sc.  :</code><code>$exp</code>
 <code>━━━━━━━━━━━━━━━━━━━━━━━━━</code>
-<b>NXN VPN STORE</b>
+<b>FAN VPN STORE</b>
 <code>━━━━━━━━━━━━━━━━━━━━━━━━━</code>
 <i>Automatic Notifikasi Installer Script...</i>
-"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://t.me/AJW29"},{"text":"Contack","url":"https://wa.me/6287898083051"}]]}l -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://t.me/AJW29"},{"text":"Contack","url":"https://wa.me/6287812264674"}]]}'
+    curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
 }
 clear
 # Pasang SSL
@@ -893,7 +894,7 @@ iptables -A FORWARD -m string --string "find_node" --algo bm -j DROP
 iptables -A FORWARD -m string --algo bm --string "BitTorrent" -j DROP
 iptables -A FORWARD -m string --algo bm --string "BitTorrent protocol" -j DROP
 iptables -A FORWARD -m string --algo bm --string "peer_id=" -j DROP
-iptables -A FORWARD -m string --algo bm --string ".torrent" -j DROP
+iptables -A FORWARD -m string --algo bm --string ".torrent"-j DROP
 iptables -A FORWARD -m string --algo bm --string "announce.php?passkey=" -j DROP
 iptables -A FORWARD -m string --algo bm --string "torrent" -j DROP
 iptables -A FORWARD -m string --algo bm --string "announce" -j DROP
@@ -1253,4 +1254,7 @@ echo -e "\e[94;1m╚════════════════════
 echo -e ""
 echo ""
 read -p "[ Enter ]  TO REBOOT"
+
 reboot
+
+
