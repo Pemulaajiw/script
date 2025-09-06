@@ -86,6 +86,62 @@ if [ "${EUID}" -ne 0 ]; then
 		echo "You need to run this script as root"
 		exit 1
 fi
+if [ "$(systemd-detect-virt)" == "openvz" ]; then
+		echo "OpenVZ is not supported"
+		exit 1
+fi
+red='\e[1;31m'
+green='\e[0;32m'
+NC='\e[0m'
+#IZIN SCRIPT
+MYIP=$(curl -sS ipv4.icanhazip.com)
+echo -e "\e[32mloading...\e[0m"
+clear
+apt install ruby -y
+gem install lolcat
+apt install wondershaper -y
+clear
+# REPO    
+    REPO="https://raw.githubusercontent.com/Pemulaajiw/script/main/"
+
+####
+start=$(date +%s)
+secs_to_human() {
+    echo "Installation time : $((${1} / 3600)) hours $(((${1} / 60) % 60)) minute's $((${1} % 60)) seconds"
+}
+### Status
+function print_ok() {
+    echo -e "${OK} ${BLUE} $1 ${FONT}"
+}
+function print_install() {
+	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+    echo -e "${YELLOW} » $1 ${FONT}"
+	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+    sleep 1
+}
+
+function print_error() {
+    echo -e "${ERROR} ${REDBG} $1 ${FONT}"
+}
+
+function print_success() {
+    if [[ 0 -eq $? ]]; then
+		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+        echo -e "${Green} » $1 berhasil dipasang"
+		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
+        sleep 2
+    fi
+}
+
+### Cek root
+function is_root() {
+    if [[ 0 == "$UID" ]]; then
+        print_ok "Root user Start installation process"
+    else
+        print_error "The current user is not the root user, please switch to the root user and run the script again"
+    fi
+
+}
 if ! apt update -y; then
 echo -e "${red}Failed to update${neutral}"
 fi
@@ -156,62 +212,6 @@ echo -e "${red}Failed to dist-upgrade${neutral}"
 else
 echo -e "${green}System dist-upgraded successfully${neutral}"
 fi
-if [ "$(systemd-detect-virt)" == "openvz" ]; then
-		echo "OpenVZ is not supported"
-		exit 1
-fi
-red='\e[1;31m'
-green='\e[0;32m'
-NC='\e[0m'
-#IZIN SCRIPT
-MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m"
-clear
-apt install ruby -y
-gem install lolcat
-apt install wondershaper -y
-clear
-# REPO    
-    REPO="https://raw.githubusercontent.com/Pemulaajiw/script/main/"
-
-####
-start=$(date +%s)
-secs_to_human() {
-    echo "Installation time : $((${1} / 3600)) hours $(((${1} / 60) % 60)) minute's $((${1} % 60)) seconds"
-}
-### Status
-function print_ok() {
-    echo -e "${OK} ${BLUE} $1 ${FONT}"
-}
-function print_install() {
-	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-    echo -e "${YELLOW} » $1 ${FONT}"
-	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-    sleep 1
-}
-
-function print_error() {
-    echo -e "${ERROR} ${REDBG} $1 ${FONT}"
-}
-
-function print_success() {
-    if [[ 0 -eq $? ]]; then
-		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-        echo -e "${Green} » $1 berhasil dipasang"
-		echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-        sleep 2
-    fi
-}
-
-### Cek root
-function is_root() {
-    if [[ 0 == "$UID" ]]; then
-        print_ok "Root user Start installation process"
-    else
-        print_error "The current user is not the root user, please switch to the root user and run the script again"
-    fi
-
-}
 function base_package() {
 print_install "Menginstall Packet Yang Dibutuhkan"
 packages=(
@@ -894,7 +894,7 @@ iptables -A FORWARD -m string --string "find_node" --algo bm -j DROP
 iptables -A FORWARD -m string --algo bm --string "BitTorrent" -j DROP
 iptables -A FORWARD -m string --algo bm --string "BitTorrent protocol" -j DROP
 iptables -A FORWARD -m string --algo bm --string "peer_id=" -j DROP
-iptables -A FORWARD -m string --algo bm --string ".torrent"-j DROP
+iptables -A FORWARD -m string --algo bm --string ".torrent" -j DROP
 iptables -A FORWARD -m string --algo bm --string "announce.php?passkey=" -j DROP
 iptables -A FORWARD -m string --algo bm --string "torrent" -j DROP
 iptables -A FORWARD -m string --algo bm --string "announce" -j DROP
@@ -909,6 +909,64 @@ cd
 apt autoclean -y >/dev/null 2>&1
 apt autoremove -y >/dev/null 2>&1
 print_success "ePro WebSocket Proxy"
+}
+
+function udp-custom(){
+print_install "Menginstall UDP-CUSTOM"
+cd
+rm -rf /root/udp
+mkdir -p /root/udp
+
+# install udp-custom
+echo downloading udp-custom
+wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8" -O /root/udp/udp-custom && rm -rf /tmp/cookies.txt
+chmod +x /root/udp/udp-custom
+
+echo downloading default config
+wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM" -O /root/udp/config.json && rm -rf /tmp/cookies.txt
+chmod 644 /root/udp/config.json
+
+if [ -z "$1" ]; then
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Team
+
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=default.target
+EOF
+else
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Team
+
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server -exclude $1
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=default.target
+EOF
+fi
+
+echo start service udp-custom
+systemctl start udp-custom &>/dev/null
+
+echo enable service udp-custom
+systemctl enable udp-custom &>/dev/null
+clear
+print_success "UDP-CUSTOM BY FAN STORE VPN"
 }
 
 function noobzvpn(){
@@ -1191,6 +1249,7 @@ clear
     ins_swab
     ins_Fail2ban
     ins_epro
+	udp-custom
     noobzvpn
     ins_trgo
     ins_restart
@@ -1254,7 +1313,4 @@ echo -e "\e[94;1m╚════════════════════
 echo -e ""
 echo ""
 read -p "[ Enter ]  TO REBOOT"
-
 reboot
-
-
