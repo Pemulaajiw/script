@@ -142,7 +142,76 @@ function is_root() {
     fi
 
 }
-
+if ! apt update -y; then
+echo -e "${red}Failed to update${neutral}"
+fi
+if ! dpkg -s sudo >/dev/null 2>&1; then
+if ! apt install sudo -y; then
+echo -e "${red}Failed to install sudo${neutral}"
+fi
+else
+echo -e "${green}sudo is already installed, skipping...${neutral}"
+fi
+if ! dpkg -s software-properties-common debconf-utils >/dev/null 2>&1; then
+if ! apt install -y --no-install-recommends software-properties-common debconf-utils; then
+echo -e "${red}Failed to install basic packages${neutral}"
+fi
+else
+echo -e "${green}software-properties-common and debconf-utils are already installed, skipping...${neutral}"
+fi
+if dpkg -s exim4 >/dev/null 2>&1; then
+if ! apt remove --purge -y exim4; then
+echo -e "${red}Failed to remove exim4${neutral}"
+else
+echo -e "${green}exim4 removed successfully${neutral}"
+fi
+else
+echo -e "${green}exim4 is not installed, skipping...${neutral}"
+fi
+if dpkg -s ufw >/dev/null 2>&1; then
+if ! apt remove --purge -y ufw; then
+echo -e "${red}Failed to remove ufw${neutral}"
+else
+echo -e "${green}ufw removed successfully${neutral}"
+fi
+else
+echo -e "${green}ufw is not installed, skipping...${neutral}"
+fi
+if dpkg -s firewalld >/dev/null 2>&1; then
+if ! apt remove --purge -y firewalld; then
+echo -e "${red}Failed to remove firewalld${neutral}"
+else
+echo -e "${green}firewalld removed successfully${neutral}"
+fi
+else
+echo -e "${green}firewalld is not installed, skipping...${neutral}"
+fi
+if ! echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections; then
+echo -e "${red}Failed to configure iptables-persistent v4${neutral}"
+fi
+if ! echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections; then
+echo -e "${red}Failed to configure iptables-persistent v6${neutral}"
+fi
+if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layout select English"; then
+echo -e "${red}Failed to configure keyboard layout${neutral}"
+fi
+if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variant select English"; then
+echo -e "${red}Failed to configure keyboard variant${neutral}"
+fi
+export DEBIAN_FRONTEND=noninteractive
+if ! apt update -y; then
+echo -e "${red}Failed to update${neutral}"
+fi
+if ! apt-get upgrade -y; then
+echo -e "${red}Failed to upgrade${neutral}"
+else
+echo -e "${green}System upgraded successfully${neutral}"
+fi
+if ! apt dist-upgrade -y; then
+echo -e "${red}Failed to dist-upgrade${neutral}"
+else
+echo -e "${green}System dist-upgraded successfully${neutral}"
+fi
 # Buat direktori xray
 print_install "Membuat direktori xray"
     mkdir -p /etc/xray
@@ -283,76 +352,6 @@ function nginx_install() {
 }
 
 # Update and remove packages
-if ! apt update -y; then
-echo -e "${red}Failed to update${neutral}"
-fi
-if ! dpkg -s sudo >/dev/null 2>&1; then
-if ! apt install sudo -y; then
-echo -e "${red}Failed to install sudo${neutral}"
-fi
-else
-echo -e "${green}sudo is already installed, skipping...${neutral}"
-fi
-if ! dpkg -s software-properties-common debconf-utils >/dev/null 2>&1; then
-if ! apt install -y --no-install-recommends software-properties-common debconf-utils; then
-echo -e "${red}Failed to install basic packages${neutral}"
-fi
-else
-echo -e "${green}software-properties-common and debconf-utils are already installed, skipping...${neutral}"
-fi
-if dpkg -s exim4 >/dev/null 2>&1; then
-if ! apt remove --purge -y exim4; then
-echo -e "${red}Failed to remove exim4${neutral}"
-else
-echo -e "${green}exim4 removed successfully${neutral}"
-fi
-else
-echo -e "${green}exim4 is not installed, skipping...${neutral}"
-fi
-if dpkg -s ufw >/dev/null 2>&1; then
-if ! apt remove --purge -y ufw; then
-echo -e "${red}Failed to remove ufw${neutral}"
-else
-echo -e "${green}ufw removed successfully${neutral}"
-fi
-else
-echo -e "${green}ufw is not installed, skipping...${neutral}"
-fi
-if dpkg -s firewalld >/dev/null 2>&1; then
-if ! apt remove --purge -y firewalld; then
-echo -e "${red}Failed to remove firewalld${neutral}"
-else
-echo -e "${green}firewalld removed successfully${neutral}"
-fi
-else
-echo -e "${green}firewalld is not installed, skipping...${neutral}"
-fi
-if ! echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections; then
-echo -e "${red}Failed to configure iptables-persistent v4${neutral}"
-fi
-if ! echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections; then
-echo -e "${red}Failed to configure iptables-persistent v6${neutral}"
-fi
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layout select English"; then
-echo -e "${red}Failed to configure keyboard layout${neutral}"
-fi
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variant select English"; then
-echo -e "${red}Failed to configure keyboard variant${neutral}"
-fi
-export DEBIAN_FRONTEND=noninteractive
-if ! apt update -y; then
-echo -e "${red}Failed to update${neutral}"
-fi
-if ! apt-get upgrade -y; then
-echo -e "${red}Failed to upgrade${neutral}"
-else
-echo -e "${green}System upgraded successfully${neutral}"
-fi
-if ! apt dist-upgrade -y; then
-echo -e "${red}Failed to dist-upgrade${neutral}"
-else
-echo -e "${green}System dist-upgraded successfully${neutral}"
-fi
 function base_package() {
 print_install "Menginstall Packet Yang Dibutuhkan"
 packages=(
@@ -911,64 +910,6 @@ apt autoremove -y >/dev/null 2>&1
 print_success "ePro WebSocket Proxy"
 }
 
-function udp-custom(){
-print_install "Menginstall UDP-CUSTOM"
-cd
-rm -rf /root/udp
-mkdir -p /root/udp
-
-# install udp-custom
-echo downloading udp-custom
-wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8" -O /root/udp/udp-custom && rm -rf /tmp/cookies.txt
-chmod +x /root/udp/udp-custom
-
-echo downloading default config
-wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM" -O /root/udp/config.json && rm -rf /tmp/cookies.txt
-chmod 644 /root/udp/config.json
-
-if [ -z "$1" ]; then
-cat <<EOF > /etc/systemd/system/udp-custom.service
-[Unit]
-Description=UDP Custom by ePro Dev. Team
-
-[Service]
-User=root
-Type=simple
-ExecStart=/root/udp/udp-custom server
-WorkingDirectory=/root/udp/
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=default.target
-EOF
-else
-cat <<EOF > /etc/systemd/system/udp-custom.service
-[Unit]
-Description=UDP Custom by ePro Dev. Team
-
-[Service]
-User=root
-Type=simple
-ExecStart=/root/udp/udp-custom server -exclude $1
-WorkingDirectory=/root/udp/
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=default.target
-EOF
-fi
-
-echo start service udp-custom
-systemctl start udp-custom &>/dev/null
-
-echo enable service udp-custom
-systemctl enable udp-custom &>/dev/null
-clear
-print_success "UDP-CUSTOM BY FAN STORE VPN"
-}
-
 function noobzvpn(){
 clear
 cd
@@ -1249,7 +1190,6 @@ clear
     ins_swab
     ins_Fail2ban
     ins_epro
-	udp-custom
     noobzvpn
     ins_trgo
     ins_restart
