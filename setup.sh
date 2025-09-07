@@ -1139,7 +1139,7 @@ if [ "$BASH" ]; then
     fi
 fi
 mesg n || true
-welcome
+menu
 EOF
 
 cat >/etc/cron.d/xp_all <<-END
@@ -1319,4 +1319,5 @@ echo -e "\e[94;1m╚════════════════════
 echo -e ""
 echo ""
 read -p "[ Enter ]  TO REBOOT"
+
 reboot
