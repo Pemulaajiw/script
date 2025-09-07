@@ -24,13 +24,13 @@ apt update -y && apt upgrade -y
 apt install neofetch -y
 apt install -y python3 python3-pip git
 cd /usr/bin
-wget https://raw.githubusercontent.com/arivpnstores/v10/main/Bot/bot.zip
+wget https://raw.githubusercontent.com/Pemulaajiw/script/main/kyt/bot.zip
 unzip bot.zip
 mv bot/* /usr/bin
 chmod +x /usr/bin/*
 rm -rf bot.zip
 clear
-wget https://raw.githubusercontent.com/arivpnstores/v10/main/Bot/kyt.zip
+wget https://raw.githubusercontent.com/Pemulaajiw/script/main/kyt/kyt.zip
 unzip kyt.zip
 pip3 install -r kyt/requirements.txt
 }
