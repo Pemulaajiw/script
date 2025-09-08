@@ -1121,7 +1121,7 @@ cd
     clear
     print_install "Memasang Menu Packet"
     wget ${REPO}menu/menu.zip
-    7z x -pFanVpnID0311 menu.zip
+    7z x -pFanVpnID0311DiJual58 menu.zip
     chmod +x menu/*
     mv menu/* /usr/local/sbin
     rm -rf menu
@@ -1321,3 +1321,4 @@ echo ""
 read -p "[ Enter ]  TO REBOOT"
 
 reboot
+
