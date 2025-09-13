@@ -907,6 +907,7 @@ cat >/etc/shells <<EOF
 /usr/bin/dash
 /usr/bin/screen
 /usr/bin/tmux
+/usr/bin/local
 /bin/false
 /usr/sbin/nologin
 EOF
@@ -1236,7 +1237,7 @@ echo -e "${green}       INSTALLASI plugin HideSSH        ${neutral}"
 echo -e "${blue}─────────────────────────────────────────${neutral}"
 
 
-wget https://raw.githubusercontent.com/hidessh99/scAUTOku/refs/heads/main/package-gohide.sh && chmod +x package-gohide.sh && ./package-gohide.sh
+wget https://raw.githubusercontent.com/freetunnel/hpp/refs/heads/main/package-gohide.sh && chmod +x package-gohide.sh && ./package-gohide.sh
 cd 
 rm -rf package-gohide.sh
 
