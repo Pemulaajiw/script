@@ -836,7 +836,7 @@ echo "Banner /etc/gerhanatunnel.txt" >>/etc/ssh/sshd_config
 sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/gerhanatunnel.txt"@g' /etc/default/dropbear
 
 # Ganti Banner
-wget -O /etc/kyt.txt "${REPO}files/issue.net"
+wget -O /etc/gerhanatunnel.txt "${REPO}files/issue.net"
 print_success "Fail2ban"
 }
 
@@ -1285,4 +1285,5 @@ echo ""
 read -p "[ Enter ]  TO REBOOT"
 
 reboot
+
 
