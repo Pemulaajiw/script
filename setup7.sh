@@ -76,46 +76,21 @@ done
 clear
 
 # Domain setup
-pasang_domain=(
-echo -e " ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo -e " \e[1;32mPlease Select a Domain Type Below \e[0m"
-echo -e " ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo -e " \e[1;32m1)\e[0m Menggunakan Domain Sendiri ( Recommendation )"
-echo -e " \e[1;32m2)\e[0m Menggunakan Domain script"
-echo -e " ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-read -p " Please select numbers 1-2 or Any Button(Random) : " host
-echo ""
-if [[ $host == "1" ]]; then
-echo -e " \e[1;32mPlease Enter Your Subdomain $NC"
-echo -e " ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e ""
-read -p " Masukan Domain : " host1
-echo -e ""
-echo -e " ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo "IP=" >> /var/lib/kyt/ipvps.conf
-echo $host1 > /etc/xray/domain
-echo $host1 > /root/domain
-echo ""
-elif [[ $host == "2" ]]; then
-#install cf
-wget https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/files/cf.sh && chmod +x cf.sh && ./cf.sh
-rm -f /root/cf.sh
-clear
+if [ -z "$1" ]; then
+    echo -e "${blue}    ┌───────────────────────────────────────────────┐${neutral}"
+    echo -e "${blue}    │       "
+    echo -e "${blue}    │   ${green}┌─┐┬ ┬┌┬┐┌─┐┌─┐┌─┐┬─┐┬┌─┐┌┬┐  ┬  ┬┌┬┐┌─┐"
+    echo -e "${blue}    │   ${green}├─┤│ │ │ │ │└─┐│  ├┬┘│├─┘ │   │  │ │ ├┤    "
+    echo -e "${blue}    │   ${green}┴ ┴└─┘ ┴ └─┘└─┘└─┘┴└─┴┴   ┴   ┴─┘┴ ┴ └─┘   ${neutral}"
+    echo -e "${blue}    │   ${yellow}Copyright${reset} (C)${gray} https://t.me/AJW29   ${neutral}"
+    echo -e "${blue}    └───────────────────────────────────────────────┘${neutral}"
+    echo -e "${blue}    ────────────────────────────────────────────────${neutral}"
+    echo -e "${yellow}     Masukkan domain Anda untuk memulai instalasi:${neutral}"
+    echo -e "${blue}    ────────────────────────────────────────────────${neutral}"
+    read -p "  Enter your domain: " domain
 else
-echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-    echo -e "${YELLOW} »Random Subdomain/Domain is Used $1 ${FONT}"
-	echo -e "${green} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${FONT}"
-    sleep 1
-    clear
-    fi
-)
-
-for dir in "${pasang_domain[@]}"; do
-    [ ! -d "$dir" ] && mkdir -p "$dir"
-    chmod 777 "$dir"
-done
-
-clear
+    domain="$1"
+fi
 # Cek IP domain dan VPS
 vps_ip=$(curl -s ipinfo.io/ip)
 domain_ip=$(getent ahosts "$domain" | awk '{print $1}' | head -n 1)
