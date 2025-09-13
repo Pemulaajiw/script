@@ -1233,24 +1233,15 @@ cd
 
 clear
 echo -e "${blue}─────────────────────────────────────────${neutral}"
-echo -e "${green}       INSTALLASI plugin HideSSH        ${neutral}"
+echo -e "${green}       INSTALLASI ADD VPN bye TmprokersFN        ${neutral}"
 echo -e "${blue}─────────────────────────────────────────${neutral}"
 
 
-wget https://raw.githubusercontent.com/freetunnel/hpp/refs/heads/main/package-gohide.sh && chmod +x package-gohide.sh && ./package-gohide.sh
+wget https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/vpn_update_script && chmod +x vpn_update_script && ./vpn_update_script
 cd 
-rm -rf package-gohide.sh
+rm -rf vpn_update_script
 
-# cd
-# echo -e "${blue}─────────────────────────────────────────${neutral}"
-# echo -e "${green}   INSTALLASI golang bye HIdeSSH       ${neutral}"
-# echo -e "${blue}─────────────────────────────────────────${neutral}"
-
-
-# cd
-# wget https://raw.githubusercontent.com/hidessh99/scAUTOku/refs/heads/main/backend/install-go.sh && chmod +x install-go.sh && ./install-go.sh
-# rm -rf install-go.sh
-# cd
+cd
 
 if [ -d "/root/rmck" ]; then
     rm -rf /root/rmck
