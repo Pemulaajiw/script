@@ -43,7 +43,7 @@ screen -S fnstvt-session bash -c "wget --inet4-only --no-check-certificate -O se
 ```
 ## MELANJUTKAN STUCK KETIKA INSTALL DIAWAL
 ```
-screen -r -d fnstvt
+screen -r -d apt install dos2unix && dos2unix fnstvt && bash fnstvt
 ```
 ==========================================================================================
 
