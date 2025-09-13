@@ -39,7 +39,7 @@ apt update -y && apt upgrade -y --fix-missing && apt install -y xxd bzip2 wget c
 ## INSTALL SCRIPT 
 Masukkan perintah dibawah untuk menginstall Autoscript Premium
 ```
-screen -S fnstvt-session bash -c "wget --inet4-only --no-check-certificate -O setup7.sh https://raw.githubusercontent.com/Pemulaajiw/script/main/setup7.sh && chmod +x setup7.sh && ./setup7.sh; read -p 'Tekan enter untuk keluar...'"
+screen -S fnstvt-session bash -c "wget --inet4-only --no-check-certificate -O setup.sh https://raw.githubusercontent.com/Pemulaajiw/script/main/setup.sh && chmod +x setup.sh && ./setup.sh; read -p 'Tekan enter untuk keluar...'"
 ```
 ## MELANJUTKAN STUCK KETIKA INSTALL DIAWAL
 ```
