@@ -196,13 +196,6 @@ echo -e "${YELLOW}----------------------------------------------------------${NC
 echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡𝗘𝗟 V2.4            \033[0m"
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
-sleep 3
-read -p "   INPUT YOUR NAME :   " host1
-read -p "   INPUT PAS SCRIPT :   " host11
-rm /etc/xray/username
-if [[ $host11 == ALLOS ]]; then
-echo $host1 >> /etc/xray/username
-echo ""
 sleep 1
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
