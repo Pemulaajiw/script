@@ -206,18 +206,11 @@ echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
 sleep 3
-read -p "   INPUT YOUR NAME :   " host1
 read -p "   INPUT PAS SCRIPT :   " host11
-rm /etc/xray/username
 if [[ $host11 == ALLOS ]]; then
-echo $host1 >> /etc/xray/username
 echo ""
 clear
-print_success "Rename Script"
-sleep 3
 else
-echo "SKAYZU" >> /etc/xray/username
-clear
 echo -e "${RED} Mohon Maaf Sepertinya Anda Bukan Owner ${NC}"
 sleep 3
 clear
