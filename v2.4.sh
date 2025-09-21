@@ -21,6 +21,12 @@ CHATID="6197482164"
 KEY="7257456294:AAF_EwHS4dMkbnnRdlR3TLJu7eK225Lbb3Y"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 export IP=$( curl -sS icanhazip.com )
+# Mendapatkan data izin dan key
+data=$(curl -s https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/register)
+key=$(echo "$data" | grep "$ip" | awk '{print $2}')
+
+# URL sumber konfigurasi dan binary
+nginx_key_url="https://nginx.org/keys/nginx_signing.key"
 function print_ok() {
 echo -e "${OK} ${BLUE} $1 ${FONT}"
 }
