@@ -27,6 +27,9 @@ key=$(echo "$data" | grep "$ip" | awk '{print $2}')
 
 # URL sumber konfigurasi dan binary
 nginx_key_url="https://nginx.org/keys/nginx_signing.key"
+dropbear_init_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear"
+dropbear_conf_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/examples/dropbear"
+dropbear_dss_url="https://raw.githubusercontent.com/joytun21/gerhana/main/fodder/dropbear/dropbear_dss_host_key"
 function print_ok() {
 echo -e "${OK} ${BLUE} $1 ${FONT}"
 }
