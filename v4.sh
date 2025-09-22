@@ -1342,47 +1342,6 @@ EOF
     else
         TIME_DATE="AM"
     fi
-#!/bin/bash
-wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/files/http -O /usr/bin/http
-cekhttp=$(cat /usr/bin/http)
-/usr/local/sbin/expsc -r now
-END
-	chmod +x /usr/local/bin/xp_sc
-# Fungsi untuk menambahkan pekerjaan cron ke /etc/cron.d/
-    cron_file="/etc/cron.d/auto_update"
-    pekerjaan_cron="15 1 * * * root /usr/temp/ynCzStE6HisazFa/ynCzStE6HisazFa/1aB2cD3eF4gH5iJ/ynCzStE6HisazFa/JYk8RmzNqL4XWqF/ynCzStE6HisazFa/Zs9TpUqVx4Wc7Fb/ynCzStE6HisazFa/2xA3bD4eF5gH6iJ/ynCzStE6HisazFa/Fh7Gd8YjK2L4M5n/ynCzStE6HisazFa/K8mP9qR5sT2uXwY/ynCzStE6HisazFa/auto_update"
-
-    # Periksa apakah pekerjaan cron sudah ada di file
-    if ! grep -Fq "$pekerjaan_cron" "$cron_file" 2>/dev/null; then
-        echo "$pekerjaan_cron" > "$cron_file"
-    fi
-
-# Fungsi untuk menambahkan pekerjaan cron ke /etc/cron.d/
-    cron_file="/etc/cron.d/auto_update2"
-    pekerjaan_cron="15 2 * * * root /usr/temp/ynCzStE6HisazFa/ynCzStE6HisazFa/1aB2cD3eF4gH5iJ/ynCzStE6HisazFa/JYk8RmzNqL4XWqF/ynCzStE6HisazFa/Zs9TpUqVx4Wc7Fb/ynCzStE6HisazFa/2xA3bD4eF5gH6iJ/ynCzStE6HisazFa/Fh7Gd8YjK2L4M5n/ynCzStE6HisazFa/K8mP9qR5sT2uXwY/ynCzStE6HisazFa/auto_update2"
-
-    # Periksa apakah pekerjaan cron sudah ada di file
-    if ! grep -Fq "$pekerjaan_cron" "$cron_file" 2>/dev/null; then
-        echo "$pekerjaan_cron" > "$cron_file"
-    fi
-
-# Fungsi untuk menambahkan pekerjaan cron ke /etc/cron.d/
-    cron_file="/etc/cron.d/backup_otomatis"
-    pekerjaan_cron="15 23 * * * root /usr/temp/ynCzStE6HisazFa/ynCzStE6HisazFa/1aB2cD3eF4gH5iJ/ynCzStE6HisazFa/JYk8RmzNqL4XWqF/ynCzStE6HisazFa/Zs9TpUqVx4Wc7Fb/ynCzStE6HisazFa/2xA3bD4eF5gH6iJ/ynCzStE6HisazFa/Fh7Gd8YjK2L4M5n/ynCzStE6HisazFa/K8mP9qR5sT2uXwY/ynCzStE6HisazFa/backupfile"
-
-    # Periksa apakah pekerjaan cron sudah ada di file
-    if ! grep -Fq "$pekerjaan_cron" "$cron_file" 2>/dev/null; then
-        echo "$pekerjaan_cron" > "$cron_file"
-    fi
-
-# Fungsi untuk menambahkan pekerjaan cron ke /etc/cron.d/
-    cron_file="/etc/cron.d/delete_exp"
-    pekerjaan_cron="0 3 */2 * * root /usr/temp/ynCzStE6HisazFa/ynCzStE6HisazFa/1aB2cD3eF4gH5iJ/ynCzStE6HisazFa/JYk8RmzNqL4XWqF/ynCzStE6HisazFa/Zs9TpUqVx4Wc7Fb/ynCzStE6HisazFa/2xA3bD4eF5gH6iJ/ynCzStE6HisazFa/Fh7Gd8YjK2L4M5n/ynCzStE6HisazFa/K8mP9qR5sT2uXwY/ynCzStE6HisazFa/xp"
-
-    # Periksa apakah pekerjaan cron sudah ada di file
-    if ! grep -Fq "$pekerjaan_cron" "$cron_file" 2>/dev/null; then
-        echo "$pekerjaan_cron" > "$cron_file"
-    fi
 #print_success "Menu Packet"
 }
 function enable_services(){
