@@ -448,7 +448,8 @@ echo "NAMESERVER KAMU : $NS_DOMAIN"
 echo $NS_DOMAIN > /etc/xray/nsdomain
 echo $NS_DOMAIN > /etc/xray/dns
 sleep 3
-cd
+fi
+clear
 }  
 select_FANNSCTUNNEL_domain() {
 #SUB=$(</dev/urandom tr -dc a-z0-9 | head -c5)
@@ -513,7 +514,8 @@ echo $SUB_DOMAIN > /etc/xray/domain
 echo "NAMESERVER KAMU : $NS_DOMAIN"
 echo $NS_DOMAIN > /etc/xray/nsdomain
 sleep 3
-cd
+fi
+clear
 }  
 select_ARISCTUNNEL_domain() {  
     echo "Selecting a Add Domain BY ARISCTUNNEL V4..."
@@ -564,7 +566,7 @@ function pasang_domain() {
     
     if [[ -z "$host" ]]; then
         # Tidak ada input dalam 3 detik, pilih domain acak
-        select_random_domain
+        select_FANNSCTUNNEL_domain
         return
     fi
 
