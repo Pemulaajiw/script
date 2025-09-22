@@ -1268,43 +1268,78 @@ if [ "/bin/bash" ]; then
   fi
 fi
 mesg n || true
-welcome
+menu
 EOF
-cat >/etc/cron.d/log_clear <<-END
-		8 0 * * * root /usr/local/bin/log_clear
+cat >/etc/cron.d/xp_all <<-END
+		SHELL=/bin/sh
+		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+		2 0 * * * root /usr/local/sbin/xp
 	END
-
-cat >/usr/local/bin/log_clear <<-END
-#!/bin/bash
-wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/files/http -O /usr/bin/http
-cekhttp=$(cat /usr/bin/http)
-tanggal=$(date +"%m-%d-%Y")
-waktu=$(date +"%T")
-echo "Sucsesfully clear & restart On $tanggal Time $waktu." >> /root/log-clear.txt
-systemctl restart udp-custom.service
-END
-	chmod +x /usr/local/bin/log_clear
+	cat >/etc/cron.d/logclean <<-END
+		SHELL=/bin/sh
+		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+		*/20 * * * * root /usr/local/sbin/clearlog
+		END
+    chmod 644 /root/.profile
 	
-cat >/etc/cron.d/daily_backup <<-END
-		0 22 * * * root /usr/local/bin/daily_backup
+    cat >/etc/cron.d/daily_reboot <<-END
+		SHELL=/bin/sh
+		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+		0 5 * * * root /sbin/reboot
+	END
+    cat >/etc/cron.d/limit_ip <<-END
+		SHELL=/bin/sh
+		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+		*/2 * * * * root /usr/local/sbin/limit-ip
+	END
+    cat >/etc/cron.d/limit_ip2 <<-END
+		SHELL=/bin/sh
+		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+		*/2 * * * * root /usr/bin/limit-ip
+	END
+    echo "*/1 * * * * root echo -n > /var/log/nginx/access.log" >/etc/cron.d/log.nginx
+    echo "*/1 * * * * root echo -n > /var/log/xray/access.log" >>/etc/cron.d/log.xray
+    service cron restart
+    cat >/home/daily_reboot <<-END
+		5
 	END
 
-cat >/usr/local/bin/daily_backup <<-END
-#!/bin/bash
-wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/files/http -O /usr/bin/http
-cekhttp=$(cat /usr/bin/http)
-tanggal=$(date +"%m-%d-%Y")
-waktu=$(date +"%T")
-echo "Sucsesfully Backup On $tanggal Time $waktu." >> /root/log-backup.txt
-/usr/local/sbin/backup -r now
-END
-	chmod +x /usr/local/bin/daily_backup
+cat >/etc/systemd/system/rc-local.service <<EOF
+[Unit]
+Description=/etc/rc.local
+ConditionPathExists=/etc/rc.local
+[Service]
+Type=forking
+ExecStart=/etc/rc.local start
+TimeoutSec=0
+StandardOutput=tty
+RemainAfterExit=yes
+SysVStartPriority=99
+[Install]
+WantedBy=multi-user.target
+EOF
 
-cat >/etc/cron.d/xp_sc <<-END
-		5 0 * * * root /usr/local/bin/xp_sc
-	END
+echo "/bin/false" >>/etc/shells
+echo "/usr/sbin/nologin" >>/etc/shells
+cat >/etc/rc.local <<EOF
+#!/bin/sh -e
+# rc.local
+# By default this script does nothing.
+iptables -I INPUT -p udp --dport 5300 -j ACCEPT
+iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300
+systemctl restart netfilter-persistent
+exit 0
+EOF
 
-cat >/usr/local/bin/xp_sc <<-END
+    chmod +x /etc/rc.local
+    
+    AUTOREB=$(cat /home/daily_reboot)
+    SETT=11
+    if [ $AUTOREB -gt $SETT ]; then
+        TIME_DATE="PM"
+    else
+        TIME_DATE="AM"
+    fi
 #!/bin/bash
 wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/files/http -O /usr/bin/http
 cekhttp=$(cat /usr/bin/http)
@@ -1346,56 +1381,6 @@ END
     if ! grep -Fq "$pekerjaan_cron" "$cron_file" 2>/dev/null; then
         echo "$pekerjaan_cron" > "$cron_file"
     fi
-cat >/etc/cron.d/logclean <<-END
-SHELL=/bin/sh
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-*/10 * * * * root /usr/local/sbin/clearlog
-END
-chmod 644 /root/.profile
-cat >/etc/cron.d/daily_reboot <<-END
-SHELL=/bin/sh
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-5 0 * * * root /sbin/reboot
-END
-echo "*/1 * * * * root echo -n > /var/log/nginx/access.log" >/etc/cron.d/log.nginx
-echo "*/1 * * * * root echo -n > /var/log/xray/access.log" >>/etc/cron.d/log.xray
-service cron restart
-cat >/home/daily_reboot <<-END
-5
-END
-cat >/etc/systemd/system/rc-local.service <<EOF
-[Unit]
-Description=/etc/rc.local
-ConditionPathExists=/etc/rc.local
-[Service]
-Type=forking
-ExecStart=/etc/rc.local start
-TimeoutSec=0
-StandardOutput=tty
-RemainAfterExit=yes
-SysVStartPriority=99
-[Install]
-WantedBy=multi-user.target
-EOF
-echo "/bin/false" >>/etc/shells
-echo "/usr/sbin/nologin" >>/etc/shells
-cat >/etc/rc.local <<EOF
-#!/bin/bash
-wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/files/http -O /usr/bin/http
-cekhttp=$(cat /usr/bin/http)
-iptables -I INPUT -p udp --dport 5300 -j ACCEPT
-iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300
-systemctl restart netfilter-persistent
-exit 0
-EOF
-chmod +x /etc/rc.local
-AUTOREB=$(cat /home/daily_reboot)
-SETT=11
-if [ $AUTOREB -gt $SETT ]; then
-TIME_DATE="PM"
-else
-TIME_DATE="AM"
-fi
 #print_success "Menu Packet"
 }
 function enable_services(){
