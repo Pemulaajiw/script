@@ -218,6 +218,7 @@ clear
     read -p "Press any key for exit"
     clear
     sleep 1
+	fi
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
 else
