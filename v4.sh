@@ -196,7 +196,28 @@ echo -e "${YELLOW}----------------------------------------------------------${NC
 echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡𝗘𝗟 V2.4            \033[0m"
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
-sleep 1
+sleep 3
+read -p "   INPUT PAS SCRIPT :   " host11
+if [[ $host11 == ALLOS ]]; then
+echo ""
+clear
+else
+echo -e "${RED} Mohon Maaf Sepertinya Anda Bukan Owner ${NC}"
+sleep 3
+clear
+    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
+    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e ""
+    echo -e "            \033[91;1mPERMISSION DENIED !\033[0m"
+    echo -e "     \033[0;33mBuy access permissions for scripts\033[0m"
+    echo -e "             \033[0;33mContact Admin :\033[0m"
+    echo -e "      \033[2;32mWhatsApp\033[0m wa.me/087812264674"
+	echo -e "      \033[2;32mTelegram\033[0m t.me/AJW29"
+    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    read -p "Press any key for exit"
+    clear
+    sleep 1
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
 else
