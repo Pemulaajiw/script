@@ -34,7 +34,7 @@ echo -e "net.ipv6.conf.all.disable_ipv6 = 1\nnet.ipv6.conf.default.disable_ipv6 
 ```
 
 ```
-apt update -y && apt upgrade -y --fix-missing && apt install -y xxd bzip2 wget curl sudo build-essential bsdmainutils screen dos2unix && update-grub && apt dist-upgrade -y && sleep 2 && reboot
+apt update -y && apt upgrade -y --fix-missing && apt install curl jq wget screen build-essential -y && update-grub && apt dist-upgrade -y && sleep 2 && reboot
 ```
 ## INSTALL SCRIPT 
 Masukkan perintah dibawah untuk menginstall Autoscript Premium
