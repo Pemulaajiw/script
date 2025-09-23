@@ -73,10 +73,22 @@ fun_bar() {
 res1() {
 apt-get update -y 
 export DEBIAN_FRONTEND=noninteractive
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null 2>&1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1 >/dev/null 2>&1
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+systemctl disable --now apparmor >/dev/null 2>&1
+systemctl stop apparmor >/dev/null 2>&1
+update-rc.d -f apparmor remove >/dev/null 2>&1 # Ini mungkin tidak ada di semua sistem, tapi aman.
+apt-get purge apparmor apparmor-utils -y >/dev/null 2>&1
+sysctl -p >/dev/null 2>&1
 echo 'openssh-server openssh-server/keep-obsolete-conffile boolean true' | debconf-set-selections
 apt install -y
-apt upgrade -y
-apt update -y
+apt update -y && apt upgrade -y
+apt install git curl python3 apt  figlet python3-pip apt-transport-https ca-certificates software-properties-common ntpdate wget netcat-openbsd ncurses-bin chrony jq -y
+-y
+wget https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/grpcurl_1.9.1_linux_x86_64.tar.gz -O /tmp/grpcurl.tar.gz && tar -xzf /tmp/grpcurl.tar.gz -C /tmp/ && sudo mv /tmp/grpcurl /usr/local/bin/ && sudo chmod +x /usr/local/bin/grpcurl
+wget https://raw.githubusercontent.com/XTLS/Xray-core/main/app/stats/command/command.proto -O stats.proto
 apt install iputils-ping -y
 apt install bzip2 -y
 apt install gzip -y
@@ -184,25 +196,6 @@ EOF
 cat <<EOF>> /etc/rmbl/warnafont/warnaf.conf
 fontlight
 EOF
-
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null 2>&1
-sysctl -w net.ipv6.conf.default.disable_ipv6=1 >/dev/null 2>&1
-echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
-sysctl -p >/dev/null 2>&1
-
-systemctl disable --now apparmor >/dev/null 2>&1
-systemctl stop apparmor >/dev/null 2>&1
-update-rc.d -f apparmor remove >/dev/null 2>&1 # Ini mungkin tidak ada di semua sistem, tapi aman.
-apt-get purge apparmor apparmor-utils -y >/dev/null 2>&1
-
-clear
-
-apt update -y && apt upgrade -y
-apt install git curl python3 apt  figlet python3-pip apt-transport-https ca-certificates software-properties-common ntpdate wget netcat-openbsd ncurses-bin chrony jq -y
--y
-wget https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/grpcurl_1.9.1_linux_x86_64.tar.gz -O /tmp/grpcurl.tar.gz && tar -xzf /tmp/grpcurl.tar.gz -C /tmp/ && sudo mv /tmp/grpcurl /usr/local/bin/ && sudo chmod +x /usr/local/bin/grpcurl
-wget https://raw.githubusercontent.com/XTLS/Xray-core/main/app/stats/command/command.proto -O stats.proto
 cd
 clear
 }
