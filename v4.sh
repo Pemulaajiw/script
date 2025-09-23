@@ -246,6 +246,66 @@ fi
 echo ""
 echo "Process ${GRAY}[ ${NC}${green}Install${NC} ${GRAY}]${NC} For Starting Installation "
 echo ""
+# --- Validasi Awal ---
+echo -e "${GREEN}♻️ Check Validasi Masuk...${NC}"
+sleep 3
+clear
+
+# Pastikan direktori yang dibutuhkan ada
+mkdir -p /etc/data
+
+# --- Mendapatkan IP Publik Pengguna ---
+user_ip=$(curl -s https://ipinfo.io/ip)
+
+# --- Meminta Nama Client dan Memvalidasi ---
+while true; do
+    read -rp $'\033[0;32mMasukkan Nama Client:\033[0m ' client_name
+
+    # Validasi Nama Client
+    if [[ -z "$client_name" ]]; then
+        echo "Nama Client tidak boleh kosong. Silakan masukkan kembali."
+        continue
+    elif [[ ! "$client_name" =~ ^[A-Za-z]+$ ]]; then
+        echo "Nama Client hanya boleh berisi huruf. Silakan masukkan kembali."
+        continue
+    fi
+
+    # Menggunakan curl untuk memeriksa apakah client_name ada dalam file permission.txt
+    permission_file=$(curl -s https://raw.githubusercontent.com/Pemulaajiw/script/main/register)
+    
+    # Mengambil IP_VPS juga untuk validasi di izin.txt
+    IP_VPS=$(curl -s https://ipinfo.io/ip) # Pastikan ini mengambil IP publik
+
+    if echo "$permission_file" | grep -q -i "$client_name" && echo "$permission_file" | grep -q "$IP_VPS"; then
+        # Mengambil tanggal kedaluwarsa dari kolom ke-3
+        exp_date=$(echo "$permission_file" | grep -i "$client_name" | awk '{print $3}')
+        
+        # Validasi format tanggal
+        if ! [[ "$exp_date" =~ ^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$ ]]; then
+            echo -e "${red}❌ Format tanggal invalid: '$exp_date' (harus YYYY-MM-DD)${NC}"
+            exit 1
+        fi
+
+        # Validasi tanggal menggunakan date
+        if ! date -d "$exp_date" "+%s" &>/dev/null; then
+            echo -e "${red}❌ Tanggal tidak valid secara kalender: $exp_date${NC}"
+            exit 1
+        fi
+
+        echo "Client Name accepted... Let's go..."
+        break
+    else
+        echo -e "${red}❌ Client Name atau IP ($IP_VPS) tidak terdaftar!${NC}"
+        echo -e "➥ Hubungi admin ${CYAN}「 ✦ @AJW29 ✦ 」${NC}"
+        # Hapus file installer jika validasi gagal
+        rm -f /root/v4 
+        exit 1
+    fi
+done
+echo -e "${GREEN}Sedang Melanjutkan proses...${NC}"
+sleep 2
+
+# --- Validasi Root Access ---
 clear
 if [ "${EUID}" -ne 0 ]; then
 echo "You need to run this script as root"
