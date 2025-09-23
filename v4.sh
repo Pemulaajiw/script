@@ -206,13 +206,6 @@ clear
 author=$(cat /etc/xray/username)
 echo ""
 echo ""
-else
-until [[ 𝗙𝗔𝗡𝗡𝗧𝗨𝗡𝗘𝗟 == "$name" ]]; do
-done
-rm /etc/xray/username
-echo "$name" > 𝗙𝗔𝗡𝗡𝗧𝗨𝗡𝗘𝗟
-echo ""
-clear
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
 else
@@ -442,9 +435,16 @@ echo $SUB_DOMAIN > /etc/xray/domain
 echo "NAMESERVER KAMU : $NS_DOMAIN"
 echo $NS_DOMAIN > /etc/xray/nsdomain
 echo $NS_DOMAIN > /etc/xray/dns
+cd
 sleep 3
-fi
-clear
+
+    if [[ -z "$nama" ]]; then
+        echo "FANSCTUNNEL V2.4" > /etc/xray/username
+    else
+        echo "$nama" > /etc/xray/username
+    fi
+    echo "Domain added successfully."
+    echo ""
 }  
 select_FANNSCTUNNEL_domain() {
 #SUB=$(</dev/urandom tr -dc a-z0-9 | head -c5)
@@ -508,9 +508,16 @@ echo "DOMAIN KAMU : $SUB_DOMAIN"
 echo $SUB_DOMAIN > /etc/xray/domain
 echo "NAMESERVER KAMU : $NS_DOMAIN"
 echo $NS_DOMAIN > /etc/xray/nsdomain
+cd
 sleep 3
-fi
-clear
+
+    if [[ -z "$nama" ]]; then
+        echo "FANSCTUNNEL V2.4" > /etc/xray/username
+    else
+        echo "$nama" > /etc/xray/username
+    fi
+    echo "Domain added successfully."
+    echo ""
 }  
 select_ARISCTUNNEL_domain() {  
     echo "Selecting a Add Domain BY ARISCTUNNEL V4..."
@@ -540,7 +547,7 @@ function pasang_domain() {
     echo -e "    ----------------------------------"
     echo -e "   |\e[1;32mPlease Select a Domain Type Below \e[0m|"
     echo -e "    ----------------------------------"
-    echo -e "     \e[1;32m1)\e[0m Your Domain"
+    echo -e "     \e[1;32m1)\e[0m Your Domain (Usahakan)"
     echo -e "     \e[1;32m2)\e[0m Random Domain"
     echo -e "     \e[1;32m3)\e[0m Use a custom Subdomain V1"
     echo -e "     \e[1;32m4)\e[0m Use a custom Subdomain V2"
@@ -614,7 +621,7 @@ function add_domain_by_arisctunnel() {
     fi
 
     if [[ -z "$nama" ]]; then
-        echo "ARISCTUNNEL V4" > /etc/xray/username
+        echo "FANSCTUNNEL V2.4" > /etc/xray/username
     else
         echo "$nama" > /etc/xray/username
     fi
