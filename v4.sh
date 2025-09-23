@@ -196,29 +196,23 @@ echo -e "${YELLOW}----------------------------------------------------------${NC
 echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡𝗘𝗟 V2.4            \033[0m"
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
-sleep 3
-read -p "   INPUT PAS SCRIPT :   " host11
-if [[ $host11 == ALLOS ]]; then
+until [[ $name =~ ^[a-zA-Z0-9_.-]+$ ]]; do
+    read -rp "Masukan Nama Kamu Disini tanpa spasi : " -e name
+done
+rm -rf /etc/xray/username
+echo "$name" > /etc/xray/username
 echo ""
 clear
+author=$(cat /etc/xray/username)
+echo ""
+echo ""
 else
-echo -e "${RED} Mohon Maaf Sepertinya Anda Bukan Owner ${NC}"
-sleep 3
+until [[ 𝗙𝗔𝗡𝗡𝗧𝗨𝗡𝗘𝗟 == "$name" ]]; do
+done
+rm /etc/xray/username
+echo "$name" > 𝗙𝗔𝗡𝗡𝗧𝗨𝗡𝗘𝗟
+echo ""
 clear
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e ""
-    echo -e "            \033[91;1mPERMISSION DENIED !\033[0m"
-    echo -e "     \033[0;33mBuy access permissions for scripts\033[0m"
-    echo -e "             \033[0;33mContact Admin :\033[0m"
-    echo -e "      \033[2;32mWhatsApp\033[0m wa.me/087812264674"
-	echo -e "      \033[2;32mTelegram\033[0m t.me/AJW29"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    read -p "Press any key for exit"
-    clear
-    sleep 1
-	fi
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
 else
