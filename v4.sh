@@ -198,21 +198,13 @@ apt-get purge apparmor apparmor-utils -y >/dev/null 2>&1
 
 clear
 
-# --- Instalasi Tools Awal ---
-wget https://raw.githubusercontent.com/freetunnel/bal/main/tools/tools.sh -O tools.sh &> /dev/null
-chmod +x tools.sh
-bash tools.sh
-start=$(date +%s)
-ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-
-# --- Update dan Instal Dependensi Umum untuk Ubuntu 24.04 ---
-echo -e "${GREEN}Memperbarui sistem dan menginstal dependensi...${NC}"
 apt update -y && apt upgrade -y
 apt install git curl python3 apt  figlet python3-pip apt-transport-https ca-certificates software-properties-common ntpdate wget netcat-openbsd ncurses-bin chrony jq -y
 -y
 wget https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/grpcurl_1.9.1_linux_x86_64.tar.gz -O /tmp/grpcurl.tar.gz && tar -xzf /tmp/grpcurl.tar.gz -C /tmp/ && sudo mv /tmp/grpcurl /usr/local/bin/ && sudo chmod +x /usr/local/bin/grpcurl
 wget https://raw.githubusercontent.com/XTLS/Xray-core/main/app/stats/command/command.proto -O stats.proto
-
+cd
+clear
 }
 # Clear the terminal
 clear
