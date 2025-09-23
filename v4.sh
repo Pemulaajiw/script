@@ -402,9 +402,9 @@ echo ""
 read -rp "silakan INPUT custom subdomain kamu : " -e SUB
 echo ""
 MYIP=$(wget -qO- icanhazip.com);
-CF_ID=mbahkoid13@gmail.com
-CF_KEY=a527f7da45eba65e5ce033619e5debe2a42e9
-DOMAIN=fanntunnel.online
+CF_ID=pribadi.no99@gmail.com
+CF_KEY=10afee244f409c97d15692d22ff9029dc666b
+DOMAIN=freetunnel.net
 SUB_DOMAIN=${SUB}.${DOMAIN}
 NS_DOMAIN=ns.${SUB_DOMAIN}
 echo "DOMAIN kamu adalah : ${SUB_DOMAIN}"
