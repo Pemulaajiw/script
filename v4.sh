@@ -225,9 +225,13 @@ rm -rf /etc/xray/username
 echo "$name" > /etc/xray/username
 echo ""
 clear
-author=$(cat /etc/xray/username)
+if [[ -z "$nama" ]]; then
+echo "FANSCTUNNELV2.4" > /etc/xray/username
 echo ""
 echo ""
+else
+echo "$nama" > /etc/xray/username
+fi
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
 else
@@ -467,11 +471,6 @@ echo $NS_DOMAIN > /etc/xray/nsdomain
 echo $NS_DOMAIN > /etc/xray/dns
 cd
 sleep 3
-
-    if [[ -z "$nama" ]]; then
-        echo "FANSCTUNNEL V2.4" > /etc/xray/username
-    else
-        echo "$nama" > /etc/xray/username
     fi
     echo "Domain added successfully."
     echo ""
@@ -540,11 +539,6 @@ echo "NAMESERVER KAMU : $NS_DOMAIN"
 echo $NS_DOMAIN > /etc/xray/nsdomain
 cd
 sleep 3
-
-    if [[ -z "$nama" ]]; then
-        echo "FANSCTUNNEL V2.4" > /etc/xray/username
-    else
-        echo "$nama" > /etc/xray/username
     fi
     echo "Domain added successfully."
     echo ""
@@ -614,10 +608,6 @@ function pasang_domain() {
         echo "IP=${host1}" >> /var/lib/kyt/ipvps.conf
         echo $host1 > /etc/xray/domain
         echo $host1 > /root/domain
-        if [[ -z "$nama" ]]; then
-            echo "FANSCTUNNEL V2.4" > /etc/xray/username
-        else
-            echo "$nama" > /etc/xray/username
         fi
         echo ""
     elif [[ $host == "2" ]]; then
@@ -648,12 +638,6 @@ function add_domain_by_arisctunnel() {
         # Tidak ada input dalam 3 detik, pilih domain acak
         select_ARISCTUNNEL_domain
         return
-    fi
-
-    if [[ -z "$nama" ]]; then
-        echo "FANSCTUNNEL V2.4" > /etc/xray/username
-    else
-        echo "$nama" > /etc/xray/username
     fi
     echo "Domain added successfully."
     echo ""
