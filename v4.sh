@@ -197,7 +197,6 @@ cat <<EOF>> /etc/rmbl/warnafont/warnaf.conf
 fontlight
 EOF
 cd
-clear
 }
 # Clear the terminal
 clear
