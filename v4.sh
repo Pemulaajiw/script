@@ -258,13 +258,24 @@ echo ""
 #     fi
 # done
 clear
-if [[ -z "$nama" ]]; then
-echo "FANSCTUNNELV2.4" > /etc/xray/username
-echo ""
-echo ""
-else
-echo "$nama" > /etc/xray/username
-fi
+# --- Validasi Awal ---
+echo -e "${GREEN}♻️ Check Validasi Masuk...${NC}"
+sleep 3
+clear
+
+# Pastikan direktori yang dibutuhkan ada
+mkdir -p /etc/data
+
+# --- Mendapatkan IP Publik Pengguna ---
+user_ip=$(curl -s https://ipinfo.io/ip)
+
+echo -e "${GREEN}Sedang Melanjutkan proses...${NC}"
+sleep 2
+
+echo -e "${GREEN}Mengunduh dan menginstal dependensi...${NC}"
+sleep 2
+
+clear
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
 else
@@ -296,6 +307,15 @@ fi
 if [ "$(systemd-detect-virt)" == "openvz" ]; then
 echo "OpenVZ is not supported"
 exit 1
+fi
+# --- Konfigurasi Hostname ---
+cd /root || exit 1
+local_ip=$(hostname -I | cut -d' ' -f1)
+host_name=$(hostname)
+
+# Perbaiki file hosts jika diperlukan
+if ! grep -q "^${local_ip} ${host_name}" /etc/hosts; then
+    echo "${local_ip} ${host_name}" >> /etc/hosts
 fi
 red='\e[1;31m'
 green='\e[0;32m'
