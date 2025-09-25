@@ -210,12 +210,36 @@ echo -e "${YELLOW}----------------------------------------------------------${NC
 echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡𝗘𝗟 V2.4            \033[0m"
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
-until [[ $name =~ ^[a-zA-Z0-9_.-]+$ ]]; do
-    read -rp "Masukan Nama Kamu Disini tanpa spasi : " -e name
-done
-rm -rf /etc/xray/username
-echo "$name" > /etc/xray/username
-echo ""
+# # --- Bagian Password ---
+# while true; do
+#     echo "Select an option/Pilih opsi:"
+#     echo "1. Ubah Password/Change Password"
+#     echo "2. or Enter, Lewati/Skip"
+#     read -p "Masukkan pilihan/Input option(1/2): " pilihan
+#     if [[ "$pilihan" == "1" ]]; then
+#         while true; do
+#             read -s -p "Password : " passwd
+#             echo
+#             read -s -p "Konfirmasi Password : " passwd_confirm
+#             echo
+#             if [[ -n "$passwd" && "$passwd" == "$passwd_confirm" ]]; then
+#                 echo "$passwd" > /etc/.password.txt
+#                 echo "Password root berhasil diubah."
+#                 break
+#             else
+#                 echo "Password harus diisi dan harus sama. Silakan coba lagi."
+#             fi
+#         done
+#         echo root:$passwd | sudo chpasswd root > /dev/null 2>&1
+#         sudo systemctl restart sshd > /dev/null 2>&1
+#         break
+#     elif [[ "$pilihan" == "2" || -z "$pilihan" ]]; then
+#         echo "Proses pengubahan password dilewati."
+#         break
+#     else
+#         echo "Pilihan tidak valid. Silakan coba lagi."
+#     fi
+# done
 clear
 if [[ -z "$nama" ]]; then
 echo "FANSCTUNNELV2.4" > /etc/xray/username
@@ -363,14 +387,6 @@ http://haproxy.debian.net buster-backports-1.8 main \
 >/etc/apt/sources.list.d/haproxy.list
 sudo apt-get update
 apt-get -y install haproxy=1.8.\*
-apt-get install -y -qq \
-        sudo python3 screen curl jq git lsof \
-        build-essential libpam0g-dev libcurl4-nss-dev \
-        openssl openvpn easy-rsa fail2ban tmux \
-        stunnel4 squid dropbear socat chrony \
-        net-tools dnsutils lsb-release neofetch \
-        libnss3-dev libnspr4-dev libsqlite3-dev \
-        xl2tpd pptpd vnstat
 else
 echo -e " Your OS Is Not Supported ($(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') )"
 exit 1
