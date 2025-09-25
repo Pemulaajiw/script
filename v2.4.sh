@@ -205,29 +205,7 @@ echo -e "${YELLOW}----------------------------------------------------------${NC
 echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡𝗘𝗟 V2.4            \033[0m"
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
-sleep 3
-read -p "   INPUT PAS SCRIPT :   " host11
-if [[ $host11 == ALLOS ]]; then
-echo ""
-clear
-else
-echo -e "${RED} Mohon Maaf Sepertinya Anda Bukan Owner ${NC}"
-sleep 3
-clear
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e ""
-    echo -e "            \033[91;1mPERMISSION DENIED !\033[0m"
-    echo -e "     \033[0;33mBuy access permissions for scripts\033[0m"
-    echo -e "             \033[0;33mContact Admin :\033[0m"
-    echo -e "      \033[2;32mWhatsApp\033[0m wa.me/087812264674"
-	echo -e "      \033[2;32mTelegram\033[0m t.me/AJW29"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    read -p "Press any key for exit"
-    clear
-    sleep 1
-	fi
+sleep 1
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
 else
@@ -350,93 +328,22 @@ function first_setup(){
 timedatectl set-timezone Asia/Jakarta
 echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
 echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+#print_success "Directory Xray"
 if [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" ]]; then
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-if ! dpkg -s software-properties-common >/dev/null 2>&1; then
-apt-get install --no-install-recommends software-properties-common || echo -e "${red}Failed to install software-properties-common${neutral}"
-else
-echo -e "${green}software-properties-common is already installed, skipping...${neutral}"
-fi
-rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
-if ! dpkg -s ubuntu-keyring >/dev/null 2>&1; then
-apt install -y ubuntu-keyring || echo -e "${red}Failed to install ubuntu-keyring${neutral}"
-else
-echo -e "${green}ubuntu-keyring is already installed, skipping...${neutral}"
-fi
-curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
-echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
-if ! dpkg -s nginx >/dev/null 2>&1; then
-if ! apt install -y nginx; then
-echo -e "${red}Failed to install nginx${neutral}"
-fi
-else
-echo -e "${green}nginx is already installed, skipping...${neutral}"
-fi
-if [ -f /etc/nginx/conf.d/default.conf ]; then
-rm /etc/nginx/conf.d/default.conf || echo -e "${red}Failed to delete /etc/nginx/conf.d/default.conf${neutral}"
-else
-echo -e "${yellow}/etc/nginx/conf.d/default.conf does not exist, skipping deletion${neutral}"
-fi
+echo "Setup Dependencies $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
+sudo apt update -y
+apt-get install --no-install-recommends software-properties-common
+add-apt-repository ppa:vbernat/haproxy-2.0 -y
+apt-get -y install haproxy=2.0.\*
 elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" ]]; then
-sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
-if ! dpkg -s debian-archive-keyring >/dev/null 2>&1; then
-apt install -y debian-archive-keyring || echo -e "${red}Failed to install debian-archive-keyring${neutral}"
-else
-echo -e "${green}debian-archive-keyring is already installed, skipping...${neutral}"
-fi
-curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
-echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
-if ! dpkg -s nginx >/dev/null 2>&1; then
-apt install -y nginx || echo -e "${red}Failed to install nginx${neutral}"
-else
-echo -e "${green}nginx is already installed, skipping...${neutral}"
-fi
-else
-echo -e "${red}Unsupported OS. Exiting.${neutral}"
-exit 1
-fi
-# Install haproxy sesuai OS dan versi
-if [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" && $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') == "18.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-2.6 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=2.6.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" && $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') == "20.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-2.9 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=2.9.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" && $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') == "22.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" && $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') == "24.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" && $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') == "10" ]]; then
-    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net buster-backports-2.6 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=2.6.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" && $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') == "11" ]]; then
-    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bullseye-backports-3.0 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" && $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') == "12" ]]; then
-    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bookworm-backports-3.0 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
+echo "Setup Dependencies For OS Is $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
+curl https://haproxy.debian.net/bernat.debian.org.gpg |
+gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg
+echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
+http://haproxy.debian.net buster-backports-1.8 main \
+>/etc/apt/sources.list.d/haproxy.list
+sudo apt-get update
+apt-get -y install haproxy=1.8.\*
 else
     echo -e "${red}Unsupported OS. Exiting.${neutral}"
     exit 1
@@ -530,6 +437,10 @@ echo $NS_DOMAIN > /etc/xray/nsdomain
 echo $NS_DOMAIN > /etc/xray/dns
 sleep 3
 cd
+sleep 1
+    fi
+    echo "Domain added successfully."
+    echo ""
 }  
 select_FANNSCTUNNEL_domain() {
 #SUB=$(</dev/urandom tr -dc a-z0-9 | head -c5)
@@ -595,6 +506,10 @@ echo "NAMESERVER KAMU : $NS_DOMAIN"
 echo $NS_DOMAIN > /etc/xray/nsdomain
 sleep 3
 cd
+sleep 1
+    fi
+    echo "Domain added successfully."
+    echo ""
 }  
 select_ARISCTUNNEL_domain() {  
     echo "Selecting a Add Domain BY ARISCTUNNEL V4..."
@@ -993,17 +908,11 @@ clear
 function ins_dropbear(){
 clear
 #print_install "Menginstall Dropbear"
-# // Installing Dropbear
-if [ -n "$dropbear_conf_url" ]; then
-[ -f /etc/default/dropbear ] && rm /etc/default/dropbear
-wget -q -O /etc/default/dropbear $dropbear_conf_url >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear.conf${neutral}"
-[ -f /etc/init.d/dropbear ] && rm /etc/init.d/dropbear
-wget -q -O /etc/init.d/dropbear $dropbear_init_url && chmod +x /etc/init.d/dropbear >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear.init${neutral}"
-[ -f /etc/dropbear/dropbear_dss_host_key ] && rm /etc/dropbear/dropbear_dss_host_key
-wget -q -O /etc/dropbear/dropbear_dss_host_key $dropbear_dss_url && chmod +x /etc/dropbear/dropbear_dss_host_key >/dev/null 2>&1 || echo -e "${red}Failed to download dropbear_dss_host_key${neutral}"
-else
-echo -e "${yellow}dropbear_conf_url is not set, skipping download of dropbear_dss_host_key${neutral}"
-fi
+apt-get install dropbear -y > /dev/null 2>&1
+wget -q -O /etc/default/dropbear "${REPO}config/dropbear.conf"
+chmod +x /etc/default/dropbear
+/etc/init.d/dropbear restart
+/etc/init.d/dropbear status
 #print_success "Dropbear"
 }
 clear
