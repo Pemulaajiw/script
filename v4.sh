@@ -489,27 +489,160 @@ export Arch=$( uname -m )
 export IP=$( curl -s https://ipinfo.io/ip/ )
 function first_setup(){
 timedatectl set-timezone Asia/Jakarta
-echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
-echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
-#print_success "Directory Xray"
-if [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" ]]; then
-echo "Setup Dependencies $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-sudo apt update -y
-apt-get install --no-install-recommends software-properties-common
-add-apt-repository ppa:vbernat/haproxy-2.0 -y
-apt-get -y install haproxy=2.0.\*
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" ]]; then
-echo "Setup Dependencies For OS Is $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-curl https://haproxy.debian.net/bernat.debian.org.gpg |
-gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg
-echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
-http://haproxy.debian.net buster-backports-1.8 main \
->/etc/apt/sources.list.d/haproxy.list
-sudo apt-get update
-apt-get -y install haproxy=1.8.\*
+# Simpan city info
+if [ -n "$city" ]; then
+    [ -f /etc/xray/city ] && rm /etc/xray/city
+    echo "$city" >>/etc/xray/city
 else
-echo -e " Your OS Is Not Supported ($(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') )"
-exit 1
+    [ -f /etc/xray/city ] && rm /etc/xray/city
+    echo "City information not available" >>/etc/xray/city
+fi
+
+# Simpan ISP info
+if [ -n "$isp" ]; then
+    [ -f /etc/xray/isp ] && rm /etc/xray/isp
+    echo "$isp" >>/etc/xray/isp
+else
+    [ -f /etc/xray/isp ] && rm /etc/xray/isp
+    echo "ISP information not available" >>/etc/xray/isp
+fi
+
+# Install Node.js jika belum ada
+if ! dpkg -s nodejs >/dev/null 2>&1; then
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - || echo -e "${red}Failed to download Node.js setup${neutral}"
+    apt-get install -y nodejs || echo -e "${red}Failed to install Node.js${neutral}"
+    npm install -g npm@latest
+else
+    echo -e "${green}Node.js is already installed, skipping...${neutral}"
+fi
+
+# Install vnstat jika belum ada
+if ! dpkg -s vnstat >/dev/null 2>&1; then
+    apt-get install -y vnstat || echo -e "${red}Failed to install vnstat${neutral}"
+    wget -q https://humdi.net/vnstat/vnstat-2.9.tar.gz
+    tar zxvf vnstat-2.9.tar.gz || echo -e "${red}Failed to extract vnstat${neutral}"
+    cd vnstat-2.9 || echo -e "${red}Failed to enter vnstat-2.9 directory${neutral}"
+    ./configure --prefix=/usr --sysconfdir=/etc >/dev/null 2>&1 && make >/dev/null 2>&1 && make install >/dev/null 2>&1
+    cd || echo -e "${red}Failed to return to home directory${neutral}"
+    net=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1)
+    vnstat -i $net
+    if grep -q 'Interface "eth0"' /etc/vnstat.conf; then
+        sed -i 's/Interface "'""eth0""'"/Interface "'""$net""'"/g' /etc/vnstat.conf
+    else
+        echo -e "Interface eth0 not found in /etc/vnstat.conf"
+    fi
+    chown vnstat:vnstat /var/lib/vnstat -R || echo -e "${red}Failed to change ownership of vnstat directory${neutral}"
+    systemctl enable vnstat
+    /etc/init.d/vnstat restart
+else
+    echo -e "${green}vnstat is already installed, skipping...${neutral}"
+fi
+
+rm -f /root/vnstat-2.9.tar.gz >/dev/null 2>&1 || echo -e "${red}Failed to delete vnstat-2.6.tar.gz file${neutral}"
+rm -rf /root/vnstat-2.9 >/dev/null 2>&1 || echo -e "${red}Failed to delete vnstat-2.6 directory${neutral}"
+
+ln -fs /usr/share/zoneinfo/$timezone /etc/localtime
+#print_success "Directory Xray"
+os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
+if [[ $os_id == "ubuntu" ]]; then
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    if ! dpkg -s software-properties-common >/dev/null 2>&1; then
+        apt-get install --no-install-recommends software-properties-common || echo -e "${red}Failed to install software-properties-common${neutral}"
+    else
+        echo -e "${green}software-properties-common is already installed, skipping...${neutral}"
+    fi
+    rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
+    if ! dpkg -s ubuntu-keyring >/dev/null 2>&1; then
+        apt install -y ubuntu-keyring || echo -e "${red}Failed to install ubuntu-keyring${neutral}"
+    else
+        echo -e "${green}ubuntu-keyring is already installed, skipping...${neutral}"
+    fi
+    curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
+    echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
+    if ! dpkg -s nginx >/dev/null 2>&1; then
+        if ! apt install -y nginx; then
+            echo -e "${red}Failed to install nginx${neutral}"
+        fi
+    else
+        echo -e "${green}nginx is already installed, skipping...${neutral}"
+    fi
+    if [ -f /etc/nginx/conf.d/default.conf ]; then
+        rm /etc/nginx/conf.d/default.conf || echo -e "${red}Failed to delete /etc/nginx/conf.d/default.conf${neutral}"
+    else
+        echo -e "${yellow}/etc/nginx/conf.d/default.conf does not exist, skipping deletion${neutral}"
+    fi
+elif [[ $os_id == "debian" ]]; then
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    rm -f /etc/apt/sources.list.d/nginx.list || echo -e "${red}Failed to delete nginx.list${neutral}"
+    if ! dpkg -s debian-archive-keyring >/dev/null 2>&1; then
+        apt install -y debian-archive-keyring || echo -e "${red}Failed to install debian-archive-keyring${neutral}"
+    else
+        echo -e "${green}debian-archive-keyring is already installed, skipping...${neutral}"
+    fi
+    curl $nginx_key_url | gpg --dearmor | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian $(lsb_release -cs) nginx" | tee /etc/apt/sources.list.d/nginx.list
+    echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | tee /etc/apt/preferences.d/99nginx
+    if ! dpkg -s nginx >/dev/null 2>&1; then
+        apt install -y nginx || echo -e "${red}Failed to install nginx${neutral}"
+    else
+        echo -e "${green}nginx is already installed, skipping...${neutral}"
+    fi
+else
+    echo -e "${red}Unsupported OS. Exiting.${neutral}"
+    exit 1
+fi
+# Install haproxy sesuai OS dan versi
+if [[ $os_id == "ubuntu" && $os_version == "18.04" ]]; then
+    add-apt-repository -y ppa:vbernat/haproxy-2.6 || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy=2.6.* || echo -e "${red}Failed to install haproxy${neutral}"
+
+elif [[ $os_id == "ubuntu" && $os_version == "20.04" ]]; then
+    add-apt-repository -y ppa:vbernat/haproxy-2.9 || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy=2.9.* || echo -e "${red}Failed to install haproxy${neutral}"
+
+elif [[ $os_id == "ubuntu" && $os_version == "22.04" ]]; then
+    add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
+
+elif [[ $os_id == "ubuntu" && $os_version == "24.04" ]]; then
+    add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
+
+elif [[ $os_id == "debian" && $os_version == "10" ]]; then
+    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
+    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net buster-backports-2.6 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy=2.6.* || echo -e "${red}Failed to install haproxy${neutral}"
+
+elif [[ $os_id == "debian" && $os_version == "11" ]]; then
+    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
+    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bullseye-backports-3.0 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
+
+elif [[ $os_id == "debian" && $os_version == "12" ]]; then
+    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
+    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bookworm-backports-3.0 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
+
+elif [[ $os_id == "debian" && $os_version == "13" ]]; then
+    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net trixie-backports-3.0 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Gagal menambahkan repository HAProxy${neutral}"
+    sudo apt update -y || echo -e "${red}Gagal update daftar paket${neutral}"
+    apt-get apt install -y haproxy || echo -e "${red}Gagal menginstal HAProxy${neutral}"
+
+elif [[ $os_id == "ubuntu" && $os_version == "25.04" ]]; then
+    # add-apt-repository -y ppa:vbernat/haproxy-3.2 || echo -e "${red}Failed to add haproxy repository${neutral}"
+    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
+    apt-get install -y haproxy || echo -e "${red}Failed to install haproxy${neutral}"
+else
+    echo -e "${red}Unsupported OS. Exiting.${neutral}"
+    exit 1
 fi
 }
 clear
@@ -527,7 +660,7 @@ fi
 clear
 select_random_domain() {
 #SUB=microsoft.azure
-#DOMAIN=ganteng.tech DOMAIN=yaddykakkoii.my.id #DOMAIN=sshweb.tech
+#DOMAIN=ganteng.tech DOMAIN=yaddykakkoi.my.id #DOMAIN=sshweb.tech
 echo "DOMAIN UTAMA ADALAH fanntunnel.online"
 echo "~~~~~~ petunjuk tentang custom subdomain ~~~~~~~~~"
 echo "JIKA KAMU INPUT KATA: test ,maka hasilnya adalah test.fanntunnel.online"
