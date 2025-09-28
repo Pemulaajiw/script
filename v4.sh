@@ -1,4 +1,8 @@
 #!/bin/bash
+# Mendapatkan data izin dan key
+ip=$(wget -qO- ipinfo.io/ip)
+data=$(curl -s https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/register)
+key=$(echo "$data" | grep "$ip" | awk '{print $2}')
 wget -q https://raw.githubusercontent.com/Pemulaajiw/script/main/files/http -O /usr/bin/http
 cekhttp=$(cat /usr/bin/http)
 Green="\e[92;1m"
