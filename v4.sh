@@ -121,38 +121,12 @@ fun_bar 'res1'
 clear
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡𝗘𝗟 V2.4            \033[0m"
+echo -e "  Developer » Klmpk𝗡𝗫𝗡VPN Tunneling{YELLOW}(${NC}${green} Stable Edition ${NC}${YELLOW})${NC}"
+echo -e "  » This Will Quick Setup VPN Server On Your Server"
+echo -e "  Pembuat : ${green}𝗡𝗫𝗡uzijww ${NC}"
+echo -e "  Recode By My Self NZNXAJW VPN STORE ${YELLOW}(${NC} 2024 ${YELLOW})${NC}"
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
-# # --- Bagian Password ---
-# while true; do
-#     echo "Select an option/Pilih opsi:"
-#     echo "1. Ubah Password/Change Password"
-#     echo "2. or Enter, Lewati/Skip"
-#     read -p "Masukkan pilihan/Input option(1/2): " pilihan
-#     if [[ "$pilihan" == "1" ]]; then
-#         while true; do
-#             read -s -p "Password : " passwd
-#             echo
-#             read -s -p "Konfirmasi Password : " passwd_confirm
-#             echo
-#             if [[ -n "$passwd" && "$passwd" == "$passwd_confirm" ]]; then
-#                 echo "$passwd" > /etc/.password.txt
-#                 echo "Password root berhasil diubah."
-#                 break
-#             else
-#                 echo "Password harus diisi dan harus sama. Silakan coba lagi."
-#             fi
-#         done
-#         echo root:$passwd | sudo chpasswd root > /dev/null 2>&1
-#         sudo systemctl restart sshd > /dev/null 2>&1
-#         break
-#     elif [[ "$pilihan" == "2" || -z "$pilihan" ]]; then
-#         echo "Proses pengubahan password dilewati."
-#         break
-#     else
-#         echo "Pilihan tidak valid. Silakan coba lagi."
-#     fi
-# done
 clear
 # --- Validasi Awal ---
 echo -e "${GREEN}♻️ Check Validasi Masuk...${NC}"
