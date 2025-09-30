@@ -73,6 +73,11 @@ echo -e "${EROR} Your OS Is Not Supported ( ${YELLOW}$( cat /etc/os-release | gr
 exit 1
 fi
 
+# Info OS
+os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
+os_version=$(grep -w VERSION_ID /etc/os-release | head -n1 | sed 's/VERSION_ID=//g' | sed 's/"//g')
+echo "OS: $os_id, Version: $os_version"
+
 # // IP Address Validating
 if [[ $IP == "" ]]; then
     echo -e "${EROR} IP Address ( ${YELLOW}Not Detected${NC} )"
@@ -1221,6 +1226,7 @@ echo ""
 read -p "[ Enter ]  TO REBOOT"
 
 reboot
+
 
 
 
