@@ -110,82 +110,6 @@ sudo apt-get install -y --no-install-recommends software-properties-common
 echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
 echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
 sudo apt-get install -y speedtest-cli vnstat libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev bc rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential gcc g++ python htop lsof tar wget curl ruby zip unzip p7zip-full python3-pip libc6 util-linux build-essential msmtp-mta ca-certificates bsd-mailx iptables iptables-persistent netfilter-persistent net-tools openssl ca-certificates gnupg gnupg2 ca-certificates lsb-release gcc shc make cmake git screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq openvpn easy-rsa
-cd
-mkdir -p /etc/rmbl/theme
-cat <<EOF>> /etc/rmbl/theme/green
-BG : \E[40;1;42m
-TEXT : \033[0;32m
-EOF
-cat <<EOF>> /etc/rmbl/theme/yellow
-BG : \E[40;1;43m
-TEXT : \033[0;33m
-EOF
-cat <<EOF>> /etc/rmbl/theme/red
-BG : \E[40;1;41m
-TEXT : \033[0;31m
-EOF
-cat <<EOF>> /etc/rmbl/theme/blue
-BG : \E[40;1;44m
-TEXT : \033[0;34m
-EOF
-cat <<EOF>> /etc/rmbl/theme/magenta
-BG : \E[40;1;45m
-TEXT : \033[0;35m
-EOF
-cat <<EOF>> /etc/rmbl/theme/cyan
-BG : \E[40;1;46m
-TEXT : \033[0;36m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightgray
-BG : \E[40;1;47m
-TEXT : \033[0;37m
-EOF
-cat <<EOF>> /etc/rmbl/theme/darkgray
-BG : \E[40;1;100m
-TEXT : \033[0;90m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightred
-BG : \E[40;1;101m
-TEXT : \033[0;91m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightgreen
-BG : \E[40;1;102m
-TEXT : \033[0;92m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightyellow
-BG : \E[40;1;103m
-TEXT : \033[0;93m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightblue
-BG : \E[40;1;104m
-TEXT : \033[0;94m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightmagenta
-BG : \E[40;1;105m
-TEXT : \033[0;95m
-EOF
-cat <<EOF>> /etc/rmbl/theme/lightcyan
-BG : \E[40;1;106m
-TEXT : \033[0;96m
-EOF
-cat <<EOF>> /etc/rmbl/theme/color.conf
-lightcyan
-EOF
-
-mkdir -p /etc/rmbl/warnafont
-cat <<EOF>> /etc/rmbl/warnafont/fontgren
-WARNAF : \033[1;92m
-EOF
-cat <<EOF>> /etc/rmbl/warnafont/fontcyan
-WARNAF : \033[1;96m
-EOF
-cat <<EOF>> /etc/rmbl/warnafont/fontlight
-WARNAF : \033[1;37m
-EOF
-cat <<EOF>> /etc/rmbl/warnafont/warnaf.conf
-fontlight
-EOF
-cd
 }
 # Clear the terminal
 clear
@@ -194,31 +118,6 @@ print_install "Menginstall Packet Yang Dibutuhkan"
 # Run the update function with progress bar
 fun_bar 'res1'
 
-# --- Disable IPv6 ---
-echo -e "${GREEN}Mematikan IPv6...${NC}"
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null 2>&1
-sysctl -w net.ipv6.conf.default.disable_ipv6=1 >/dev/null 2>&1
-echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
-sysctl -p >/dev/null 2>&1
-
-# --- Disable AppArmor (Ubuntu 24.04) ---
-echo -e "${GREEN}Mematikan AppArmor...${NC}"
-systemctl disable --now apparmor >/dev/null 2>&1
-systemctl stop apparmor >/dev/null 2>&1
-update-rc.d -f apparmor remove >/dev/null 2>&1 # Ini mungkin tidak ada di semua sistem, tapi aman.
-apt-get purge apparmor apparmor-utils -y >/dev/null 2>&1
-
-clear
-# --- Update dan Instal Dependensi Umum untuk Ubuntu 24.04 ---
-echo -e "${GREEN}Memperbarui sistem dan menginstal dependensi...${NC}"
-apt update -y && apt upgrade -y
-apt install git curl python3 apt  figlet python3-pip apt-transport-https ca-certificates software-properties-common ntpdate wget netcat-openbsd ncurses-bin chrony jq -y
--y
-wget https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/grpcurl_1.9.1_linux_x86_64.tar.gz -O /tmp/grpcurl.tar.gz && tar -xzf /tmp/grpcurl.tar.gz -C /tmp/ && sudo mv /tmp/grpcurl /usr/local/bin/ && sudo chmod +x /usr/local/bin/grpcurl
-wget https://raw.githubusercontent.com/XTLS/Xray-core/main/app/stats/command/command.proto -O stats.proto
-
-cd
 clear
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo -e "\033[96;1m          WELCOME TO SRICPT BY 𝗙𝗔𝗡𝗡SC𝗧𝗨𝗡𝗘𝗟 V2.4            \033[0m"
@@ -295,10 +194,6 @@ fi
 echo ""
 echo "Process ${GRAY}[ ${NC}${green}Install${NC} ${GRAY}]${NC} For Starting Installation "
 echo ""
-# Info OS
-os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
-os_version=$(grep -w VERSION_ID /etc/os-release | head -n1 | sed 's/VERSION_ID=//g' | sed 's/"//g')
-echo "OS: $os_id, Version: $os_version"
 # --- Validasi Root Access ---
 clear
 if [ "${EUID}" -ne 0 ]; then
@@ -309,93 +204,6 @@ if [ "$(systemd-detect-virt)" == "openvz" ]; then
 echo "OpenVZ is not supported"
 exit 1
 fi
-# Update package list
-if ! apt update -y; then
-    echo -e "${red}Failed to update${neutral}"
-fi
-
-# Install sudo if not installed
-if ! dpkg -s sudo >/dev/null 2>&1; then
-    if ! apt install sudo -y; then
-        echo -e "${red}Failed to install sudo${neutral}"
-    fi
-else
-    echo -e "${green}sudo is already installed, skipping...${neutral}"
-fi
-
-# Install software-properties-common and debconf-utils
-if ! dpkg -s software-properties-common debconf-utils >/dev/null 2>&1; then
-    if ! apt install -y --no-install-recommends software-properties-common debconf-utils; then
-        echo -e "${red}Failed to install basic packages${neutral}"
-    fi
-else
-    echo -e "${green}software-properties-common and debconf-utils are already installed, skipping...${neutral}"
-fi
-
-# Remove exim4 if installed
-if dpkg -s exim4 >/dev/null 2>&1; then
-    if ! apt remove --purge -y exim4; then
-        echo -e "${red}Failed to remove exim4${neutral}"
-    else
-        echo -e "${green}exim4 removed successfully${neutral}"
-    fi
-else
-    echo -e "${green}exim4 is not installed, skipping...${neutral}"
-fi
-
-# Remove ufw if installed
-if dpkg -s ufw >/dev/null 2>&1; then
-    if ! apt remove --purge -y ufw; then
-        echo -e "${red}Failed to remove ufw${neutral}"
-    else
-        echo -e "${green}ufw removed successfully${neutral}"
-    fi
-else
-    echo -e "${green}ufw is not installed, skipping...${neutral}"
-fi
-
-# Remove firewalld if installed
-if dpkg -s firewalld >/dev/null 2>&1; then
-    if ! apt remove --purge -y firewalld; then
-        echo -e "${red}Failed to remove firewalld${neutral}"
-    else
-        echo -e "${green}firewalld removed successfully${neutral}"
-    fi
-else
-    echo -e "${green}firewalld is not installed, skipping...${neutral}"
-fi
-
-# Configure iptables-persistent
-if ! echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections; then
-    echo -e "${red}Failed to configure iptables-persistent v4${neutral}"
-fi
-if ! echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections; then
-    echo -e "${red}Failed to configure iptables-persistent v6${neutral}"
-fi
-
-# Configure keyboard
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layout select English"; then
-    echo -e "${red}Failed to configure keyboard layout${neutral}"
-fi
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variant select English"; then
-    echo -e "${red}Failed to configure keyboard variant${neutral}"
-fi
-
-# Update & upgrade system
-if ! apt update -y; then
-    echo -e "${red}Failed to update${neutral}"
-fi
-if ! apt-get upgrade -y; then
-    echo -e "${red}Failed to upgrade${neutral}"
-else
-    echo -e "${green}System upgraded successfully${neutral}"
-fi
-if ! apt dist-upgrade -y; then
-    echo -e "${red}Failed to dist-upgrade${neutral}"
-else
-    echo -e "${green}System dist-upgraded successfully${neutral}"
-fi
-
 # --- Konfigurasi Hostname ---
 cd /root || exit 1
 local_ip=$(hostname -I | cut -d' ' -f1)
@@ -493,33 +301,6 @@ export Kernel=$( uname -r )
 export Arch=$( uname -m )
 export IP=$( curl -s https://ipinfo.io/ip/ )
 function first_setup(){
-# Simpan city info
-if [ -n "$city" ]; then
-    [ -f /etc/xray/city ] && rm /etc/xray/city
-    echo "$city" >>/etc/xray/city
-else
-    [ -f /etc/xray/city ] && rm /etc/xray/city
-    echo "City information not available" >>/etc/xray/city
-fi
-
-# Simpan ISP info
-if [ -n "$isp" ]; then
-    [ -f /etc/xray/isp ] && rm /etc/xray/isp
-    echo "$isp" >>/etc/xray/isp
-else
-    [ -f /etc/xray/isp ] && rm /etc/xray/isp
-    echo "ISP information not available" >>/etc/xray/isp
-fi
-
-# Install Node.js jika belum ada
-if ! dpkg -s nodejs >/dev/null 2>&1; then
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - || echo -e "${red}Failed to download Node.js setup${neutral}"
-    apt-get install -y nodejs || echo -e "${red}Failed to install Node.js${neutral}"
-    npm install -g npm@latest
-else
-    echo -e "${green}Node.js is already installed, skipping...${neutral}"
-fi
-
 timedatectl set-timezone Asia/Jakarta
 echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
 echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
