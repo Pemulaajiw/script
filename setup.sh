@@ -220,7 +220,6 @@ else
 echo -e " Your OS Is Not Supported ($(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') )"
 exit 1
 fi
-print_success "Directory Xray"
 }
 
 
@@ -1178,6 +1177,7 @@ echo ""
 read -p "[ Enter ]  TO REBOOT"
 
 reboot
+
 
 
 
