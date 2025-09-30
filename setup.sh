@@ -73,11 +73,6 @@ echo -e "${EROR} Your OS Is Not Supported ( ${YELLOW}$( cat /etc/os-release | gr
 exit 1
 fi
 
-# Info OS
-os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
-os_version=$(grep -w VERSION_ID /etc/os-release | head -n1 | sed 's/VERSION_ID=//g' | sed 's/"//g')
-echo "OS: $os_id, Version: $os_version"
-
 # // IP Address Validating
 if [[ $IP == "" ]]; then
     echo -e "${EROR} IP Address ( ${YELLOW}Not Detected${NC} )"
@@ -97,94 +92,6 @@ fi
 if [ "$(systemd-detect-virt)" == "openvz" ]; then
 		echo "OpenVZ is not supported"
 		exit 1
-fi
-# Update package list
-if ! apt update -y; then
-    echo -e "${red}Failed to update${neutral}"
-fi
-
-# Install sudo if not installed
-if ! dpkg -s sudo >/dev/null 2>&1; then
-    if ! apt install sudo -y; then
-        echo -e "${red}Failed to install sudo${neutral}"
-    fi
-else
-    echo -e "${green}sudo is already installed, skipping...${neutral}"
-fi
-
-# Install software-properties-common and debconf-utils
-if ! dpkg -s software-properties-common debconf-utils >/dev/null 2>&1; then
-    if ! apt install -y --no-install-recommends software-properties-common debconf-utils; then
-        echo -e "${red}Failed to install basic packages${neutral}"
-    fi
-else
-    echo -e "${green}software-properties-common and debconf-utils are already installed, skipping...${neutral}"
-fi
-
-# Remove exim4 if installed
-if dpkg -s exim4 >/dev/null 2>&1; then
-    if ! apt remove --purge -y exim4; then
-        echo -e "${red}Failed to remove exim4${neutral}"
-    else
-        echo -e "${green}exim4 removed successfully${neutral}"
-    fi
-else
-    echo -e "${green}exim4 is not installed, skipping...${neutral}"
-fi
-
-# Remove ufw if installed
-if dpkg -s ufw >/dev/null 2>&1; then
-    if ! apt remove --purge -y ufw; then
-        echo -e "${red}Failed to remove ufw${neutral}"
-    else
-        echo -e "${green}ufw removed successfully${neutral}"
-    fi
-else
-    echo -e "${green}ufw is not installed, skipping...${neutral}"
-fi
-
-# Remove firewalld if installed
-if dpkg -s firewalld >/dev/null 2>&1; then
-    if ! apt remove --purge -y firewalld; then
-        echo -e "${red}Failed to remove firewalld${neutral}"
-    else
-        echo -e "${green}firewalld removed successfully${neutral}"
-    fi
-else
-    echo -e "${green}firewalld is not installed, skipping...${neutral}"
-fi
-
-# Configure iptables-persistent
-if ! echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections; then
-    echo -e "${red}Failed to configure iptables-persistent v4${neutral}"
-fi
-if ! echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections; then
-    echo -e "${red}Failed to configure iptables-persistent v6${neutral}"
-fi
-
-# Configure keyboard
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/layout select English"; then
-    echo -e "${red}Failed to configure keyboard layout${neutral}"
-fi
-if ! debconf-set-selections <<<"keyboard-configuration keyboard-configuration/variant select English"; then
-    echo -e "${red}Failed to configure keyboard variant${neutral}"
-fi
-
-export DEBIAN_FRONTEND=noninteractive
-
-# Update & upgrade system
-if ! apt update -y; then
-    echo -e "${red}Failed to update${neutral}"
-fi
-if ! apt-get upgrade -y; then
-    echo -e "${red}Failed to upgrade${neutral}"
-else
-    echo -e "${green}System upgraded successfully${neutral}"
-fi
-if ! apt dist-upgrade -y; then
-    echo -e "${red}Failed to dist-upgrade${neutral}"
-else
-    echo -e "${green}System dist-upgraded successfully${neutral}"
 fi
 red='\e[1;31m'
 green='\e[0;32m'
@@ -312,49 +219,6 @@ apt-get -y install haproxy
 else
 echo -e " Your OS Is Not Supported ($(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') )"
 exit 1
-fi
-# Install haproxy sesuai OS dan versi
-if [[ $os_id == "ubuntu" && $os_version == "18.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-2.6 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=2.6.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $os_id == "ubuntu" && $os_version == "20.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-2.9 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=2.9.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $os_id == "ubuntu" && $os_version == "22.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $os_id == "ubuntu" && $os_version == "24.04" ]]; then
-    add-apt-repository -y ppa:vbernat/haproxy-3.0 || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $os_id == "debian" && $os_version == "10" ]]; then
-    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net buster-backports-2.6 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=2.6.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $os_id == "debian" && $os_version == "11" ]]; then
-    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bullseye-backports-3.0 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-elif [[ $os_id == "debian" && $os_version == "12" ]]; then
-    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg || echo -e "${red}Failed to add haproxy repository${neutral}"
-    echo "deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bookworm-backports-3.0 main" >/etc/apt/sources.list.d/haproxy.list || echo -e "${red}Failed to add haproxy repository${neutral}"
-    sudo apt update -y || echo -e "${red}Failed to update package list${neutral}"
-    apt-get install -y haproxy=3.0.* || echo -e "${red}Failed to install haproxy${neutral}"
-
-else
-    echo -e "${red}Unsupported OS. Exiting.${neutral}"
-    exit 1
 fi
 print_success "Directory Xray"
 }
@@ -1314,6 +1178,7 @@ echo ""
 read -p "[ Enter ]  TO REBOOT"
 
 reboot
+
 
 
 
