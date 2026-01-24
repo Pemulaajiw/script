@@ -1,0 +1,207 @@
+#!/bin/bash
+domain=$(cat /etc/xray/domain)
+
+domain=$(cat /etc/xray/domain)
+function send_log(){
+  # args: protocol user iplimit cekcek
+  local protocol="$1"
+  local user="$2"
+  local iplimit="$3"
+  local cekcek="$4"
+
+  # ========== CONFIG ==========
+  local ENV_FILE="/etc/notif/limit.env"
+  local BOT_TOKEN CHAT_ID ADMINX
+
+  if [ -f "$ENV_FILE" ]; then
+    . "$ENV_FILE"
+  fi
+
+  local KEY="${BOT_TOKEN:-}"
+  local CHATID="${CHAT_ID:-}"
+  local ADMIN="${ADMINX:-}"
+  local TIME="10"
+  local URL="https://api.telegram.org/bot${KEY}/sendMessage"
+
+  if [ -z "$KEY" ] || [ -z "$CHATID" ] || [ -z "$ADMIN" ]; then
+    echo "[send_log] BOT_TOKEN/CHAT_ID/ADMINX tidak ditemukan di $ENV_FILE" >&2
+    return 1
+  fi
+
+  # ========== DATA ==========
+  local ISP CITY DOMAIN
+  [ -f /etc/xray/isp ]    && ISP="$(cat /etc/xray/isp 2>/dev/null)"
+  [ -f /etc/xray/city ]   && CITY="$(cat /etc/xray/city 2>/dev/null)"
+  [ -f /etc/xray/domain ] && DOMAIN="$(cat /etc/xray/domain 2>/dev/null)"
+
+  local SERVICE="${protocol^^}"  # uppercase proto
+  local total="${cekcek}/${iplimit} IP"
+
+  # Escape HTML (safe for telegram parse_mode=html)
+  html_escape() { sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'; }
+
+  local ISP_E CITY_E DOMAIN_E USER_E TOTAL_E SERVICE_E
+  ISP_E="$(printf '%s' "$ISP"     | html_escape)"
+  CITY_E="$(printf '%s' "$CITY"    | html_escape)"
+  DOMAIN_E="$(printf '%s' "$DOMAIN" | html_escape)"
+  USER_E="$(printf '%s' "$user"    | html_escape)"
+  TOTAL_E="$(printf '%s' "$total"   | html_escape)"
+  SERVICE_E="$(printf '%s' "$SERVICE"| html_escape)"
+
+  # ========== MESSAGE ==========
+  # Note: use single-quoted heredoc + later variable substitution to preserve formatting
+  read -r -d '' TEXT <<'EOF'
+<b>┌──────────────────────────┐</b>
+<b>   🚨 NOTIF LIMIT IP USER NAKAL 🚨   </b>
+<b>└──────────────────────────┘</b>
+
+<pre>
+┌─────────────────────────────────────┐
+│ 🔧 Service  : ${SERVICE_E}
+│ 🌐 Domain   : ${DOMAIN_E}
+│ ✨ City     : ${CITY_E}
+│ 🏷 ISP      : ${ISP_E}
+│ 👤 Username : ${USER_E}
+│ 📊 Usage    : ${TOTAL_E}
+├─────────────────────────────────────┤
+│ ⏰ $(date "+%d-%m-%Y %H:%M:%S")
+└─────────────────────────────────────┘
+</pre>
+
+<i>🤖 Notifikasi Bot Otomatis ${ADMIN}</i>
+EOF
+
+  # Substitute variables inside TEXT
+  TEXT="${TEXT//\${SERVICE_E}/$SERVICE_E}"
+  TEXT="${TEXT//\${DOMAIN_E}/$DOMAIN_E}"
+  TEXT="${TEXT//\${CITY_E}/$CITY_E}"
+  TEXT="${TEXT//\${ISP_E}/$ISP_E}"
+  TEXT="${TEXT//\${USER_E}/$USER_E}"
+  TEXT="${TEXT//\${TOTAL_E}/$TOTAL_E}"
+  TEXT="${TEXT//\${ADMIN}/$ADMIN}"
+
+  # ========== SEND ==========
+  curl -s --max-time "$TIME" \
+    --data-urlencode "text=${TEXT}" \
+    -d "chat_id=${CHATID}" \
+    -d "parse_mode=html" \
+    "$URL" >/dev/null
+}
+
+lock_user_vm() {
+  if [ -z "$user" ]; then
+    echo "lock_user: variable \$user is empty; skipping lock." >&2
+    return 1
+  fi
+  # ensure lock db exists
+  mkdir -p /etc/xray
+  touch /etc/xray/.lock.db
+
+  uuid=$(grep -E "^},{" "/etc/xray/config.json" |  grep -wE '"'"${user}"'"' | cut -d " " -f 2 | cut -d '"' -f 2 | uniq )
+  exp=$(grep -wE "^### $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+  sed -i '/#vmess$/a\### '"$user $exp $uuid"'' /etc/xray/.lock.db
+}
+lock_user_vl() {
+  if [ -z "$user" ]; then
+    echo "lock_user: variable \$user is empty; skipping lock." >&2
+    return 1
+  fi
+  # ensure lock db exists
+  mkdir -p /etc/xray
+  touch /etc/xray/.lock.db
+
+  uuid=$(grep -E "^},{" "/etc/xray/config.json" |  grep -wE '"'"${user}"'"' | cut -d " " -f 2 | cut -d '"' -f 2 | uniq )
+  exp=$(grep -wE "^#& $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+  sed -i '/#vless$/a\#& '"$user $exp $uuid"'' /etc/xray/.lock.db
+}
+lock_user_tr() {
+  if [ -z "$user" ]; then
+    echo "lock_user: variable \$user is empty; skipping lock." >&2
+    return 1
+  fi
+  # ensure lock db exists
+  mkdir -p /etc/xray
+  touch /etc/xray/.lock.db
+
+  uuid=$(grep -E "^},{" "/etc/xray/config.json" |  grep -wE '"'"${user}"'"' | cut -d " " -f 2 | cut -d '"' -f 2 | uniq )
+  exp=$(grep -wE "^#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+  sed -i '/#trojan$/a\#! '"$user $exp $uuid"'' /etc/xray/.lock.db
+}
+function vmip() {
+    echo -n > /var/log/xray/access.log
+    sleep 60
+    declare -a data=($(ls /etc/kyt/limit/vmess/ip))
+    for user in "${data[@]}"
+    do
+        iplimit=$(cat /etc/kyt/limit/vmess/ip/$user)
+        ehh=$(cat /var/log/xray/access.log | grep "$user" | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq)
+        cekcek=$(echo -e "$ehh" | wc -l)
+        if [[ $cekcek -gt $iplimit ]]; then
+            exp=$(grep -w "^### $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+            sed -i "/### $user /{n;s/^/#/}" /etc/xray/config.json
+            systemctl restart xray >> /dev/null 2>&1
+            send_log "vmess" "$user" "$iplimit" "$cekcek"
+            lock_user_vm
+            echo "unlockxray vmess $user" | at now + 5 minutes
+        else
+            echo ""
+        fi
+        sleep 0.1
+    done
+}
+
+function vlip(){
+    echo -n > /var/log/xray/access.log
+    sleep 60
+    declare -a data=($(ls /etc/kyt/limit/vless/ip))
+    for user in "${data[@]}"
+    do
+        iplimit=$(cat /etc/kyt/limit/vless/ip/$user)
+        ehh=$(cat /var/log/xray/access.log | grep "$user" | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq)
+        cekcek=$(echo -e "$ehh" | wc -l)
+        if [[ $cekcek -gt $iplimit ]]; then
+            exp=$(grep -w "^#& $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+            sed -i "/^#& $user /{n;s/^/#/}" /etc/xray/config.json
+            systemctl restart xray >> /dev/null 2>&1
+            lock_user_vl
+            echo "unlockxray vless $user" | at now + 5 minutes
+            send_log "vless" "$user" "$iplimit" "$cekcek"
+            lock_user
+        else
+            echo ""
+        fi
+        sleep 0.1
+    done
+}
+
+function trip(){
+    echo -n > /var/log/xray/access.log
+    sleep 60
+    declare -a data=($(ls /etc/kyt/limit/trojan/ip))
+    for user in "${data[@]}"
+    do
+        iplimit=$(cat /etc/kyt/limit/trojan/ip/$user)
+        ehh=$(cat /var/log/xray/access.log | grep "$user" | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq)
+        cekcek=$(echo -e "$ehh" | wc -l)
+        if [[ $cekcek -gt $iplimit ]]; then
+            exp=$(grep -w "^#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+            sed -i "/^#! $user /{n;s/^/#/}" /etc/xray/config.json
+            systemctl restart xray >> /dev/null 2>&1
+            lock_user_tr
+            echo "unlockxray trojan $user" | at now + 5 minutes
+            send_log "trojan" "$user" "$iplimit" "$cekcek"
+            lock_user
+        else
+            echo ""
+        fi
+        sleep 0.1
+    done
+}
+
+if [[ ${1} == "vmip" ]]; then
+    vmip
+elif [[ ${1} == "vlip" ]]; then
+    vlip
+elif [[ ${1} == "trip" ]]; then
+    trip
+fi

@@ -1,0 +1,107 @@
+#!/bin/bash
+# unlockxray: Unlock Xray user and notify via Telegram
+# Usage: unlockxray <protocol> <user>
+set -e
+
+proto="$1"
+user="$2"
+cfg="/etc/xray/config.json"
+
+if [ -z "$proto" ] || [ -z "$user" ]; then
+  echo "usage: unlockxray <vmess|vless|trojan> <user>" >&2
+  exit 1
+fi
+
+if [ ! -r "$cfg" ]; then
+  echo "Cannot read $cfg" >&2
+  exit 1
+fi
+
+# Un-comment next line after marker depending on proto
+case "$proto" in
+  vmess)  sed -i "/^### $user /{n;s/^#//}" "$cfg" ;;
+  vless)  sed -i "/^#& $user /{n;s/^#//}" "$cfg" ;;
+  trojan) sed -i "/^#! $user /{n;s/^#//}" "$cfg" ;;
+  *) echo "Unknown protocol: $proto" >&2; exit 1 ;;
+esac
+
+# Restart xray (best-effort)
+systemctl restart xray >/dev/null 2>&1 || true
+
+# ================= NOTIFICATION (mirip template send-log) =================
+# ========== CONFIG ==========
+ENV_FILE="/etc/notif/limit.env"
+BOT_TOKEN=""
+CHAT_ID=""
+ADMINX=""
+if [ -f "$ENV_FILE" ]; then
+  . "$ENV_FILE"
+fi
+
+KEY="${BOT_TOKEN:-}"
+CHATID="${CHAT_ID:-}"
+ADMIN="${ADMINX:-}"
+TIME="10"
+URL="https://api.telegram.org/bot${KEY}/sendMessage"
+
+if [ -z "$KEY" ] || [ -z "$CHATID" ] || [ -z "$ADMIN" ]; then
+  echo "[unlockxray] BOT_TOKEN/CHAT_ID/ADMINX tidak ditemukan di $ENV_FILE" >&2
+  # Do not fail hard; just skip notif
+  exit 0
+fi
+
+# ========== DATA ==========
+ISP=""; CITY=""; DOMAIN=""
+[ -f /etc/xray/isp ]    && ISP="$(cat /etc/xray/isp 2>/dev/null)"
+[ -f /etc/xray/city ]   && CITY="$(cat /etc/xray/city 2>/dev/null)"
+[ -f /etc/xray/domain ] && DOMAIN="$(cat /etc/xray/domain 2>/dev/null)"
+
+SERVICE="$proto"
+
+# Escape HTML
+html_escape() { sed -e 's/&/\\&amp;/g' -e 's/</\\&lt;/g' -e 's/>/\\&gt;/g'; }
+
+ISP_E="$(printf '%s' "$ISP"     | html_escape)"
+CITY_E="$(printf '%s' "$CITY"    | html_escape)"
+DOMAIN_E="$(printf '%s' "$DOMAIN" | html_escape)"
+USER_E="$(printf '%s' "$user"    | html_escape)"
+SERVICE_E="$(printf '%s' "$SERVICE"| html_escape)"
+
+# ========== MESSAGE (AKUN DIBUKA KEMBALI) ==========
+read -r -d '' TEXT <<'EOF'
+<b>┌──────────────────────────┐</b>
+<b>        ✅ AKUN DIBUKA KEMBALI ✅       </b>
+<b>└──────────────────────────┘</b>
+
+<pre>
+┌─────────────────────────────────────┐
+│ 🔧 Service  : ${SERVICE_E}
+│ 🌐 Domain   : ${DOMAIN_E}
+│ ✨ City     : ${CITY_E}
+│ 🏷 ISP      : ${ISP_E}
+│ 👤 Username : ${USER_E}
+├─────────────────────────────────────┤
+│ ⏰ $(date "+%d-%m-%Y %H:%M:%S")
+└─────────────────────────────────────┘
+</pre>
+
+<i>🤖 Notifikasi Bot Otomatis ${ADMIN}</i>
+EOF
+
+# Substitute variables inside TEXT (since we used single-quoted heredoc)
+TEXT="${TEXT//\${SERVICE_E}/$SERVICE_E}"
+TEXT="${TEXT//\${DOMAIN_E}/$DOMAIN_E}"
+TEXT="${TEXT//\${CITY_E}/$CITY_E}"
+TEXT="${TEXT//\${ISP_E}/$ISP_E}"
+TEXT="${TEXT//\${USER_E}/$USER_E}"
+TEXT="${TEXT//\${ADMIN}/$ADMIN}"
+
+# ========== SEND ==========
+curl -s --max-time "$TIME" \
+  --data-urlencode "text=${TEXT}" \
+  -d "chat_id=${CHATID}" \
+  -d "parse_mode=html" \
+  "$URL" >/dev/null 2>&1 || true
+
+echo "Unlocked $proto $user"
+exit 0

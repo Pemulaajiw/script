@@ -1,0 +1,12 @@
+[Unit]
+Description=Limit Usage Xray Service
+Documentation=FighterTunnel
+After=syslog.target network-online.target
+
+[Service]
+User=root
+NoNewPrivileges=true
+ExecStart=/usr/local/sbin/limit-ip vlip
+
+[Install]
+WantedBy=multi-user.target
