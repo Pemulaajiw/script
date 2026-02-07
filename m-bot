@@ -20,11 +20,12 @@ STS_ON="\033[0;32mON \033[0;32m🟢\033[0m"
 STS_OFF="\033[0;31mOFF \033[0;5;31m🔴\033[0m"
 
 # // Border Color
-BORDER="${CYAN}"
+colornow=$(cat /etc/rmbl/theme/color.conf)
+BORDER="$(cat /etc/rmbl/theme/$colornow | grep -w "TEXT" | cut -d: -f2|sed 's/ //g')"
 
 # // URL Installer & Izin
 BOT_INSTALLER_URL="https://github.com/hokagelegend9999/alpha.v2/raw/refs/heads/main/bot/bot.sh"
-IPVPES="https://raw.githubusercontent.com/hokagelegend9999/ijin/refs/heads/main/alpha"
+IPVPES="https://raw.githubusercontent.com/Pemulaajiw/script/refs/heads/main/register"
 
 # // PATH FILE BACKUP (SESUAI REQUEST)
 BACKUP_CMD="/usr/local/sbin/backup"
@@ -317,7 +318,7 @@ show_main_menu() {
     # 1. Header
     echo -e ""
     print_gradient "╭═══════════════════════════════════════╮"
-    print_gradient "│    ALPHA SCRIPT TELEGRAM PREMIUM      │"
+    print_gradient "│    FANTUNEL SCRIPT TELEGRAM PREMIUM      │"
     print_gradient "╰═══════════════════════════════════════╯"
 
     # 2. Client & System Info
@@ -364,7 +365,7 @@ show_main_menu() {
     line
     echo -e "${BORDER} │ ${WHITE}${BOLD}          CONTACT SUPPORT            ${BORDER}│${NC}"
     mid
-    printf "${BORDER} │ ${GREEN}📞 Whatsapp :${WHITE} %-21s ${BORDER}│${NC}\n" "087726917005"
+    printf "${BORDER} │ ${GREEN}📞 Whatsapp :${WHITE} %-21s ${BORDER}│${NC}\n" "087898083051"
     close
     echo -ne "  ${WHITE}Select Option : ${NC}"
 }
