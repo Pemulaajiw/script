@@ -1,0 +1,419 @@
+#!/bin/bash
+
+# ==================================================
+#  ALPHA SCRIPT TELEGRAM PRO - FINAL FIX
+# ==================================================
+
+# // Definisi Warna (Universal \033)
+NC='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+WHITE='\033[0;37m'
+BOLD='\033[1m'
+YELLOW='\033[0;33m'
+
+# // Definisi Status Indikator (FIX: Gunakan \033)
+# ON: Teks Hijau + Icon
+STS_ON="\033[0;32mON \033[0;32m🟢\033[0m"
+# OFF: Teks Merah + Icon Kedip
+STS_OFF="\033[0;31mOFF \033[0;5;31m🔴\033[0m"
+
+# // Border Color
+BORDER="${CYAN}"
+
+# // URL Installer & Izin
+BOT_INSTALLER_URL="https://github.com/hokagelegend9999/alpha.v2/raw/refs/heads/main/bot/bot.sh"
+IPVPES="https://raw.githubusercontent.com/hokagelegend9999/ijin/refs/heads/main/alpha"
+
+# // PATH FILE BACKUP (SESUAI REQUEST)
+BACKUP_CMD="/usr/local/sbin/backup"
+
+# // Clear Screen
+clear
+
+# ==================================================
+# FUNGSI GRADASI (Emas -> Biru -> Ungu)
+# ==================================================
+print_gradient() {
+    local text="$1"
+    awk -v text="$text" 'BEGIN {
+        len = length(text);
+        r_start=255; g_start=215; b_start=0;
+        r_mid=0;     g_mid=128;   b_mid=255;
+        r_end=138;   g_end=43;    b_end=226;
+        for (i=0; i<len; i++) {
+            ratio = i / (len-1);
+            if (ratio <= 0.5) {
+                f = ratio * 2;
+                r = int(r_start + (r_mid - r_start) * f);
+                g = int(g_start + (g_mid - g_start) * f);
+                b = int(b_start + (b_mid - b_start) * f);
+            } else {
+                f = (ratio - 0.5) * 2;
+                r = int(r_mid + (r_end - r_mid) * f);
+                g = int(g_mid + (g_end - g_mid) * f);
+                b = int(b_mid + (b_end - b_mid) * f);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr(text, i+1, 1);
+        }
+        printf "\033[0m\n";
+    }'
+}
+
+# ==================================================
+# FUNGSI HELPER & LAYOUT
+# ==================================================
+
+# Fungsi Garis (Lebar Compact)
+line() { echo -e "${BORDER} ╭─────────────────────────────────────╮${NC}"; }
+mid()  { echo -e "${BORDER} ├─────────────────────────────────────┤${NC}"; }
+close(){ echo -e "${BORDER} ╰─────────────────────────────────────╯${NC}"; }
+
+# Fungsi Loading Bar
+fun_bar() {
+    CMD="$1"
+    (
+        [[ -e $HOME/fim ]] && rm $HOME/fim
+        $CMD >/dev/null 2>&1
+        touch $HOME/fim
+    ) >/dev/null 2>&1 &
+
+    tput civis
+    echo -ne "  \033[0;33mSedang Memproses \033[1;37m- \033[0;33m["
+    while true; do
+        for ((i = 0; i < 18; i++)); do
+            echo -ne "\033[0;32m#"
+            sleep 0.1s
+        done
+        if [[ -e $HOME/fim ]]; then
+            rm $HOME/fim
+            break
+        fi
+        echo -e "\033[0;33m]"
+        sleep 1s
+        tput cuu1
+        tput dl1
+        echo -ne "  \033[0;33mSedang Memproses \033[1;37m- \033[0;33m["
+    done
+    echo -e "\033[0;33m]\033[1;37m -\033[1;32m SUKSES !\033[1;37m"
+    tput cnorm
+}
+
+# Fungsi Cek IP
+checking_sc() {
+    MYIP=$(curl -sS ipv4.icanhazip.com)
+    DATE_SERVER=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+    TODAY=$(date +"%Y-%m-%d" -d "$DATE_SERVER")
+    
+    local useexp=$(wget -qO- $IPVPES | grep $MYIP | awk '{print $3}')
+    local client_name=$(wget -qO- $IPVPES | grep $MYIP | awk '{print $2}')
+    
+    if [[ "$TODAY" < "$useexp" ]]; then
+        EXP_DATE=$useexp
+        CLIENT_NAME=$client_name
+        current_epoch=$(date +%s)
+        exp_epoch=$(date -d "$useexp" +%s)
+        days_remaining=$(( (exp_epoch - current_epoch) / 86400 ))
+        return 0
+    else
+        clear
+        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+        echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
+        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+        echo -e "             ${RED}PERMISSION DENIED !${NC}"
+        echo -e "   \033[0;33mYour VPS${NC} $MYIP \033[0;33mHas been Banned${NC}"
+        exit 1
+    fi
+}
+# Cek IP saat start
+checking_sc
+
+# ==================================================
+# LOGIC BOT PANEL
+# ==================================================
+
+func_restart_bot() {
+    clear
+    print_gradient "╭═══════════════════════════════════════╮"
+    print_gradient "│          RESTART BOT SERVICE          │"
+    print_gradient "╰═══════════════════════════════════════╯"
+    echo -e "  \033[1;91m Restarting systemd kyt...\033[1;37m"
+    restart_cmd() { systemctl restart kyt; }
+    fun_bar 'restart_cmd'
+    echo -e ""
+    read -n 1 -s -r -p "Press [ Enter ] to back on menu"
+    bot_panel_menu
+}
+
+func_stop_bot() {
+    clear
+    print_gradient "╭═══════════════════════════════════════╮"
+    print_gradient "│            STOP BOT SERVICE           │"
+    print_gradient "╰═══════════════════════════════════════╯"
+    echo -e "  \033[1;91m Stopping systemd kyt...\033[1;37m"
+    stop_cmd() { systemctl stop kyt; }
+    fun_bar 'stop_cmd'
+    echo -e ""
+    read -n 1 -s -r -p "Press [ Enter ] to back on menu"
+    bot_panel_menu
+}
+
+# ==================================================
+# FUNGSI BARU: JADWAL BACKUP (DESIGN SESUAI PERMINTAAN)
+# ==================================================
+func_schedule_backup() {
+    clear
+    # Cek Status Cron
+    if crontab -l 2>/dev/null | grep -q "$BACKUP_CMD"; then
+        sts_backup="$STS_ON"
+        # Ambil jadwal raw
+        sch=$(crontab -l | grep "$BACKUP_CMD" | head -n 1 | awk '{print $2}')
+        if [[ "$sch" == "*" ]]; then info_sch="Setiap 1 Jam"; 
+        elif [[ "$sch" == "*/6" ]]; then info_sch="Setiap 6 Jam";
+        elif [[ "$sch" == "*/12" ]]; then info_sch="Setiap 12 Jam";
+        elif [[ "$sch" == "0" ]]; then info_sch="Harian (00:00)";
+        else 
+            # Cek jika custom jam
+            sch_hour=$(crontab -l | grep "$BACKUP_CMD" | head -n 1 | awk '{print $2}')
+            info_sch="Jam $sch_hour:00 (Harian)"
+        fi
+    else
+        sts_backup="$STS_OFF"
+        info_sch="-"
+    fi
+
+    echo -e ""
+    print_gradient "╭═══════════════════════════════════════╮"
+    print_gradient "│         AUTO BACKUP SCHEDULER         │"
+    print_gradient "╰═══════════════════════════════════════╯"
+    line
+    printf "${BORDER} │ ${WHITE}Status Auto Backup : %-15b ${BORDER}      │${NC}\n" "$sts_backup"
+    printf "${BORDER} │ ${WHITE}Jadwal Saat Ini    : ${YELLOW}%-21s ${BORDER}│${NC}\n" "$info_sch"
+    mid
+    printf "${BORDER} │ ${CYAN}[1] %-31s ${BORDER}│${NC}\n" "Backup Setiap 1 Jam"
+    printf "${BORDER} │ ${CYAN}[2] %-31s ${BORDER}│${NC}\n" "Backup Setiap 6 Jam"
+    printf "${BORDER} │ ${CYAN}[3] %-31s ${BORDER}│${NC}\n" "Backup Setiap 12 Jam"
+    printf "${BORDER} │ ${CYAN}[4] %-31s ${BORDER}│${NC}\n" "Backup Harian (Jam 00:00)"
+    printf "${BORDER} │ ${CYAN}[5] %-31s ${BORDER}│${NC}\n" "Atur Waktu Manual (Set Jam)"
+    printf "${BORDER} │ ${CYAN}[6] %-31s ${BORDER}│${NC}\n" "Matikan Auto Backup (OFF)"
+    echo -e "${BORDER} │                                     │${NC}"
+    printf "${BORDER} │ ${RED}[0] Kembali ke Menu Utama              ${BORDER}│${NC}\n"
+    close
+    
+    echo -ne "  ${WHITE}Select Option : ${NC}"
+    read -r ab_opt
+    
+    # Fungsi update cron internal
+    update_cron() {
+        crontab -l 2>/dev/null | grep -v "$BACKUP_CMD" | crontab -
+        if [[ "$1" != "off" ]]; then
+            (crontab -l 2>/dev/null; echo "$1") | crontab -
+        fi
+    }
+
+    case $ab_opt in
+        1)
+            cmd_1() { update_cron "0 * * * * $BACKUP_CMD"; }
+            echo -e ""; fun_bar 'cmd_1'; func_schedule_backup ;;
+        2)
+            cmd_2() { update_cron "0 */6 * * * $BACKUP_CMD"; }
+            echo -e ""; fun_bar 'cmd_2'; func_schedule_backup ;;
+        3)
+            cmd_3() { update_cron "0 */12 * * * $BACKUP_CMD"; }
+            echo -e ""; fun_bar 'cmd_3'; func_schedule_backup ;;
+        4)
+            cmd_4() { update_cron "0 0 * * * $BACKUP_CMD"; }
+            echo -e ""; fun_bar 'cmd_4'; func_schedule_backup ;;
+        5)
+            echo -e ""
+            echo -e "  ${WHITE}Masukkan Jam Backup (Format 24 Jam, 0-23)${NC}"
+            echo -e "  ${YELLOW}Contoh: 7 = Jam 7 Pagi, 23 = Jam 11 Malam${NC}"
+            echo -e ""
+            read -p "  Input Jam : " jam_input
+            
+            # Validasi Input Angka
+            if [[ "$jam_input" =~ ^[0-9]+$ ]] && [ "$jam_input" -ge 0 ] && [ "$jam_input" -le 23 ]; then
+                 cmd_5() { update_cron "0 $jam_input * * * $BACKUP_CMD"; }
+                 echo -e ""; fun_bar 'cmd_5'; func_schedule_backup
+            else
+                 echo -e "  ${RED}Input tidak valid! Harap masukkan angka 0-23.${NC}"
+                 sleep 2; func_schedule_backup
+            fi
+            ;;
+        6)
+            cmd_6() { update_cron "off"; }
+            echo -e ""; fun_bar 'cmd_6'; func_schedule_backup ;;
+        0) show_main_menu ;;
+        *) func_schedule_backup ;;
+    esac
+}
+
+# ==================================================
+# SUB-MENU: BOT PANEL (FIXED)
+# ==================================================
+bot_panel_menu() {
+    clear
+    # Cek Status Service
+    if systemctl is-active --quiet kyt; then 
+        s_bot="$STS_ON"
+    else 
+        s_bot="$STS_OFF"
+    fi
+
+    echo -e ""
+    print_gradient "╭═══════════════════════════════════════╮"
+    print_gradient "│             MENU BOT PANEL            │"
+    print_gradient "╰═══════════════════════════════════════╯"
+    
+    line
+    # PERBAIKAN DI SINI: Menggunakan %b untuk variabel warna agar tidak bocor
+    printf "${BORDER} │ ${WHITE}Status Bot Service : %-15b ${BORDER}            │${NC}\n" "$s_bot"
+    mid
+    printf "${BORDER} │ ${CYAN}[1] %-33s ${BORDER}│${NC}\n" "Installer Bot Panel (Add)"
+    printf "${BORDER} │ ${CYAN}[2] %-33s ${BORDER}│${NC}\n" "Delete Bot Panel (Hapus)"
+    printf "${BORDER} │ ${CYAN}[3] %-33s ${BORDER}│${NC}\n" "Stop Service Bot"
+    printf "${BORDER} │ ${CYAN}[4] %-33s ${BORDER}│${NC}\n" "Restart Service Bot"
+    printf "${BORDER} │ ${CYAN}[5] %-33s ${BORDER}│${NC}\n" "Menu Fitur Bot Telegram"
+    echo -e "${BORDER} │                                     │${NC}"
+    printf "${BORDER} │ ${RED}[0] %-33s ${BORDER}│${NC}\n" "Kembali ke Menu Utama"
+    close
+    
+    echo -ne "  ${WHITE}Select Option : ${NC}"
+    read -r opt
+    case $opt in
+        1) clear; echo -e "${GREEN}[INFO] Downloading...${NC}"; wget -q "${BOT_INSTALLER_URL}" -O bot.sh && chmod +x bot.sh && ./bot.sh ;;
+        2) clear; if command -v hapus-bot &> /dev/null; then hapus-bot; else echo -e "${RED}Script hapus-bot not found.${NC}"; sleep 2; bot_panel_menu; fi ;;
+        3) func_stop_bot ;;
+        4) func_restart_bot ;;
+        5) clear; if command -v menu-bot &> /dev/null; then menu-bot; else echo -e "${RED}Script menu-bot not found.${NC}"; sleep 2; bot_panel_menu; fi ;;
+        0) show_main_menu ;;
+        *) bot_panel_menu ;;
+    esac
+}
+
+# ==================================================
+# MAIN MENU DISPLAY
+# ==================================================
+show_main_menu() {
+    clear
+    # Get Data
+    os_name=$(grep -w PRETTY_NAME /etc/os-release | head -n1 | sed 's/PRETTY_NAME//g' | sed 's/=//g' | sed 's/"//g')
+    IPVPS=$(curl -s ipv4.icanhazip.com)
+    tram=$(free -m | awk 'NR==2 {print $2}')
+    uram=$(free -m | awk 'NR==2 {print $3}')
+    ram_display="$uram MB / $tram MB"
+    domain=$(cat /etc/xray/domain 2>/dev/null || echo "Domain Not Set")
+
+    # Check Services
+    # Gunakan if-else sederhana untuk memastikan variable terisi string warna yang benar
+    if systemctl is-active --quiet xray; then s_xray="$STS_ON"; else s_xray="$STS_OFF"; fi
+    if systemctl is-active --quiet nginx; then s_nginx="$STS_ON"; else s_nginx="$STS_OFF"; fi
+    if systemctl is-active --quiet kyt; then s_bot="$STS_ON"; else s_bot="$STS_OFF"; fi
+    
+    ws_stat=$(systemctl status ws | grep Active | awk '{print $3}' | tr -d '()')
+    if [[ $ws_stat == "running" ]]; then s_ws="$STS_ON"; else s_ws="$STS_OFF"; fi
+
+    # 1. Header
+    echo -e ""
+    print_gradient "╭═══════════════════════════════════════╮"
+    print_gradient "│    ALPHA SCRIPT TELEGRAM PREMIUM      │"
+    print_gradient "╰═══════════════════════════════════════╯"
+
+    # 2. Client & System Info
+    line
+    printf "${BORDER} │ ${WHITE}Client : ${GREEN}%-26s ${BORDER}│${NC}\n" "${CLIENT_NAME:-User}"
+    printf "${BORDER} │ ${WHITE}Expiry : ${GREEN}%-26s ${BORDER}│${NC}\n" "${days_remaining} Days"
+    mid
+    printf "${BORDER} │ ${CYAN}🖥️ %-7s  : ${WHITE}%-22s ${BORDER}│${NC}\n" "OS" "$os_name"
+    printf "${BORDER} │ ${CYAN}📡 %-7s : ${WHITE}%-22s ${BORDER}│${NC}\n" "IP" "$IPVPS"
+    printf "${BORDER} │ ${CYAN}💾 %-7s : ${WHITE}%-22s ${BORDER}│${NC}\n" "RAM" "$ram_display"
+    close
+
+    # 3. Status Summary
+    echo -e ""
+    print_gradient " ╭──────────────────────╮"
+    print_gradient " │    SERVICE STATUS    │"
+    print_gradient " ╰──────────────────────╯"
+    line
+    # Menggunakan %b untuk variabel status agar warna render sempurna
+    printf "${BORDER} │ ${CYAN}⚡ %-24s %b ${BORDER}  │${NC}\n" "Xray Core" "$s_xray"
+    printf "${BORDER} │ ${CYAN}🌏 %-24s %b ${BORDER}  │${NC}\n" "Nginx Webserver" "$s_nginx"
+    printf "${BORDER} │ ${CYAN}🕸️  %-24s %b ${BORDER}  │${NC}\n" "WebSocket" "$s_ws"
+    printf "${BORDER} │ ${CYAN}🤖 %-24s %b ${BORDER}  │${NC}\n" "Bot Telegram" "$s_bot"
+    close
+
+    # 4. Menu Options
+    echo -e ""
+    print_gradient " ╭──────────────────────╮"
+    print_gradient " │      MENU OPTIONS    │"
+    print_gradient " ╰──────────────────────╯"
+    line
+    printf "${BORDER} │ ${CYAN}[1] %-31s ${BORDER}│${NC}\n" "Menu BOT Panel"
+    printf "${BORDER} │ ${CYAN}[2] %-31s ${BORDER}│${NC}\n" "Menu BOT Notifikasi"
+    printf "${BORDER} │ ${CYAN}[3] %-31s ${BORDER}│${NC}\n" "Menu BOT Backup (Manual)"
+    printf "${BORDER} │ ${CYAN}[4] %-31s ${BORDER}│${NC}\n" "UPDATE BOT TELEGRAM"
+    mid
+    printf "${BORDER} │ ${CYAN}[5] %-31s ${BORDER}│${NC}\n" "Menu Jadwal Backup (Auto)"
+    echo -e "${BORDER} │                                     │${NC}"
+    printf "${BORDER} │ ${RED}[x] %-31s ${BORDER}│${NC}\n" "Exit Menu"
+    close
+
+    # 5. Footer
+    echo -e ""
+    line
+    echo -e "${BORDER} │ ${WHITE}${BOLD}          CONTACT SUPPORT            ${BORDER}│${NC}"
+    mid
+    printf "${BORDER} │ ${GREEN}📞 Whatsapp :${WHITE} %-21s ${BORDER}│${NC}\n" "087726917005"
+    close
+    echo -ne "  ${WHITE}Select Option : ${NC}"
+}
+
+# ==================================================
+# LOOP UTAMA
+# ==================================================
+while true; do
+    show_main_menu
+    read -r menu
+    case $menu in
+        1) checking_sc; bot_panel_menu ;;
+        2) clear; checking_sc; bot ;;
+        3) 
+            clear; checking_sc
+            echo -e "\n${YELLOW}Note: Harap Setup ID & Token sebelum backup!${NC}"
+            sleep 2; mbot-backup
+            ;;
+        4)
+            clear
+            echo -e "${GREEN} [INFO] Writing New Update Script...${NC}"
+            # Script Update Internal
+            cat << 'EOF' > /usr/bin/update-bot
+#!/bin/bash
+apt-get install ruby zip unzip wget -y > /dev/null 2>&1
+gem install lolcat &> /dev/null
+clear
+echo -e "\e[1;97;101m UPDATING BOT TELEGRAM... \e[0m"
+systemctl stop kyt
+rm -rf /usr/bin/kyt/modules /usr/bin/kyt/shell
+mkdir -p /usr/bin/kyt/modules /usr/bin/kyt/shell
+wget -q -O modules.zip "https://raw.githubusercontent.com/hokagelegend9999/alpha.v2/main/bot/modules.zip"
+unzip -o modules.zip -d /usr/bin/kyt/modules/ > /dev/null 2>&1
+if [ -d "/usr/bin/kyt/modules/modules" ]; then mv /usr/bin/kyt/modules/modules/* /usr/bin/kyt/modules/; fi
+wget -q -O shell.zip "https://raw.githubusercontent.com/hokagelegend9999/alpha.v2/main/bot/shell.zip"
+unzip -o shell.zip -d /usr/bin/kyt/shell/ > /dev/null 2>&1
+if [ -d "/usr/bin/kyt/shell/shell" ]; then mv /usr/bin/kyt/shell/shell/* /usr/bin/kyt/shell/; fi
+chmod +x -R /usr/bin/kyt/shell/ /usr/bin/kyt/modules/
+systemctl enable kyt
+systemctl restart kyt
+echo -e "\e[1;32m UPDATE SUKSES! \e[0m"
+sleep 2
+menu
+EOF
+            chmod +x /usr/bin/update-bot
+            /usr/bin/update-bot
+            ;;
+        5) checking_sc; func_schedule_backup ;;
+        x|X) echo -e "\n${RED}Bye...${NC}"; exit 0 ;;
+        *) echo -e "\n${RED}Invalid Option!${NC}"; sleep 1 ;;
+    esac
+done
