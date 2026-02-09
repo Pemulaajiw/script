@@ -1,0 +1,222 @@
+import TelegramBot from 'node-telegram-bot-api';
+import fs from 'fs';
+import axios from 'axios';
+
+// ==========================================
+// 1. KONFIGURASI UTAMA
+// ==========================================
+const config = {
+    token: "8595583887:AAEetqI53eeJAbf_u6pSo54Z7HM29vN_dn4", 
+    ownerId: 6197482164, 
+    botUsername: "FANTUNNEL_PPOB_BOT", 
+    userBalanceFile: "./database/user_balance.json", 
+    historyFile: "./database/history.json",
+    xlSessionsFile: "./database/xl_sessions.json",
+    apiKeyKMSP: "29dc3989-2394-448d-a7a5-8a6c3fa59f5d", 
+    apiKeyPayment: "e435777e-47ed-4485-a06c-767dbe895d1f", 
+    markupMember: 3000,   
+    markupReseller: 1000,
+    priceUpgradeReseller: 10000,
+    bonusReferralUpgrade: 2000 
+};
+
+const botStartTime = Date.now();
+const bot = new TelegramBot(config.token, { polling: true });
+
+// ==========================================
+// 2. DATABASE HANDLER
+// ==========================================
+if (!fs.existsSync('./database')) fs.mkdirSync('./database');
+const loadDB = (file, defaultVal) => {
+    try {
+        if (!fs.existsSync(file)) {
+            fs.writeFileSync(file, JSON.stringify(defaultVal, null, 2));
+            return defaultVal;
+        }
+        return JSON.parse(fs.readFileSync(file));
+    } catch (e) { return defaultVal; }
+};
+const saveDB = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
+
+let userBalance = loadDB(config.userBalanceFile, {}); 
+let historyTrx = loadDB(config.historyFile, []);
+
+const userState = {}; 
+const tempOrder = {}; 
+
+const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+const getUserData = (userId, referrerId = null) => {
+    if (!userBalance[userId]) {
+        userBalance[userId] = { 
+            balance: 0, 
+            role: 'member',
+            referredBy: (referrerId && referrerId != userId) ? referrerId : null 
+        };
+        saveDB(config.userBalanceFile, userBalance);
+    }
+    return userBalance[userId];
+};
+
+const getRuntime = () => {
+    const uptime = Date.now() - botStartTime;
+    const seconds = Math.floor((uptime / 1000) % 60);
+    const minutes = Math.floor((uptime / (1000 * 60)) % 60);
+    const hours = Math.floor((uptime / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(uptime / (1000 * 60 * 60 * 24));
+    return `${days}h ${hours}j ${minutes}m ${seconds}d`;
+};
+
+// ==========================================
+// 3. FUNGSI BACKUP & BROADCAST
+// ==========================================
+const runBackup = async (targetId) => {
+    const dbFolder = './database';
+    try {
+        const files = fs.readdirSync(dbFolder);
+        await bot.sendMessage(targetId, "🤖 *AUTO BACKUP SYSTEM*");
+        for (const file of files) {
+            await bot.sendDocument(targetId, `${dbFolder}/${file}`);
+        }
+    } catch (e) { console.log(e); }
+};
+
+const runBroadcast = async (text) => {
+    const users = Object.keys(userBalance);
+    let success = 0;
+    for (const id of users) {
+        try {
+            await bot.sendMessage(id, `📢 *PENGUMUMAN*\n\n${text}`, { parse_mode: 'Markdown' });
+            success++;
+        } catch (e) { /* user block bot */ }
+    }
+    return success;
+};
+
+// ==========================================
+// 4. TAMPILAN DASHBOARD
+// ==========================================
+const sendMainMenu = async (chatId, userId, name, messageId = null) => {
+    const userData = getUserData(userId);
+    const totalUsers = Object.keys(userBalance).length;
+    
+    let trxHarian = 0, trxBulanan = 0, trxGlobal = 0;
+    const today = new Date().toLocaleDateString('id-ID');
+    const thisMonth = (new Date().getMonth() + 1) + "-" + new Date().getFullYear();
+
+    historyTrx.forEach(trx => {
+        const tDate = new Date(trx.date);
+        trxGlobal += trx.amount || 0;
+        if (tDate.toLocaleDateString('id-ID') === today) trxHarian += trx.amount || 0;
+        if (((tDate.getMonth() + 1) + "-" + tDate.getFullYear()) === thisMonth) trxBulanan += trx.amount || 0;
+    });
+
+    const dashText = `
+┏━━━━━━━━━━━━━━━━━━━┓
+┃        ✨ **WELCOME** ✨        ┃
+┗━━━━━━━━━━━━━━━━━━━┛
+๑⚙️๑ *${name}*
+───────────────────
+*TELEBOT TOKO PPOB BERGARANSI*
+───────────────────
+👤 **Name** : ${name}
+🆔 **Chat ID** : \`${userId}\`
+👑 **Role** : ${userData.role.toUpperCase()}
+💰 **Saldo** : ${formatRupiah(userData.balance)}
+⏳ **Runtime** : ${getRuntime()}
+───────────────────
+📊 *Total User* •–•»  *${totalUsers}*
+───────────────────
+📈 **TRX HARIAN** : ${formatRupiah(trxHarian)}
+📅 **TRX BULANAN** : ${formatRupiah(trxBulanan)}
+🌍 **TRX GLOBAL** : ${formatRupiah(trxGlobal)}
+───────────────────
+👤 *Chat Owner Bot:* @Gemilangkinasih`;
+
+    const opts = {
+        parse_mode: 'Markdown',
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🛒 Beli Paket', callback_data: 'menu_list' }, { text: '💰 Isi Saldo', callback_data: 'menu_topup' }],
+                [{ text: '🎁 Referral', callback_data: 'menu_referral' }, { text: '📜 Riwayat', callback_data: 'menu_history' }],
+                [{ text: '👑 Upgrade Reseller', callback_data: 'menu_reseller' }, { text: '👤 Owner', callback_data: 'menu_owner' }],
+                [{ text: '🔔 Channel', url: 'https://t.me/yourchannel' }, { text: '👥 Group', url: 'https://t.me/yourgroup' }]
+            ]
+        }
+    };
+
+    if (messageId) return bot.editMessageText(dashText, { chat_id: chatId, message_id: messageId, ...opts }).catch(()=>{});
+    bot.sendMessage(chatId, dashText, opts);
+};
+
+// ==========================================
+// 5. MESSAGE HANDLER
+// ==========================================
+bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const text = msg.text;
+
+    if (msg.chat.type !== 'private' || !text) return;
+
+    // Handle Commands
+    if (text.startsWith('/')) {
+        if (text.startsWith('/start')) {
+            const parts = text.split(' ');
+            getUserData(userId, parts.length > 1 ? parts[1] : null);
+            return sendMainMenu(chatId, userId, msg.from.first_name);
+        }
+        
+        // Broadcast Command: /bc Halo semuanya
+        if (text.startsWith('/bc ') && userId === config.ownerId) {
+            const bcText = text.replace('/bc ', '');
+            bot.sendMessage(chatId, "⏳ Mengirim broadcast ke semua user...");
+            const total = await runBroadcast(bcText);
+            return bot.sendMessage(chatId, `✅ Berhasil mengirim pesan ke ${total} user.`);
+        }
+
+        if (text === '/backup' && userId === config.ownerId) return runBackup(config.ownerId);
+        return;
+    }
+
+    // Handle States (Topup / Beli)
+    const state = userState[chatId];
+    if (state === 'WAITING_TOPUP_AMOUNT') {
+        // ... logika topup kamu ...
+    }
+});
+
+// ==========================================
+// 6. CALLBACK HANDLER
+// ==========================================
+bot.on('callback_query', async (clb) => {
+    const chatId = clb.message.chat.id;
+    const userId = clb.from.id;
+    const data = clb.data;
+
+    if (data === 'back_to_menu') return sendMainMenu(chatId, userId, clb.from.first_name, clb.message.message_id);
+    
+    if (data === 'menu_referral') {
+        const link = `https://t.me/${config.botUsername}?start=${userId}`;
+        return bot.sendMessage(chatId, `🎁 *PROGRAM REFERRAL*\n\nBagikan link ini: \`${link}\`\nBonus upgrade: *${formatRupiah(config.bonusReferralUpgrade)}*`, { parse_mode: 'Markdown' });
+    }
+
+    if (data === 'menu_owner') {
+        if (userId !== config.ownerId) return bot.answerCallbackQuery(clb.id, { text: "Khusus Owner!" });
+        return bot.sendMessage(chatId, "👑 *OWNER MENU*\n\n- Ketik `/bc [pesan]` untuk broadcast\n- Ketik `/backup` untuk ambil database\n- Tombol di bawah:", {
+            reply_markup: { inline_keyboard: [[{ text: '📤 Backup Sekarang', callback_data: 'menu_backup' }]] }
+        });
+    }
+
+    if (data === 'menu_backup') {
+        if (userId === config.ownerId) runBackup(config.ownerId);
+    }
+});
+
+// Auto Backup 00:00
+setInterval(() => {
+    const d = new Date();
+    if (d.getHours() === 0 && d.getMinutes() === 0) runBackup(config.ownerId);
+}, 60000);
+
+console.log("Bot Fantunnel V2 Pro is Running...");
