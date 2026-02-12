@@ -1,82 +1,206 @@
-import TelegramBot from 'node-telegram-bot-api';
-import fs from 'fs';
-import axios from 'axios';
+const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
+const axios = require('axios');
 
 // ==========================================
-// 1. KONFIGURASI UTAMA
+// 1. KONFIGURASI UTAMA (Sesuaikan API Key Kamu)
 // ==========================================
 const config = {
     token: "8595583887:AAEetqI53eeJAbf_u6pSo54Z7HM29vN_dn4", 
     ownerId: 6197482164, 
+    botUsername: "FANTUNNEL_PPOB_BOT", 
+    
+    // Database Files
     userBalanceFile: "./database/user_balance.json", 
     historyFile: "./database/history.json",
     xlSessionsFile: "./database/xl_sessions.json",
+    
+    // API Keys
     apiKeyKMSP: "29dc3989-2394-448d-a7a5-8a6c3fa59f5d", 
     apiKeyPayment: "e435777e-47ed-4485-a06c-767dbe895d1f", 
     sidompulAuth: "Basic c2lkb21wdWxhcGk6YXBpZ3drbXNw",
-    sidompulKey: "60ef29aa-a648-4668-90ae-20951ef90c55", // Disamakan dengan API KMSP
-    markupMember: 3000,   
+    sidompulKey: "60ef29aa-a648-4668-90ae-20951ef90c55", 
+    
+    // Margin Harga
+    markupMember: 3000,    
     markupReseller: 1000,
-    priceUpgradeReseller: 10000 // Harga upgrade ke reseller (Ganti sesuai keinginan)
+    priceUpgradeReseller: 10000
 };
+
+const botStartTime = Date.now();
+const bot = new TelegramBot(config.token, { polling: true });
 
 // ==========================================
 // 2. DATABASE HANDLER
 // ==========================================
 if (!fs.existsSync('./database')) fs.mkdirSync('./database');
-const loadDB = (file, defaultVal) => {
-    try {
-        if (!fs.existsSync(file)) {
-            fs.writeFileSync(file, JSON.stringify(defaultVal, null, 2));
-            return defaultVal;
-        }
-        return JSON.parse(fs.readFileSync(file));
-    } catch (e) { return defaultVal; }
+const loadDB = (file, def) => {
+    if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify(def));
+    return JSON.parse(fs.readFileSync(file));
 };
 const saveDB = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
 
 let userBalance = loadDB(config.userBalanceFile, {}); 
 let historyTrx = loadDB(config.historyFile, []);
-let xlSessions = loadDB(config.xlSessionsFile, {}); // FIX: Tambahkan definisi ini
-
+let xlSessions = loadDB(config.xlSessionsFile, {});
 const userState = {}; 
-const tempOrder = {}; 
+const tempOrder = {};
 
-const bot = new TelegramBot(config.token, { polling: true });
 const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+const getRuntime = () => {
+    const uptime = Date.now() - botStartTime;
+    const s = Math.floor((uptime / 1000) % 60);
+    const m = Math.floor((uptime / (1000 * 60)) % 60);
+    const h = Math.floor((uptime / (1000 * 60 * 60)) % 24);
+    return `${h}j ${m}m ${s}d`;
+};
 
-const getUserData = (userId) => {
+// ==========================================
+// 3. TAMPILAN START (SESUAI REQUEST)
+// ==========================================
+const sendStartMenu = async (chatId, userId, name) => {
+    const totalUsers = Object.keys(userBalance).length;
+    let day = 0, global = 0;
+    const tgl = new Date().toLocaleDateString('id-ID');
+    historyTrx.forEach(t => {
+        global += (t.price || 0);
+        if (new Date(t.date).toLocaleDateString('id-ID') === tgl) day += (t.price || 0);
+    });
+
+    const menuMsg = `
+<code>╔══════════════════════╗</code>
+<code>║       WELCOME        ║</code>
+<code>╚══════════════════════╝</code>
+<b>๑๏ ${name} ๏๑</b>
+━━━━━━━━━━━━━━━━━━━━━
+<b>TELEBOT TOKO PPOB BERGARANSI</b>
+━━━━━━━━━━━━━━━━━━━━━
+<b>Name</b>      : ${name}
+<b>Username</b>  : @${config.botUsername}
+<b>Chat ID</b>   : <code>${userId}</code>
+<b>Runtime</b>   : ${getRuntime()}
+━━━━━━━━━━━━━━━━━━━━━
+<blockquote><b>Total User ・ー⪧ ${totalUsers}</b></blockquote>
+━━━━━━━━━━━━━━━━━━━━━
+<b>TRX HARIAN</b>  : ${formatRupiah(day)}
+<b>TRX GLOBAL</b>  : ${formatRupiah(global)}
+━━━━━━━━━━━━━━━━━━━━━
+<b>Chat Owner Bot</b> <a href="https://t.me/AJW29">Gemilangkinasih</a>`;
+
+    bot.sendMessage(chatId, menuMsg, {
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🔔 Channel', url: 'https://t.me/klmpkfsvpn' }, { text: '👥 Group', url: 'https://t.me/klmpkfsvpn' }],
+                [{ text: '🏠 Main Menu', callback_data: 'back_to_menu' }]
+            ]
+        }
+    });
+};
+
+// ==========================================
+// 4. MAIN MENU (FITUR LENGKAP)
+// ==========================================
+const sendMainMenu = (chatId, userId) => {
+    const userData = userBalance[userId] || { balance: 0, role: 'member' };
+    const text = `
+🛒 <b>DASHBOARD TRANSAKSI</b>
+━━━━━━━━━━━━━━━━━━━━━
+👤 <b>Role</b> : ${userData.role.toUpperCase()}
+💰 <b>Saldo</b> : ${formatRupiah(userData.balance)}
+━━━━━━━━━━━━━━━━━━━━━
+Silakan pilih menu di bawah ini:`;
+
+    bot.sendMessage(chatId, text, {
+        parse_mode: 'HTML',
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🛒 Beli Paket', callback_data: 'menu_list' }, { text: '💰 Isi Saldo', callback_data: 'menu_topup' }],
+                [{ text: '🔍 Cek Kuota', callback_data: 'menu_cekkouta' }, { text: '🔐 Login XL', callback_data: 'menu_xl_login' }],
+                [{ text: '👑 Upgrade Reseller', callback_data: 'menu_reseller' }, { text: '📜 Riwayat', callback_data: 'menu_history' }],
+                [{ text: '👤 Owner Panel', callback_data: 'menu_owner' }]
+            ]
+        }
+    });
+};
+
+// ==========================================
+// 5. LOGIC & CALLBACK (GABUNGAN)
+// ==========================================
+bot.on('callback_query', async (query) => {
+    const { data, message, from } = query;
+    const chatId = message.chat.id;
+    const userId = from.id;
+
+    if (data === 'back_to_menu') return sendMainMenu(chatId, userId);
+
+    // Filter Menu List
+    if (data === 'menu_list') {
+        bot.sendMessage(chatId, "📂 Pilih Kategori:", {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: '🔥 Best Seller', callback_data: 'cat_bestseller' }, { text: '👨‍👩‍👧‍👦 XL Akrab', callback_data: 'cat_akrab' }],
+                    [{ text: '🏠 Kembali', callback_data: 'back_to_menu' }]
+                ]
+            }
+        });
+    }
+
+    // Logic Topup
+    if (data === 'menu_topup') {
+        userState[chatId] = 'WAIT_TOPUP';
+        bot.sendMessage(chatId, "💰 Masukkan jumlah topup (Min 1000):");
+    }
+
+    // Logic Owner
+    if (data === 'menu_owner' && userId == config.ownerId) {
+        bot.sendMessage(chatId, "👑 <b>OWNER PANEL</b>", {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: '➕ Tambah Saldo', callback_data: 'owner_add' }, { text: '📢 Broadcast', callback_data: 'owner_bc' }]
+                ]
+            }
+        });
+    }
+
+    bot.answerCallbackQuery(query.id);
+});
+
+// Handle Pesan Masuk
+bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const text = msg.text;
+
     if (!userBalance[userId]) {
         userBalance[userId] = { balance: 0, role: 'member' };
         saveDB(config.userBalanceFile, userBalance);
     }
-    return userBalance[userId];
-};
 
+    if (text === '/start') return sendStartMenu(chatId, userId, msg.from.first_name);
 
-const sendMainMenu = async (chatId, userId, name, messageId = null) => {
-    const userData = getUserData(userId);
-    const text = `🤖 *BOT PPOB & XL TOOLS*\nHalo *${name}*, Selamat datang!\n\n👑 Role: *${userData.role.toUpperCase()}*\n💰 Saldo: *${formatRupiah(userData.balance)}*\n🆔 ID: \`${userId}\`\n\nSilakan pilih menu di bawah ini:`;
-    
-    const options = {
-        parse_mode: 'Markdown',
-        reply_markup: {
-            inline_keyboard: [
-                [{ text: '🛒 Beli Paket', callback_data: 'menu_beli' }, { text: '💰 Isi Saldo', callback_data: 'menu_topup' }],
-                [{ text: '🔍 Cek Kuota', callback_data: 'menu_cekkouta' }, { text: '📜 Riwayat', callback_data: 'menu_history' }],
-                [{ text: '🔐 Login XL', callback_data: 'menu_xl_login' }, { text: '📊 Info XL', callback_data: 'menu_xl_info' }],
-                [{ text: '👤 Owner', callback_data: 'menu_owner' }, { text: '📦 List Paket', callback_data: 'menu_list' }],
-                [{ text: '👨‍👩‍👧‍👦 Cek Anggota Akrab', callback_data: 'menu_cek_akrab' }]
-            ]
-        }
-    };
-
-    if (messageId) {
-        await bot.editMessageText(text, { chat_id: chatId, message_id: messageId, ...options }).catch(() => {});
-    } else {
-        await bot.sendMessage(chatId, text, options);
+    // Proses Topup Amount
+    if (userState[chatId] === 'WAIT_TOPUP') {
+        const nominal = parseInt(text);
+        if (isNaN(nominal) || nominal < 1000) return bot.sendMessage(chatId, "❌ Nominal salah.");
+        delete userState[chatId];
+        
+        bot.sendMessage(chatId, `⏳ Membuat QRIS untuk ${formatRupiah(nominal)}...`);
+        try {
+            const res = await axios.get(`https://my-payment.autsc.my.id/api/deposit?amount=${nominal}&apikey=${config.apiKeyPayment}`);
+            if (res.data.status === 'success') {
+                bot.sendPhoto(chatId, res.data.data.qris_url, {
+                    caption: `✅ <b>SCAN QRIS INI</b>\nTotal: ${formatRupiah(res.data.data.total_amount)}\n\nOtomatis masuk setelah bayar!`,
+                    parse_mode: 'HTML'
+                });
+            }
+        } catch (e) { bot.sendMessage(chatId, "❌ API Payment Error."); }
     }
-};
+});
+
+console.log("🤖 BOT AKTIF & LENGKAP!");
 
 
 // ==========================================
