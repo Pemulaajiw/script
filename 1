@@ -1,0 +1,207 @@
+require('dotenv').config();
+const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
+const axios = require('axios');
+
+// ==========================================
+// 1. KONFIGURASI UTAMA (Membaca dari .env)
+// ==========================================
+const config = {
+    token: process.env.TELEGRAM_BOT_TOKEN, 
+    ownerId: parseInt(process.env.OWNER_ID),
+    groupId: process.env.GROUP_ID,
+    botUsername: "FANTUNNEL_PPOB_BOT", 
+    
+    userBalanceFile: "./database/user_balance.json", 
+    historyFile: "./database/history.json",
+    xlSessionsFile: "./database/xl_sessions.json",
+    lastStockFile: "./database/last_stock.json",
+    
+    apiKeyKMSP: process.env.API_KEY_KMSP, 
+    apiKeyPayment: process.env.API_KEY_PAYMENT, 
+    sidompulAuth: process.env.SIDOMPUL_AUTH,
+    sidompulKey: process.env.SIDOMPUL_KEY, 
+    
+    markupMember: 3000,    
+    markupReseller: 1000,
+    priceUpgradeReseller: 10000,
+    bonusReferralUpgrade: 2000
+};
+
+const botStartTime = Date.now();
+const bot = new TelegramBot(config.token, { polling: true });
+
+// ==========================================
+// 2. DATABASE HANDLER
+// ==========================================
+if (!fs.existsSync('./database')) fs.mkdirSync('./database');
+
+const loadDB = (file, defaultVal) => {
+    try {
+        if (!fs.existsSync(file)) {
+            fs.writeFileSync(file, JSON.stringify(defaultVal, null, 2));
+            return defaultVal;
+        }
+        return JSON.parse(fs.readFileSync(file));
+    } catch (e) { return defaultVal; }
+};
+
+const saveDB = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
+
+let userBalance = loadDB(config.userBalanceFile, {}); 
+let historyTrx = loadDB(config.historyFile, []);
+let xlSessions = loadDB(config.xlSessionsFile, {});
+
+const userState = {}; 
+const tempOrder = {}; 
+const isProcessing = {};
+
+// Helper Functions
+const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+const getUserData = (userId, referrerId = null) => {
+    if (!userBalance[userId]) {
+        userBalance[userId] = { balance: 0, role: 'member', referredBy: (referrerId && referrerId != userId) ? referrerId : null };
+        saveDB(config.userBalanceFile, userBalance);
+    }
+    return userBalance[userId];
+};
+
+// ==========================================
+// 3. FITUR OTOMATIS (MONITOR STOK & PROFIT)
+// ==========================================
+
+// A. Monitor Stok Cerdas (Anti-Spam)
+const checkStockToGroup = async (manualChatId = null) => {
+    try {
+        const res = await axios.get(`https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
+        if (res.data && res.data.data) {
+            const currentAkrab = res.data.data.filter(p => p.package_name.toLowerCase().includes('akrab'));
+            let previousStock = loadDB(config.lastStockFile, {});
+            let changes = [];
+            let currentStockMap = {};
+
+            currentAkrab.forEach(p => {
+                currentStockMap[p.package_code] = { name: p.package_name, price: p.package_harga_int };
+                if (!previousStock[p.package_code]) {
+                    changes.push(`✨ *BARU:* ${p.package_name} - ${formatRupiah(p.package_harga_int + config.markupMember)}`);
+                } else if (previousStock[p.package_code].price !== p.package_harga_int) {
+                    const status = p.package_harga_int < previousStock[p.package_code].price ? "📉 TURUN" : "📈 NAIK";
+                    changes.push(`${status}: ${p.package_name} jadi ${formatRupiah(p.package_harga_int + config.markupMember)}`);
+                }
+            });
+
+            // Jika dipanggil manual via /stok
+            if (manualChatId) {
+                let msgStok = `📊 *DAFTAR STOK AKRAB LIVE*\n━━━━━━━━━━━━━━━━━━\n\n`;
+                currentAkrab.forEach(p => msgStok += `✅ *${p.package_name}*\n  └ Harga: *${formatRupiah(p.package_harga_int + config.markupMember)}*\n`);
+                msgStok += `\n🛒 Order via: @${config.botUsername}`;
+                return bot.sendMessage(manualChatId, msgStok, { parse_mode: 'Markdown' });
+            }
+
+            // Jika ada perubahan stok untuk notifikasi grup
+            if (changes.length > 0) {
+                let msg = `🔔 *UPDATE STOK & HARGA AKRAB*\n⏰ _${new Date().toLocaleString('id-ID')}_\n\n${changes.join('\n')}\n\n🛒 Cek: @${config.botUsername}`;
+                bot.sendMessage(config.groupId, msg, { parse_mode: 'Markdown' });
+                saveDB(config.lastStockFile, currentStockMap);
+            }
+        }
+    } catch (e) { console.error("Stock check failed"); }
+};
+
+// B. Laporan Profit Harian (Setiap jam 00:00)
+setInterval(() => {
+    const now = new Date();
+    if (now.getHours() === 0 && now.getMinutes() === 0) {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const tgl = yesterday.toLocaleDateString('id-ID');
+        
+        let dailyTrx = historyTrx.filter(t => new Date(t.date).toLocaleDateString('id-ID') === tgl && t.status === 'SUCCESS');
+        let totalOmzet = dailyTrx.reduce((a, b) => a + b.price, 0);
+        let totalProfit = dailyTrx.reduce((a, b) => a + (b.price - b.price_server), 0);
+
+        let report = `💰 *LAPORAN PROFIT HARIAN*\n📅 Tanggal: ${tgl}\n━━━━━━━━━━━━━━━━━━\n`;
+        report += `✅ Sukses: ${dailyTrx.length} TRX\n`;
+        report += `💵 Omzet: ${formatRupiah(totalOmzet)}\n`;
+        report += `📈 Profit: ${formatRupiah(totalProfit)}\n━━━━━━━━━━━━━━━━━━`;
+        
+        bot.sendMessage(config.ownerId, report, { parse_mode: 'Markdown' });
+    }
+}, 60000); // Cek tiap menit
+
+// ==========================================
+// 4. MESSAGE & COMMAND HANDLER
+// ==========================================
+bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const text = msg.text;
+    if (!text) return;
+
+    // Perintah /stok di Grup
+    if (text.startsWith('/stok')) {
+        return checkStockToGroup(chatId);
+    }
+
+    if (msg.chat.type !== 'private') return;
+
+    if (text.startsWith('/start')) {
+        const referrerId = text.split(' ')[1] || null;
+        getUserData(msg.from.id, referrerId);
+        return sendMainMenu(chatId, msg.from.id, msg.from.first_name);
+    }
+
+    // State Handler (Beli Paket, Topup, dll - Tetap sama seperti kodemu sebelumnya)
+    handleUserStates(chatId, msg.from.id, text);
+});
+
+// ==========================================
+// 5. CALLBACK QUERY & TRANSAKSI
+// ==========================================
+bot.on('callback_query', async (callback) => {
+    const chatId = callback.message.chat.id;
+    const userId = callback.from.id;
+    const data = callback.data;
+
+    if (data === 'confirm_buy') {
+        const order = tempOrder[chatId];
+        const userData = getUserData(userId);
+        if (!order || isProcessing[chatId]) return;
+        
+        if (userData.balance < order.price_sell) return bot.sendMessage(chatId, "❌ Saldo Kurang");
+
+        isProcessing[chatId] = true;
+        try {
+            const res = await axios.get(`https://golang-openapi-tembak-xltembakservice.kmsp-store.com/v1`, {
+                params: { api_key: config.apiKeyKMSP, phone: order.phone, package_code: order.package_code }
+            });
+
+            if (res.data.status) {
+                userBalance[userId].balance -= order.price_sell;
+                saveDB(config.userBalanceFile, userBalance);
+
+                historyTrx.push({
+                    userId, date: new Date().toISOString(), product: order.name,
+                    price: order.price_sell, price_server: order.price_server, status: 'SUCCESS'
+                });
+                saveDB(config.historyFile, historyTrx);
+
+                // --- TESTIMONI OTOMATIS ---
+                const maskedPhone = order.phone.slice(0, 5) + 'xxxx' + order.phone.slice(-4);
+                const testi = `🎉 *TRANSAKSI BERHASIL!*\n━━━━━━━━━━━━\n📦 ${order.name}\n📱 ${maskedPhone}\n💰 ${formatRupiah(order.price_sell)}\n✅ Status: SUKSES\n━━━━━━━━━━━━\n🛒 Order: @${config.botUsername}`;
+                bot.sendMessage(config.groupId, testi, { parse_mode: 'Markdown' });
+
+                await bot.sendMessage(chatId, "✅ Transaksi Berhasil!");
+            } else {
+                bot.sendMessage(chatId, `❌ Gagal: ${res.data.message}`);
+            }
+        } catch (e) { bot.sendMessage(chatId, "❌ Gangguan Server"); }
+        finally { delete isProcessing[chatId]; delete tempOrder[chatId]; }
+    }
+    // ... Tambahkan navigasi menu lainnya di sini ...
+});
+
+// Jalankan monitor stok setiap 10 menit
+setInterval(checkStockToGroup, 600000);
+
+console.log('🤖 BOT FANTUNNEL AKTIF & TERMONITOR!');
