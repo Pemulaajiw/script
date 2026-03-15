@@ -103,7 +103,7 @@ systemctl restart client-sldns server-sldns
 clear
 # 8. Kirim Notifikasi ke Bot Telegram (SINKRONISASI)
 if [[ -n "$AUTO_CHATID" ]]; then
-    TOKEN="8401742770:AAFs81f2dBEfAIgr9uq2i_96ryclSG95ue8"
+    TOKEN="6995675547:AAGGQLVwoHVcnrb2fRhUOnnAqL4ef6f0NsQ"
     URL="https://api.telegram.org/bot$TOKEN/sendMessage"
     
     TEXT="<b>✅ SLOWDNS INSTALLED SUCCESSFULLY</b>%0A"
