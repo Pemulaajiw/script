@@ -99,29 +99,3 @@ END
 systemctl daemon-reload
 systemctl enable --now client-sldns server-sldns
 systemctl restart client-sldns server-sldns
-
-clear
-# 8. Kirim Notifikasi ke Bot Telegram (SINKRONISASI)
-if [[ -n "$AUTO_CHATID" ]]; then
-    TOKEN="6995675547:AAGGQLVwoHVcnrb2fRhUOnnAqL4ef6f0NsQ"
-    URL="https://api.telegram.org/bot$TOKEN/sendMessage"
-    
-    TEXT="<b>✅ SLOWDNS INSTALLED SUCCESSFULLY</b>%0A"
-    TEXT+="<code>─────────────────────────────</code>%0A"
-    TEXT+="📡 <b>IP VPS      :</b> <code>$(curl -s ifconfig.me)</code>%0A"
-    TEXT+="🌐 <b>NS Domain  :</b> <code>$NS_DOMAIN</code>%0A"
-    TEXT+="🔌 <b>Target Port :</b> <code>127.0.0.1:2269</code>%0A"
-    TEXT+="📅 <b>Waktu       :</b> <code>$(date +'%Y-%m-%d %H:%M:%S')</code>%0A"
-    TEXT+="<code>─────────────────────────────</code>%0A"
-    TEXT+="🚀 <b>KLMPKFSVPN PREMIUM SlowDNS Service</b>"
-
-    # Tombol Kembali
-    KEYBOARD='{"inline_keyboard": [[{"text": "🔙 KEMBALI KE MENU", "callback_data": "menu"}]]}'
-
-    curl -s -X POST "$URL" \
-         -d chat_id="$AUTO_CHATID" \
-         -d text="$TEXT" \
-         -d parse_mode="html" \
-         -d reply_markup="$KEYBOARD" > /dev/null 2>&1
-fi
-sleep 2
