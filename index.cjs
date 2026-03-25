@@ -650,6 +650,81 @@ Status: *AUTO-SEND SUCCESS*`;
                 await bot.sendMessage(chatId, hText, { parse_mode: 'Markdown' });
             } catch (err) { bot.sendMessage(chatId, "⚠️ Gagal memuat riwayat."); }
         }
+        else if (data === 'owner_leaderboard') {
+            await bot.answerCallbackQuery(callback.id);
+            // Urutkan user berdasarkan total transaksi terbanyak
+            let topUsers = Object.keys(userBalance)
+                .map(id => ({
+                    name: userBalance[id].name || "User Baru",
+                    total: userBalance[id].total_trx || 0
+                }))
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 5); // Ambil 5 besar
+
+            let txt = `🏆 *TOP TRANSAKSI (BULAN INI)*\n━━━━━━━━━━━━━━━━━━\n\n`;
+            topUsers.forEach((u, i) => {
+                const medali = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👤';
+                txt += `${medali} *${u.name}* — ${u.total} Transaksi\n`;
+            });
+            txt += `\n_Tingkatkan transaksi & raih bonus saldo!_`;
+
+            await bot.editMessageCaption(txt, { 
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [[{ text: '🏠 KEMBALI', callback_data: 'back_to_menu' }]] }
+            });
+        }
+
+        // --- 📖 FITUR PANDUAN BOT ---
+        else if (data === 'menu_panduan') {
+            await bot.answerCallbackQuery(callback.id);
+            const txtPanduan = `📖 *PANDUAN PENGGUNAAN BOT*\n━━━━━━━━━━━━━━━━━━\n\n` +
+                `1️⃣ *ISI SALDO:* Klik menu Isi Saldo, bayar via QRIS otomatis.\n` +
+                `2️⃣ *BELI PAKET:* Pilih menu Beli Paket. Nomor akan tersimpan otomatis setelah transaksi pertama.\n` +
+                `3️⃣ *GANTI NOMOR:* Ingin ganti nomor? Masuk ke menu *PROFIL* > *Ganti Akun*.\n` +
+                `4️⃣ *REWARD:* Tiap kelipatan *20 Transaksi*, bonus saldo *Rp 2.000* otomatis masuk!\n\n` +
+                `5️⃣ *AUTO-RESELLER:* Capai *50 Transaksi* untuk harga lebih murah (Role Reseller).\n\n` +
+                `6️⃣ *MAINTENANCE:* 🕒 **23:40 - 00:10 WIB** (Hindari transaksi di jam ini).\n\n` +
+                `⚠️ *Penting:* Pastikan nomor XL dalam masa aktif.`;
+                `• Transaksi yang sudah diproses tidak dapat dibatalkan.`;
+                `• CS Aktif: 08:00 - 22:00 WIB.`;
+                
+                `@AJW29 AdminCS — *Solusi Kuota Murah & Cepat!*`;
+            
+            await bot.editMessageCaption(txtPanduan, { 
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [[{ text: '🏠 MENU UTAMA', callback_data: 'back_to_menu' }]] }
+            });
+        }
+// --- MENU PROFIL (DENGAN TRACKER REWARD) ---
+        else if (data === 'menu_profile') {
+            const u = userBalance[userId] || { balance: 0, total_trx: 0, role: 'member' };
+            const totalTrx = u.total_trx || 0;
+            
+            // Hitung sisa transaksi menuju reward (Target: 20)
+            const targetReward = 20;
+            const sisaKeReward = targetReward - (totalTrx % targetReward);
+            const progress = totalTrx % targetReward;
+
+            let pText = `👤 *PROFIL PENGGUNA*\n━━━━━━━━━━━━━━━━━━\n\n`;
+            pText += `🆔 ID: \`${userId}\`\n`;
+            pText += `🎭 Role: *${u.role.toUpperCase()}*\n`;
+            pText += `💰 Saldo: *${formatRupiah(u.balance)}*\n`;
+            pText += `📊 Total Transaksi: *${totalTrx}*\n\n`;
+            
+            pText += `🎁 *PROGRESS REWARD*\n`;
+            pText += `[${'🟢'.repeat(Math.floor(progress/4))}${'⚪'.repeat(5 - Math.floor(progress/4))}] ${progress}/${targetReward}\n`;
+            pText += `👉 _Lakukan *${sisaKeReward}* transaksi lagi untuk bonus saldo Rp 2.000!_`;
+
+            await bot.editMessageCaption(pText, {
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '🔄 Refresh', callback_data: 'menu_profile' }],
+                        [{ text: '🏠 Kembali', callback_data: 'back_to_menu' }]
+                    ]
+                }
+            });
+        }
 
     } catch (error) {
         console.error("Terjadi kesalahan pada callback:", error.message);
