@@ -1,0 +1,500 @@
+const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
+const axios = require('axios');
+
+// ==========================================
+// 1. KONFIGURASI UTAMA
+// ==========================================
+const config = {
+    // ⚠️ HARAP GANTI TOKEN DAN API KEY DEMI KEAMANAN
+    token: "8595583887:AAEetqI53eeJAbf_u6pSo54Z7HM29vN_dn4", 
+    ownerId: 6197482164, 
+    botUsername: "FANTUNNEL_PPOB_BOT", 
+    notifGroupId: "-1002076809846",
+    
+    // File Database
+    userBalanceFile: "./database/user_balance.json", 
+    historyFile: "./database/history.json",
+    xlSessionsFile: "./database/xl_sessions.json",
+    
+    // API Keys (KMSP & Payment)
+    apiKeyKMSP: "29dc3989-2394-448d-a7a5-8a6c3fa59f5d", 
+    apiKeyPayment: "e435777e-47ed-4485-a06c-767dbe895d1f", 
+    
+    // Sidompul (Cek Kuota)
+    sidompulAuth: "Basic c2lkb21wdWxhcGk6YXBpZ3drbXNw",
+    sidompulKey: "60ef29aa-a648-4668-90ae-20951ef90c55", 
+    
+    // Harga & Margin
+    markupMember: 1380,    
+    markupReseller: 800,
+    priceUpgradeReseller: 10000,
+    targetReward: 20, 
+    bonusReward: 2000,
+    bonusReferralUpgrade: 2000
+};
+
+const botStartTime = Date.now();
+const bot = new TelegramBot(config.token, { polling: true });
+
+// ==========================================
+// 2. DATABASE HANDLER (Fix Logic)
+// ==========================================
+if (!fs.existsSync('./database')) fs.mkdirSync('./database');
+
+const loadDB = (file, defaultVal) => {
+    try {
+        if (!fs.existsSync(file)) {
+            fs.writeFileSync(file, JSON.stringify(defaultVal, null, 2));
+            return defaultVal;
+        }
+        return JSON.parse(fs.readFileSync(file));
+    } catch (e) {
+        console.error(`Error loading DB ${file}:`, e);
+        return defaultVal;
+    }
+};
+
+const saveDB = (file, data) => {
+    try {
+        const tempFile = `${file}.tmp`;
+        fs.writeFileSync(tempFile, JSON.stringify(data, null, 2));
+        fs.renameSync(tempFile, file); 
+    } catch (e) {
+        console.error(`Error saving DB ${file}:`, e);
+    }
+};
+
+// [PERBAIKAN 3] Pindahkan deklarasi variabel ke atas sebelum fungsi getUserData
+let userBalance = loadDB(config.userBalanceFile, {}); 
+let historyTrx = loadDB(config.historyFile, []);
+let xlSessions = loadDB(config.xlSessionsFile, {});
+
+// State Management
+const userState = {}; 
+const tempOrder = {}; 
+const isProcessing = {}; 
+
+function getUserData(userId, referrerId = null) {
+    const id = String(userId); 
+    if (!userBalance[id]) {
+        userBalance[id] = {
+            balance: 0,
+            role: 'member', 
+            total_trx: 0,
+            referred_by: referrerId, // [PERBAIKAN 2] Perhatikan nama kunci ini
+            name: "",
+            saved_phone: null
+        };
+        saveDB(config.userBalanceFile, userBalance);
+    }
+    return userBalance[id];
+}
+
+// Helper Functions
+const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+const getRuntime = () => {
+    const uptime = Date.now() - botStartTime;
+    const seconds = Math.floor((uptime / 1000) % 60);
+    const minutes = Math.floor((uptime / (1000 * 60)) % 60);
+    const hours = Math.floor((uptime / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(uptime / (1000 * 60 * 60 * 24));
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+};
+
+// ==========================================
+// 3. TAMPILAN MENU UTAMA
+// ==========================================
+const sendMainMenu = async (chatId, userId, name, messageId = null) => {
+    const userData = getUserData(userId);
+    const totalUsers = Object.keys(userBalance).length;
+    let totalTrx = 0;
+    historyTrx.forEach(t => { totalTrx += (t.price || 0); });
+
+    const menuMsg = `
+┏━━━━━━━━━━━━━━━━━━━┓
+┃  ✨ *FANTUNNEL STORE* ✨    
+┗━━━━━━━━━━━━━━━━━━━┛
+👋 Halo, *${name}*
+───────────────────
+👤 *Role* : ${userData.role.toUpperCase()}
+💰 *Saldo* : ${formatRupiah(userData.balance)}
+⏳ *Runtime* : ${getRuntime()}
+───────────────────
+📊 *Statistik Bot:*
+👥 User: ${totalUsers} | 🌍 Total TRX: ${formatRupiah(totalTrx)}
+───────────────────
+☀️ [ADMIN](https://t.me/AJW29) ☀️ [GRUP](https://t.me/klmpkfsvpn) ☀️ [TESTI](https://t.me/klmpkfsvpn/1)`;
+
+    const opts = {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🛒 Beli Paket', callback_data: 'menu_list' }, { text: '💰 Isi Saldo', callback_data: 'menu_topup' }],
+                [{ text: '🔍 Cek Kuota', callback_data: 'menu_cekkouta' }, { text: '📜 Riwayat', callback_data: 'menu_history' }],
+                [{ text: '🔐 Login XL', callback_data: 'menu_xl_login' }, { text: '📊 Info XL', callback_data: 'menu_xl_info' }],
+                [{ text: '👑 Upgrade Reseller', callback_data: 'menu_reseller' }, { text: '📦 Ganti Akun / Logout XL', callback_data: 'logout_xl' }],
+                [{ text: '👨‍👩‍👧‍👦 Cek Akrab', callback_data: 'menu_cek_akrab' }, { text: '🎁 Referral', callback_data: 'menu_referral' }],
+                [{ text: '📖 Panduan Bot', callback_data: 'menu_panduan' }], 
+                [{ text: '🏆 Top Transaksi', callback_data: 'owner_leaderboard' }], 
+                [{ text: '👤 Owner Panel', callback_data: 'menu_owner' }, { text: '👤 Profil', callback_data: 'menu_profile' }]
+            ]
+        }
+    };
+
+    try {
+        if (messageId) {
+            return await bot.editMessageCaption(menuMsg, {
+                chat_id: chatId,
+                message_id: messageId,
+                reply_markup: opts.reply_markup,
+                parse_mode: 'Markdown'
+            });
+        } else {
+            const logoPath = './logo.jpg';
+            if (fs.existsSync(logoPath)) {
+                return await bot.sendPhoto(chatId, fs.createReadStream(logoPath), {
+                    caption: menuMsg,
+                    parse_mode: 'Markdown',
+                    reply_markup: opts.reply_markup
+                });
+            } else {
+                return await bot.sendMessage(chatId, menuMsg, {
+                    parse_mode: 'Markdown',
+                    reply_markup: opts.reply_markup
+                });
+            }
+        }
+    } catch (e) { console.error("Error Menu Utama:", e.message); }
+};
+
+// ==========================================
+// 4. CALLBACK QUERY HANDLER
+// ==========================================
+bot.on('callback_query', async (callback) => {
+    const chatId = callback.message.chat.id;
+    const messageId = callback.message.message_id;
+    const data = callback.data;
+    const userId = callback.from.id;
+    const userData = getUserData(userId);
+
+    try {
+        if (data === 'back_to_menu') {
+            await sendMainMenu(chatId, userId, callback.from.first_name, messageId);
+        }
+        else if (data === 'menu_list') {
+            await bot.editMessageCaption('📂 *PILIH KATEGORI PAKET*:', {
+                chat_id: chatId, message_id: messageId,
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '💎 BEST SELLER', callback_data: 'cat_bestseller' }, { text: '⚡ XTRA COMBO', callback_data: 'cat_combo' }],
+                        [{ text: '👨‍👩‍👧‍👦 XL AKRAB', callback_data: 'cat_akrab' }, { text: '🔥 HOTROD', callback_data: 'cat_hotrod' }],
+                        [{ text: '🌐 SEMUA PAKET', callback_data: 'cat_all' }], 
+                        [{ text: '📊 CEK STOK AKRAB', callback_data: 'menu_stok_akrab' }],
+                        [{ text: '🔙 KEMBALI', callback_data: 'back_to_menu' }]
+                    ]
+                },
+                parse_mode: 'Markdown'
+            });
+        }
+        else if (data.startsWith('cat_')) {
+            const [ , kategori, pageStr] = data.split('_');
+            const page = parseInt(pageStr) || 0;
+            const itemsPerPage = 5;
+
+            try {
+                const res = await axios.get(`https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
+                let filtered = res.data.data;
+
+                if (kategori === 'bestseller') {
+                    filtered = filtered.filter(p => /edukasi|conference|iflix|xtra kuota/i.test(p.package_name));
+                } else if (kategori === 'akrab') {
+                    filtered = filtered.filter(p => p.package_name.toLowerCase().includes('akrab'));
+                } else if (kategori === 'combo') {
+                    filtered = filtered.filter(p => p.package_name.toLowerCase().includes('combo'));
+                } else if (kategori === 'hotrod') {
+                    filtered = filtered.filter(p => p.package_name.toLowerCase().includes('hotrod'));
+                }
+
+                const totalPages = Math.ceil(filtered.length / itemsPerPage);
+                const paginatedItems = filtered.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+                const markup = userData.role === 'reseller' ? config.markupReseller : config.markupMember;
+                const roleIcon = userData.role === 'reseller' ? "💎 RESELLER" : "👤 MEMBER";
+
+                let pText = `📦 *KATEGORI: ${kategori.toUpperCase()}*\n`;
+                pText += `🎭 *TIPE AKUN:* ${roleIcon}\n`;
+                pText += `📖 *HALAMAN:* ${page + 1}/${totalPages}\n━━━━━━━━━━━━━━━━━━\n\n`;
+
+                const inlineKeyboard = [];
+
+                paginatedItems.forEach(p => {
+                    const hargaJual = Math.ceil(Number(p.package_harga_int) + markup);
+                    const deskripsi = p.package_description && p.package_description.trim() !== "" 
+                        ? p.package_description 
+                        : "Metode tembak otomatis (Dor). Proses cepat 1-5 menit.";
+
+                    pText += `🔹 *${p.package_name}*\n📝 _${deskripsi}_\n💰 *${formatRupiah(hargaJual)}*\n──────────────────\n`;
+                    inlineKeyboard.push([{ text: `🛒 BELI | ${formatRupiah(hargaJual)}`, callback_data: `buy_direct_${p.package_code}` }]);
+                });
+
+                const nav = [];
+                if (page > 0) nav.push({ text: '⬅️ Prev', callback_data: `cat_${kategori}_${page - 1}` });
+                if ((page + 1) * itemsPerPage < filtered.length) nav.push({ text: 'Next ➡️', callback_data: `cat_${kategori}_${page + 1}` });
+                
+                if (nav.length > 0) inlineKeyboard.push(nav);
+                inlineKeyboard.push([{ text: '🔙 KEMBALI KE MENU', callback_data: 'menu_list' }]);
+
+                await bot.editMessageText(pText, { 
+                    chat_id: chatId, message_id: messageId, parse_mode: 'Markdown', reply_markup: { inline_keyboard: inlineKeyboard } 
+                }).catch(() => {
+                    return bot.editMessageCaption(pText, { 
+                        chat_id: chatId, message_id: messageId, parse_mode: 'Markdown', reply_markup: { inline_keyboard: inlineKeyboard } 
+                    });
+                });
+            } catch (err) {
+                console.error("Error Fetching Data:", err.message);
+                bot.answerCallbackQuery(callback.id, { text: "❌ Gagal memuat data pusat." });
+            }
+        }
+        else if (data.startsWith('buy_direct_')) {
+            const code = data.replace('buy_direct_', '');
+            await bot.answerCallbackQuery(callback.id, { text: "⏳ Mengecek ketersediaan..." });
+
+            try {
+                const resSaldo = await axios.get(`https://golang-openapi-panelaccountbalance-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
+                const saldoModal = Number(resSaldo.data.data.balance || resSaldo.data.balance);
+                const res = await axios.get(`https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
+                const p = res.data.data.find(x => x.package_code === code);
+                
+                if (!p) return bot.sendMessage(chatId, "❌ Paket tidak ditemukan.");
+
+                const hargaModal = Number(p.package_harga_int);
+                const markup = userData.role === 'reseller' ? config.markupReseller : config.markupMember;
+                const hargaJual = hargaModal + markup;
+
+                if (saldoModal < hargaModal) {
+                    return bot.sendMessage(chatId, `⚠️ *STOK SEDANG RE-FILL*\n\nMohon maaf Bos, saldo modal admin sedang menipis.\nSilakan hubungi Admin atau pilih paket lain.`);
+                }
+                
+                tempOrder[chatId] = { 
+                    package_code: code, 
+                    price_sell: hargaJual, 
+                    name: p.package_name,
+                    waitingForNumber: true 
+                };
+
+                await bot.sendMessage(chatId, `🛒 *ORDER:* ${p.package_name}\n💰 *HARGA:* ${formatRupiah(hargaJual)}\n\n*SILAKAN KIRIM NOMOR TUJUAN:*`, { parse_mode: 'Markdown' });
+            } catch (err) {
+                console.error("Error Buy Logic:", err.message);
+                bot.sendMessage(chatId, "❌ Terjadi kesalahan sistem saat memproses.");
+            }
+        }
+        else if (data === 'logout_xl_direct') {
+            userBalance[userId].saved_phone = null;
+            saveDB(config.userBalanceFile, userBalance);
+            userState[chatId] = 'WAITING_BUY_PHONE';
+            await bot.editMessageText("🔄 *NOMOR DIRESET*\n\n👉 Sekarang masukkan **NOMOR HP (XL)** baru:", { 
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown' 
+            });
+        }
+        else if (data === 'menu_topup') {
+            userState[chatId] = 'WAITING_TOPUP_AMOUNT';
+            await bot.sendMessage(chatId, '💰 *ISI SALDO OTOMATIS*\n\nMasukkan nominal Topup (Min. 1.000):');
+        }
+        else if (data === 'check_payment') {
+            const order = tempOrder[chatId];
+            if (!order || order.type !== 'topup') return bot.sendMessage(chatId, '❌ Sesi expired.');
+            const res = await axios.get(`https://my-payment.autsc.my.id/api/status/payment`, { params: { transaction_id: order.trx_id, apikey: config.apiKeyPayment } });
+            if (res.data.paid) {
+                userBalance[userId].balance += order.amount_added;
+                saveDB(config.userBalanceFile, userBalance);
+                delete tempOrder[chatId];
+                await bot.sendMessage(chatId, `✅ *TOPUP BERHASIL*\nSaldo masuk: ${formatRupiah(order.amount_added)}`);
+            } else {
+                bot.answerCallbackQuery(callback.id, { text: "⏳ Belum ada pembayaran." });
+            }
+        }
+        else if (data === 'menu_reseller') {
+            if (userData.role === 'reseller') return bot.answerCallbackQuery(callback.id, { text: "Sudah Reseller!" });
+            await bot.editMessageCaption(`👑 *UPGRADE RESELLER*\n\nBiaya: *${formatRupiah(config.priceUpgradeReseller)}*\nBenefit: Harga lebih murah & Prioritas.\n\nKlik setuju untuk potong saldo:`, {
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [[{ text: '✅ SETUJU', callback_data: 'confirm_upgrade' }], [{ text: '❌ BATAL', callback_data: 'back_to_menu' }]] }
+            });
+        }
+        else if (data === 'confirm_upgrade') {
+            if (userData.balance < config.priceUpgradeReseller) return bot.sendMessage(chatId, "❌ Saldo tidak cukup.");
+            
+            userBalance[userId].balance -= config.priceUpgradeReseller;
+            userBalance[userId].role = 'reseller';
+            
+            // [PERBAIKAN 2] Perbaiki Typo Pemanggilan referred_by
+            if (userData.referred_by && userBalance[userData.referred_by]) {
+                userBalance[userData.referred_by].balance += config.bonusReferralUpgrade;
+                bot.sendMessage(userData.referred_by, `💰 *BONUS REFERRAL!*\nTeman Anda upgrade reseller. Saldo +${formatRupiah(config.bonusReferralUpgrade)}`);
+            }
+            
+            saveDB(config.userBalanceFile, userBalance);
+            await bot.sendMessage(chatId, "🎉 *SUKSES!* Sekarang Anda adalah RESELLER.");
+        }
+        else if (data === 'menu_referral') {
+            const link = `https://t.me/${config.botUsername}?start=${userId}`;
+            await bot.sendMessage(chatId, `🎁 *REFERRAL*\nDapatkan *${formatRupiah(config.bonusReferralUpgrade)}* setiap teman upgrade Reseller!\n\nLink kamu:\n\`${link}\``, { parse_mode: 'Markdown' });
+        }
+        else if (data === 'menu_cekkouta') {
+            userState[chatId] = 'WAITING_CHECK_QUOTA';
+            await bot.sendMessage(chatId, '🔍 *CEK KUOTA*\nMasukkan nomor XL (08xx):');
+        }
+        else if (data === 'menu_cek_akrab') {
+            userState[chatId] = 'WAITING_CEK_AKRAB';
+            await bot.sendMessage(chatId, '👨‍👩‍👧‍👦 *CEK AKRAB*\nMasukkan nomor XL pengelola:');
+        }
+        else if (data === 'menu_stok_akrab') {
+            await bot.answerCallbackQuery(callback.id, { text: "🔍 Menghubungi Server Sidompul..." });
+            try {
+                await bot.editMessageCaption("⏳ *MENGHUBUNGI SERVER SIDOMPUL...*\nSedang memproses autentikasi dan cek stok.", {
+                    chat_id: chatId, message_id: messageId, parse_mode: 'Markdown'
+                }).catch(() => {});
+
+                const res = await axios.get(`https://golang-openapi-checkpackagestockakrabglobal-xltembakservice.kmsp-store.com/v1`, {
+                    params: { api_key: config.apiKeyKMSP },
+                    headers: {
+                        "Authorization": config.sidompulAuth,
+                        "X-API-Key": config.sidompulKey,
+                        "X-App-Version": "4.0.0"
+                    },
+                    timeout: 40000 
+                });
+
+                if (res.data && res.data.data) {
+                    const dataStok = res.data.data;
+                    let txt = `📊 *STOK LIVE SIDOMPUL*\n━━━━━━━━━━━━━━━━━━\n\n`;
+                    const kb = [];
+
+                    dataStok.forEach(p => {
+                        txt += `✅ *${p.package_name}*\n📝 Status: Available\n\n`;
+                        kb.push([{ text: `🛒 BELI: ${p.package_name.split(' ')[0]}...`, callback_data: `buy_direct_${p.package_code}` }]);
+                    });
+
+                    kb.push([{ text: '🔙 KEMBALI', callback_data: 'menu_list' }]);
+
+                    await bot.editMessageCaption(txt, { 
+                        chat_id: chatId, message_id: messageId, parse_mode: 'Markdown', reply_markup: { inline_keyboard: kb } 
+                    });
+                } else {
+                    await bot.sendMessage(chatId, "⚠️ *STOK TIDAK DITEMUKAN*\nRespon sukses tapi data kosong. Mungkin stok regional sedang habis.");
+                }
+            } catch (e) {
+                console.error("Error Detail Sidompul:", e.response ? e.response.data : e.message);
+                let detailError = "Koneksi Terputus.";
+                if (e.response && e.response.status === 401) detailError = "Auth Sidompul Expired (Minta OTP lagi).";
+                if (e.response && e.response.status === 403) detailError = "X-API-Key Salah.";
+                await bot.sendMessage(chatId, `⚠️ *AUTENTIKASI GAGAL*\n\nDetail: ${detailError}\n_Pastikan login Sidompul masih aktif._`);
+            }
+        }
+        else if (data === 'menu_xl_login') {
+            userState[chatId] = 'WAITING_XL_PHONE';
+            await bot.sendMessage(chatId, '🔐 *LOGIN XL*\nMasukkan nomor XL untuk OTP:');
+        }
+        else if (data === 'menu_xl_info') {
+            if (!xlSessions[userId]) return bot.sendMessage(chatId, '❌ Login XL dulu.');
+            await bot.sendMessage(chatId, '⏳ Loading info...');
+            const res = await axios.get(`https://golang-openapi-quotadetails-xltembakservice.kmsp-store.com/v1`, {
+                params: { api_key: config.apiKeyKMSP, access_token: xlSessions[userId].access_token }
+            });
+            if (res.data.status) {
+                let t = `📊 *KUOTA ANDA*\n\n`;
+                res.data.data.quotas.forEach(q => { t += `✅ *${q.name}*\nExp: ${q.expired_at}\n\n`; });
+                await bot.sendMessage(chatId, t, { parse_mode: 'Markdown' });
+            }
+        }
+        else if (data === 'menu_history') {
+            try {
+                const myHistory = historyTrx
+                    .filter(h => String(h.userId) === String(userId))
+                    .slice(-5)
+                    .reverse();
+
+                if (myHistory.length === 0) {
+                    return bot.sendMessage(chatId, "📜 *BELUM ADA RIWAYAT*\n\nAnda belum pernah melakukan transaksi paket.", { parse_mode: 'Markdown' });
+                }
+
+                let hText = "📜 *5 RIWAYAT TERAKHIR*\n━━━━━━━━━━━━━━━━━━\n\n";
+                myHistory.forEach((h, i) => {
+                    const statusEmoji = h.status === 'SUCCESS' ? '✅' : '❌';
+                    const tanggal = h.date ? h.date.split('T')[0] : '-';
+                    hText += `${i + 1}. ${statusEmoji} *${h.product}*\n  📱 No: \`${h.phone || '-'}\`\n  💰 ${formatRupiah(h.price)} | 📅 ${tanggal}\n──────────────────\n`;
+                });
+
+                await bot.sendMessage(chatId, hText, { parse_mode: 'Markdown' });
+            } catch (err) {
+                console.error("Error Riwayat:", err);
+                bot.sendMessage(chatId, "⚠️ Gagal memuat riwayat.");
+            }
+        }
+        else if (data === 'confirm_buy') {
+            const order = tempOrder[chatId];
+            if (!order) return bot.sendMessage(chatId, "❌ Sesi habis.");
+            if (userData.balance < order.price_sell) return bot.sendMessage(chatId, "❌ Saldo kurang.");
+            if (isProcessing[chatId]) return;
+
+            isProcessing[chatId] = true;
+            try {
+                await bot.editMessageText("⏳ *SEDANG DIPROSES...*", { chat_id: chatId, message_id: messageId });
+                const res = await axios.get(`https://golang-openapi-packagepurchase-xltembakservice.kmsp-store.com/v1`, {
+                    params: { api_key: config.apiKeyKMSP, phone: order.phone, package_code: order.package_code }
+                });
+
+                if (res.data && res.data.status) {
+                    userBalance[userId].balance -= order.price_sell;
+                    userBalance[userId].saved_phone = order.phone; 
+
+                    userBalance[userId].total_trx = (userBalance[userId].total_trx || 0) + 1;
+                    const currentTrx = userBalance[userId].total_trx;
+
+                    if (currentTrx % 20 === 0) {
+                        const bonus = 2000;
+                        userBalance[userId].balance += bonus;
+                        bot.sendMessage(userId, `🎉 *BONUS CAIR!* Saldo +${formatRupiah(bonus)} karena sudah mencapai ${currentTrx} transaksi!`);
+                    }
+
+                    if (currentTrx >= 50 && userBalance[userId].role !== 'reseller') {
+                        userBalance[userId].role = 'reseller';
+                        bot.sendMessage(userId, `🎊 *SELAMAT!* Anda resmi menjadi **RESELLER**!\nSekarang Anda mendapatkan harga lebih murah di setiap paket.`);
+                        bot.sendMessage(config.ownerId, `🚀 *UPGRADE ROLE:* User ${userId} otomatis jadi Reseller.`);
+                    }
+
+                    historyTrx.push({ userId, date: new Date().toISOString(), product: order.name, price: order.price_sell, status: 'SUCCESS', phone: order.phone });
+                    saveDB(config.userBalanceFile, userBalance);
+                    saveDB(config.historyFile, historyTrx);
+
+                    await bot.sendMessage(chatId, `✅ *SUKSES!*\n📦 ${order.name}\n📱 ${order.phone}\n💰 Sisa Saldo: ${formatRupiah(userBalance[userId].balance)}\n\n_Nomor HP ini telah disimpan untuk transaksi berikutnya._`);
+
+                    if (config.notifGroupId) {
+                        const textGrup = `
+🔔 *TRANSAKSI BARU*
+━━━━━━━━━━━━━━━━━━
+👤 *Pembeli:* ${callback.from.first_name}
+📦 *Produk:* ${order.name}
+📱 *Nomor:* \`${order.phone}\`
+💰 *Harga:* ${formatRupiah(order.price_sell)}
+🎭 *Role:* ${userData.role.toUpperCase()}
+━━━━━━━━━━━━━━━━━━
+Status: *BERHASIL (LUNAS)*`;
+                        await bot.sendMessage(config.notifGroupId, textGrup, { parse_mode: 'Markdown' }).catch(e => console.log("Gagal kirim ke grup:", e.message));
+                    }
+
+                    delete tempOrder[chatId];
+                } else {
+                    await bot.sendMessage(chatId, `❌ Gagal: ${res.data.message}`);
+                }
+            } catch (e) { 
+                bot.sendMessage(chatId, "⚠️ Gangguan Server"); 
+            } finally { 
+                delete isProcessing[chatId]; 
+            }
+        }
+    // [PERBAIKAN 1] Menambahkan penutup blok try dan penutup event callback_query
+    } catch (error) {
+        console.error("Callback Query Error Global:", error.message);
+    }
+});
