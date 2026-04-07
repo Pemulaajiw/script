@@ -128,12 +128,13 @@ const sendMainMenu = async (chatId, userId, name, messageId = null) => {
 ☀️ [ADMIN](https://t.me/AJW29) ☀️ [GRUP](https://t.me/klmpkfsvpn) ☀️ [TESTI](https://t.me/klmpkfsvpn/1)`;
 
     const opts = {
+        parse_mode: 'Markdown',
         reply_markup: {
             inline_keyboard: [
                 [{ text: '🛒 Beli Paket', callback_data: 'menu_list' }, { text: '💰 Isi Saldo', callback_data: 'menu_topup' }],
                 [{ text: '🔍 Cek Kuota', callback_data: 'menu_cekkouta' }, { text: '📜 Riwayat', callback_data: 'menu_history' }],
                 [{ text: '🔐 Login XL', callback_data: 'menu_xl_login' }, { text: '📊 Info XL', callback_data: 'menu_xl_info' }],
-                [{ text: '👑 Upgrade Reseller', callback_data: 'menu_reseller' }, { text: '📦 Ganti Akun / Logout XL', callback_data: 'logout_xl' }],
+                [{ text: '👑 Upgrade Reseller', callback_data: 'menu_reseller' }, { text: '📦 Logout XL', callback_data: 'logout_xl' }],
                 [{ text: '👨‍👩‍👧‍👦 Cek Akrab', callback_data: 'menu_cek_akrab' }, { text: '🎁 Referral', callback_data: 'menu_referral' }],
                 [{ text: '📖 Panduan Bot', callback_data: 'menu_panduan' }], 
                 [{ text: '🏆 Top Transaksi', callback_data: 'owner_leaderboard' }], 
@@ -144,28 +145,36 @@ const sendMainMenu = async (chatId, userId, name, messageId = null) => {
 
     try {
         if (messageId) {
+            // Jika user menekan tombol 'Kembali', kita edit caption gambarnya saja
             return await bot.editMessageCaption(menuMsg, {
                 chat_id: chatId,
                 message_id: messageId,
-                reply_markup: opts.reply_markup,
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                reply_markup: opts.reply_markup
+            }).catch(async (err) => {
+                // Handle jika pesan sebelumnya bukan gambar (biar gak error)
+                return await bot.editMessageText(menuMsg, {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    ...opts
+                });
             });
         } else {
+            // Kirim pesan baru
             const logoPath = './logo.jpg';
             if (fs.existsSync(logoPath)) {
                 return await bot.sendPhoto(chatId, fs.createReadStream(logoPath), {
                     caption: menuMsg,
-                    parse_mode: 'Markdown',
-                    reply_markup: opts.reply_markup
+                    ...opts
                 });
             } else {
-                return await bot.sendMessage(chatId, menuMsg, {
-                    parse_mode: 'Markdown',
-                    reply_markup: opts.reply_markup
-                });
+                // Jika file logo.jpg hilang di folder, kirim teks saja sebagai cadangan
+                return await bot.sendMessage(chatId, menuMsg, opts);
             }
         }
-    } catch (e) { console.error("Error Menu Utama:", e.message); }
+    } catch (e) { 
+        console.error("Error Menu Utama:", e.message); 
+    }
 };
 
 // ==========================================
