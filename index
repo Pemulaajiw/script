@@ -493,27 +493,22 @@ Status: *BERHASIL (LUNAS)*`;
                 delete isProcessing[chatId]; 
             }
         }
-    // [PERBAIKAN 1] Menambahkan penutup blok try dan penutup event callback_query
-    } catch (error) {
-        console.error("Callback Query Error Global:", error.message);
-    }
-});
-        // --- OWNER PANEL (UPDATE) ---
-        else if (data === 'menu_owner') {
-            if (userId !== config.ownerId) return;
-            await bot.editMessageCaption("👑 *OWNER DASHBOARD*\n\nKelola modal dan user Anda di sini:", {
-                chat_id: chatId, message_id: messageId,
-                reply_markup: {
-                    inline_keyboard: [
-                        [{ text: '💰 Saldo Supplier', callback_data: 'owner_cek_saldo_kmsp' }], // Tombol Baru
-                        [{ text: '➕ Tambah Saldo', callback_data: 'owner_add_saldo' }, { text: '🎭 Set Role', callback_data: 'owner_set_role' }],
-                        [{ text: '📢 Broadcast', callback_data: 'owner_broadcast' }],
-                        [{ text: '🗑️ Reset Riwayat', callback_data: 'owner_reset_history' }],
-                        [{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]
-                    ]
-                }
-            });
-        }
+        // --- OWNER PANEL (UPDATE) ---
+        else if (data === 'menu_owner') {
+            if (userId !== config.ownerId) return;
+            await bot.editMessageCaption("👑 *OWNER DASHBOARD*\n\nKelola modal dan user Anda di sini:", {
+                chat_id: chatId, message_id: messageId,
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '💰 Saldo Supplier', callback_data: 'owner_cek_saldo_kmsp' }],
+                        [{ text: '➕ Tambah Saldo', callback_data: 'owner_add_saldo' }, { text: '🎭 Set Role', callback_data: 'owner_set_role' }],
+                        [{ text: '📢 Broadcast', callback_data: 'owner_broadcast' }],
+                        [{ text: '🗑️ Reset Riwayat', callback_data: 'owner_reset_history' }],
+                        [{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]
+                    ]
+                }
+            });
+        }
         else if (data === 'owner_add_saldo') {
             userState[chatId] = 'OWNER_WAITING_ID_ADD';
             bot.sendMessage(chatId, "Masukkan ID User:");
