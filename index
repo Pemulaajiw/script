@@ -7,6 +7,7 @@ const axios = require('axios');
 // ==========================================
 const config = {
     // ⚠️ HARAP GANTI TOKEN DAN API KEY DEMI KEAMANAN
+    // Jangan sebarluaskan token bot dan API key payment ke publik.
     token: "8595583887:AAEetqI53eeJAbf_u6pSo54Z7HM29vN_dn4", 
     ownerId: 6197482164, 
     botUsername: "FANTUNNEL_PPOB_BOT", 
@@ -65,7 +66,7 @@ const saveDB = (file, data) => {
     }
 };
 
-// [PERBAIKAN 3] Pindahkan deklarasi variabel ke atas sebelum fungsi getUserData
+// Pindahkan deklarasi variabel ke atas sebelum fungsi getUserData
 let userBalance = loadDB(config.userBalanceFile, {}); 
 let historyTrx = loadDB(config.historyFile, []);
 let xlSessions = loadDB(config.xlSessionsFile, {});
@@ -82,7 +83,7 @@ function getUserData(userId, referrerId = null) {
             balance: 0,
             role: 'member', 
             total_trx: 0,
-            referred_by: referrerId, // [PERBAIKAN 2] Perhatikan nama kunci ini
+            referred_by: referrerId,
             name: "",
             saved_phone: null
         };
@@ -112,11 +113,14 @@ const sendMainMenu = async (chatId, userId, name, messageId = null) => {
     let totalTrx = 0;
     historyTrx.forEach(t => { totalTrx += (t.price || 0); });
 
+    // PERBAIKAN: Sanitasi nama user agar bot tidak crash saat parsing Markdown
+    const safeName = (name || "User").replace(/[_*[\]()~`>#+\-=|{}.!]/g, '');
+
     const menuMsg = `
 ┏━━━━━━━━━━━━━━━━━━━┓
 ┃  ✨ *FANTUNNEL STORE* ✨    
 ┗━━━━━━━━━━━━━━━━━━━┛
-👋 Halo, *${name}*
+👋 Halo, *${safeName}*
 ───────────────────
 👤 *Role* : ${userData.role.toUpperCase()}
 💰 *Saldo* : ${formatRupiah(userData.balance)}
