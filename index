@@ -627,7 +627,6 @@ Status: *BERHASIL (LUNAS)*`;
         }
 
         // --- 📖 FITUR PANDUAN BOT ---
-        // --- 📖 FITUR PANDUAN BOT ---
         else if (data === 'menu_panduan') {
             await bot.answerCallbackQuery(callback.id);
             const txtPanduan = `📖 *PANDUAN PENGGUNAAN BOT*\n━━━━━━━━━━━━━━━━━━\n\n` +
@@ -868,7 +867,7 @@ bot.on('message', async (msg) => {
         // FLOW CEK KUOTA / AKRAB
         else if (state === 'WAITING_CHECK_QUOTA') {
     let phone = text.replace(/[^0-9]/g, '');
-    if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+    if (phone.startsWith('08')) phone = '62' + phone.slice(1);
     
     delete userState[chatId];
     await bot.sendMessage(chatId, '🔍 *Sedang mengecek kuota ke server...*', { parse_mode: 'Markdown' });
@@ -904,7 +903,7 @@ bot.on('message', async (msg) => {
 }
         else if (state === 'WAITING_CEK_AKRAB') {
     let phone = text.replace(/[^0-9]/g, '');
-    if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+    if (phone.startsWith('08')) phone = '62' + phone.slice(1);
     
     delete userState[chatId];
     await bot.sendMessage(chatId, '🔍 *Sedang mengecek status paket Akrab...*', { parse_mode: 'Markdown' });
