@@ -627,26 +627,26 @@ Status: *BERHASIL (LUNAS)*`;
         }
 
         // --- 📖 FITUR PANDUAN BOT ---
-        else if (data === 'menu_panduan') {
-            await bot.answerCallbackQuery(callback.id);
-            const txtPanduan = `📖 *PANDUAN PENGGUNAAN BOT*\n━━━━━━━━━━━━━━━━━━\n\n` +
-                `1️⃣ *ISI SALDO:* Klik menu Isi Saldo, bayar via QRIS otomatis.\n` +
-                `2️⃣ *BELI PAKET:* Pilih menu Beli Paket. Nomor akan tersimpan otomatis setelah transaksi pertama.\n` +
-                `3️⃣ *GANTI NOMOR:* Ingin ganti nomor? Masuk ke menu *PROFIL* > *Ganti Akun*.\n` +
-                `4️⃣ *REWARD:* Tiap kelipatan *20 Transaksi*, bonus saldo *Rp 2.000* otomatis masuk!\n\n` +
-                `5️⃣ *AUTO-RESELLER:* Capai *50 Transaksi* untuk harga lebih murah (Role Reseller).\n\n` +
-                `6️⃣ *MAINTENANCE:* 🕒 **23:40 - 00:10 WIB** (Hindari transaksi di jam ini).\n\n` +
-                `⚠️ *Penting:* Pastikan nomor XL dalam masa aktif.`;
-                `• Transaksi yang sudah diproses tidak dapat dibatalkan.`;
-                `• CS Aktif: 08:00 - 22:00 WIB.`;
-                
-                `@AJW29 AdminCS — *Solusi Kuota Murah & Cepat!*`;
-            
-            await bot.editMessageCaption(txtPanduan, { 
-                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
-                reply_markup: { inline_keyboard: [[{ text: '🏠 MENU UTAMA', callback_data: 'back_to_menu' }]] }
-            });
-        }
+        // --- 📖 FITUR PANDUAN BOT ---
+        else if (data === 'menu_panduan') {
+            await bot.answerCallbackQuery(callback.id);
+            const txtPanduan = `📖 *PANDUAN PENGGUNAAN BOT*\n━━━━━━━━━━━━━━━━━━\n\n` +
+                `1️⃣ *ISI SALDO:* Klik menu Isi Saldo, bayar via QRIS otomatis.\n` +
+                `2️⃣ *BELI PAKET:* Pilih menu Beli Paket. Nomor akan tersimpan otomatis setelah transaksi pertama.\n` +
+                `3️⃣ *GANTI NOMOR:* Ingin ganti nomor? Masuk ke menu *PROFIL* > *Ganti Akun*.\n` +
+                `4️⃣ *REWARD:* Tiap kelipatan *20 Transaksi*, bonus saldo *Rp 2.000* otomatis masuk!\n\n` +
+                `5️⃣ *AUTO-RESELLER:* Capai *50 Transaksi* untuk harga lebih murah (Role Reseller).\n\n` +
+                `6️⃣ *MAINTENANCE:* 🕒 **23:40 - 00:10 WIB** (Hindari transaksi di jam ini).\n\n` +
+                `⚠️ *Penting:* Pastikan nomor XL dalam masa aktif.\n` +
+                `• Transaksi yang sudah diproses tidak dapat dibatalkan.\n` +
+                `• CS Aktif: 08:00 - 22:00 WIB.\n\n` +
+                `@AJW29 AdminCS — *Solusi Kuota Murah & Cepat!*`;
+            
+            await bot.editMessageCaption(txtPanduan, { 
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [[{ text: '🏠 MENU UTAMA', callback_data: 'back_to_menu' }]] }
+            });
+        }
 // --- MENU PROFIL (DENGAN TRACKER REWARD) ---
         else if (data === 'menu_profile') {
             const u = userBalance[userId] || { balance: 0, total_trx: 0, role: 'member' };
