@@ -707,36 +707,64 @@ Status: *BERHASIL (LUNAS)*`;
 // 5. MESSAGE HANDLER (Chat Logic) - FIXED
 // ==========================================
 bot.on('message', async (msg) => {
+
     const chatId = msg.chat.id;
+
     const userId = msg.from.id;
+
     const name = msg.from.first_name || "User";
+
     const text = msg.text;
 
+
+
     // 1. Validasi: Abaikan jika bukan pesan teks atau bukan chat pribadi
+
     if (!text || msg.chat.type !== 'private') return;
 
-    // 2. Perintah /start dan /menu (Digabung jadi satu)
+
+
+    // 2. Perintah /start dan /menu
+
     if (text === '/start' || text === '/menu') {
-        // Langsung panggil fungsi Tampilan Menu Utama kamu yang tadi
+
         return await sendMainMenu(chatId, userId, name);
+
     }
+
+
 
     // 3. Perintah Khusus Owner (/backup)
+
     if (text === '/backup' && userId === config.ownerId) {
+
         if (fs.existsSync(config.userBalanceFile)) await bot.sendDocument(chatId, config.userBalanceFile);
+
         if (fs.existsSync(config.historyFile)) await bot.sendDocument(chatId, config.historyFile);
+
         return;
+
     }
 
-    // 4. (Opsional) Respon jika user ketik hal lain yang tidak dikenal
-    // else {
-    //     await bot.sendMessage(chatId, "❌ Perintah tidak dikenal. Ketik /menu untuk bantuan.");
-    // }
-});
 
-    // --- STATE HANDLER ---
-    const state = userState[chatId];
-    if (!state) return; 
+
+    // --- STATE HANDLER ---
+
+    // PERBAIKAN: State handler harus di dalam blok `bot.on('message')` ini
+
+    const state = userState[chatId];
+
+    if (state) {
+
+        // Tulis logika kelanjutan prosesmu di sini
+
+        // Misalnya: if (state === 'nunggu_nomor') { proses(text); }
+
+        return;
+
+    }
+
+});
 
     try {
         // FLOW BELI PAKET
