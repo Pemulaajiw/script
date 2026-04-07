@@ -700,41 +700,29 @@ Status: *BERHASIL (LUNAS)*`;
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
+    const name = msg.from.first_name || "User";
     const text = msg.text;
 
-    // Abaikan jika bukan private chat atau tidak ada teks
-    if (msg.chat.type !== 'private' || !text) return;
+    // 1. Validasi: Abaikan jika bukan pesan teks atau bukan chat pribadi
+    if (!text || msg.chat.type !== 'private') return;
 
-    // --- PERINTAH KHUSUS OWNER ---
+    // 2. Perintah /start dan /menu (Digabung jadi satu)
+    if (text === '/start' || text === '/menu') {
+        // Langsung panggil fungsi Tampilan Menu Utama kamu yang tadi
+        return await sendMainMenu(chatId, userId, name);
+    }
+
+    // 3. Perintah Khusus Owner (/backup)
     if (text === '/backup' && userId === config.ownerId) {
         if (fs.existsSync(config.userBalanceFile)) await bot.sendDocument(chatId, config.userBalanceFile);
         if (fs.existsSync(config.historyFile)) await bot.sendDocument(chatId, config.historyFile);
         return;
     }
 
-    // --- PERINTAH UNTUK SEMUA USER ---
-    if (text === '/start') {
-        return bot.sendMessage(chatId, "👋 *Halo! Selamat datang di FANTUNNEL STORE.*\n\nSilakan klik tombol di bawah atau ketik /menu untuk mulai transaksi.", {
-            parse_mode: 'Markdown',
-            reply_markup: {
-                inline_keyboard: [[{ text: '📱 Buka Menu Utama', callback_data: 'back_to_menu' }]]
-            }
-        });
-    }
-
-    if (text === '/menu') {
-        // Langsung panggil fungsi menu utama kamu (biasanya back_to_menu)
-        // Jika kamu belum punya fungsinya, kita kirim pesan manual dulu:
-        return bot.sendMessage(chatId, "📋 *MENU LAYANAN*\n\nSilakan pilih paket yang tersedia:", {
-            parse_mode: 'Markdown',
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: '🛒 Beli Paket XL', callback_data: 'menu_xl' }],
-                    [{ text: '👤 Profil & Saldo', callback_data: 'menu_profile' }]
-                ]
-            }
-        });
-    }
+    // 4. (Opsional) Respon jika user ketik hal lain yang tidak dikenal
+    // else {
+    //     await bot.sendMessage(chatId, "❌ Perintah tidak dikenal. Ketik /menu untuk bantuan.");
+    // }
 });
 
     // --- STATE HANDLER ---
