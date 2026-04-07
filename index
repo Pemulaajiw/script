@@ -741,42 +741,51 @@ bot.on('message', async (msg) => {
         }
 
         else if (state === 'WAITING_BUY_PHONE') {
-    let phone = text.replace(/[^0-9]/g, '');
-    if (phone.startsWith('08')) phone = '62' + phone.slice(1);
-    if (phone.length < 10) return bot.sendMessage(chatId, "❌ Nomor tidak valid.");
+            let phone = text.replace(/[^0-9]/g, '');
+            if (phone.startsWith('08')) phone = '62' + phone.slice(1);
+            if (phone.length < 10) return bot.sendMessage(chatId, "❌ Nomor tidak valid.");
 
-    const userData = getUserData(userId);
-    const order = tempOrder[chatId];
-    order.phone = phone;
+            const userData = getUserData(userId);
+            const order = tempOrder[chatId];
+            order.phone = phone;
 
-    // Hitung sisa saldo
-    const sisaSaldo = userData.balance - order.price_sell;
-    
-    // Reset state agar bot tidak bingung
-    delete userState[chatId];
-    
-    const receipt = 
-        `🧾 *RINGKASAN PESANAN*\n` +
-        `━━━━━━━━━━━━━━━━━━\n` +
-        `📦 *Produk* : ${order.name}\n` +
-        `📱 *Nomor* : \`${order.phone}\`\n` +
-        `💰 *Harga* : *${formatRupiah(order.price_sell)}*\n` +
-        `━━━━━━━━━━━━━━━━━━\n` +
-        `👤 *Saldo Anda* : ${formatRupiah(userData.balance)}\n` +
-        `📉 *Sisa Saldo* : _${formatRupiah(sisaSaldo)}_\n` +
-        `━━━━━━━━━━━━━━━━━━\n` +
-        `⚠️ _Pastikan nomor sudah benar. Transaksi yang sudah diproses tidak dapat dibatalkan._`;
-    
-    await bot.sendMessage(chatId, receipt, {
-        parse_mode: 'Markdown',
-        reply_markup: { 
-            inline_keyboard: [
-                [{ text: '✅ BAYAR SEKARANG', callback_data: 'confirm_buy' }],
-                [{ text: '❌ BATALKAN', callback_data: 'back_to_menu' }]
-            ] 
-        }
-    });
-}
+            // Hitung sisa saldo
+            const sisaSaldo = userData.balance - order.price_sell;
+            
+            // TAMBAHAN: Validasi Saldo Cukup atau Tidak
+            if (sisaSaldo < 0) {
+                delete userState[chatId]; // Reset state
+                return bot.sendMessage(chatId, `❌ *SALDO TIDAK MENCUKUPI*\n\n💰 Harga Paket: *${formatRupiah(order.price_sell)}*\n💳 Saldo Anda: *${formatRupiah(userData.balance)}*\n\nSilakan isi ulang saldo terlebih dahulu melalui menu Topup.`, {
+                    parse_mode: 'Markdown',
+                    reply_markup: { inline_keyboard: [[{ text: '➕ Isi Saldo', callback_data: 'menu_topup' }], [{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]] }
+                });
+            }
+            
+            // Reset state agar bot tidak bingung
+            delete userState[chatId];
+            
+            const receipt = 
+                `🧾 *RINGKASAN PESANAN*\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `📦 *Produk* : ${order.name}\n` +
+                `📱 *Nomor* : \`${order.phone}\`\n` +
+                `💰 *Harga* : *${formatRupiah(order.price_sell)}*\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `👤 *Saldo Anda* : ${formatRupiah(userData.balance)}\n` +
+                `📉 *Sisa Saldo* : _${formatRupiah(sisaSaldo)}_\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `⚠️ _Pastikan nomor sudah benar. Transaksi yang sudah diproses tidak dapat dibatalkan._`;
+            
+            await bot.sendMessage(chatId, receipt, {
+                parse_mode: 'Markdown',
+                reply_markup: { 
+                    inline_keyboard: [
+                        [{ text: '✅ BAYAR SEKARANG', callback_data: 'confirm_buy' }],
+                        [{ text: '❌ BATALKAN', callback_data: 'back_to_menu' }]
+                    ] 
+                }
+            });
+        }
 
         // FLOW TOPUP
         else if (state === 'WAITING_TOPUP_AMOUNT') {
