@@ -704,7 +704,7 @@ Status: *BERHASIL (LUNAS)*`;
 });
 
 // ==========================================
-// 5. MESSAGE HANDLER (Chat Logic) - FULLY FIXED
+// 5. MESSAGE HANDLER (Chat Logic) - FIXED
 // ==========================================
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
@@ -717,7 +717,6 @@ bot.on('message', async (msg) => {
 
     // 2. Perintah /start dan /menu
     if (text === '/start' || text === '/menu') {
-        delete userState[chatId]; // Reset state agar tidak sangkut
         return await sendMainMenu(chatId, userId, name);
     }
 
@@ -728,18 +727,21 @@ bot.on('message', async (msg) => {
         return;
     }
 
-    // 4. --- STATE HANDLER (LOGIKA PROSES) ---
+    // --- STATE HANDLER ---
     const state = userState[chatId];
-    if (!state) return; // Jika tidak ada state aktif, abaikan pesan lainnya
+    
+    // Jika tidak ada state yang aktif, hentikan eksekusi di sini
+    if (!state) return;
 
+    // Semua logika state harus berada di DALAM blok try-catch ini
     try {
-        // --- FLOW BELI PAKET ---
+        // FLOW BELI PAKET
         if (state === 'WAITING_BUY_CODE') {
             const code = text.toUpperCase().trim();
             const res = await axios.get(`https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
             const p = res.data.data.find(x => x.package_code === code);
             
-            if (!p) return bot.sendMessage(chatId, '❌ *Kode paket tidak ditemukan.*\nSilakan masukkan kode yang benar.');
+            if (!p) return bot.sendMessage(chatId, '❌ *Kode paket tidak ditemukan.*\nSilakan masukkan kode yang benar atau cek menu List Paket.');
             
             const userData = getUserData(userId);
             const markup = userData.role === 'reseller' ? config.markupReseller : config.markupMember;
@@ -760,87 +762,193 @@ bot.on('message', async (msg) => {
             const order = tempOrder[chatId];
             order.phone = phone;
 
+            // Hitung sisa saldo
             const sisaSaldo = userData.balance - order.price_sell;
             
+            // Validasi Saldo Cukup atau Tidak
             if (sisaSaldo < 0) {
-                delete userState[chatId];
-                return bot.sendMessage(chatId, `❌ *SALDO TIDAK MENCUKUPI*\n\n💰 Harga: *${formatRupiah(order.price_sell)}*\n💳 Saldo: *${formatRupiah(userData.balance)}*`, {
+                delete userState[chatId]; // Reset state
+                return bot.sendMessage(chatId, `❌ *SALDO TIDAK MENCUKUPI*\n\n💰 Harga Paket: *${formatRupiah(order.price_sell)}*\n💳 Saldo Anda: *${formatRupiah(userData.balance)}*\n\nSilakan isi ulang saldo terlebih dahulu melalui menu Topup.`, {
                     parse_mode: 'Markdown',
-                    reply_markup: { inline_keyboard: [[{ text: '➕ Isi Saldo', callback_data: 'menu_topup' }], [{ text: '🏠 Menu Utama', callback_data: 'menu_main' }]] }
+                    reply_markup: { inline_keyboard: [[{ text: '➕ Isi Saldo', callback_data: 'menu_topup' }], [{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]] }
                 });
             }
             
             delete userState[chatId];
-            const receipt = `🧾 *RINGKASAN PESANAN*\n━━━━━━━━━━━━━━━━━━\n📦 *Produk* : ${order.name}\n📱 *Nomor* : \`${order.phone}\`\n💰 *Harga* : *${formatRupiah(order.price_sell)}*\n━━━━━━━━━━━━━━━━━━\n⚠️ _Pastikan nomor sudah benar!_`;
+            
+            const receipt = 
+                `🧾 *RINGKASAN PESANAN*\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `📦 *Produk* : ${order.name}\n` +
+                `📱 *Nomor* : \`${order.phone}\`\n` +
+                `💰 *Harga* : *${formatRupiah(order.price_sell)}*\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `👤 *Saldo Anda* : ${formatRupiah(userData.balance)}\n` +
+                `📉 *Sisa Saldo* : _${formatRupiah(sisaSaldo)}_\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `⚠️ _Pastikan nomor sudah benar. Transaksi yang sudah diproses tidak dapat dibatalkan._`;
             
             await bot.sendMessage(chatId, receipt, {
                 parse_mode: 'Markdown',
                 reply_markup: { 
-                    inline_keyboard: [[{ text: '✅ BAYAR SEKARANG', callback_data: 'confirm_buy' }], [{ text: '❌ BATALKAN', callback_data: 'menu_main' }]] 
+                    inline_keyboard: [
+                        [{ text: '✅ BAYAR SEKARANG', callback_data: 'confirm_buy' }],
+                        [{ text: '❌ BATALKAN', callback_data: 'back_to_menu' }]
+                    ] 
                 }
             });
         }
 
-        // --- FLOW TOPUP ---
+        // FLOW TOPUP
         else if (state === 'WAITING_TOPUP_AMOUNT') {
             const nominal = parseInt(text.replace(/[^0-9]/g, ''));
-            if (isNaN(nominal) || nominal < 1000) return bot.sendMessage(chatId, "❌ Minimal Topup Rp 1.000");
+            
+            if (isNaN(nominal) || nominal < 1000 || nominal > 2000000) {
+                return bot.sendMessage(chatId, "❌ *Nominal tidak valid!*\nMinimal Topup: Rp 1.000\nMaksimal Topup: Rp 2.000.000", { parse_mode: 'Markdown' });
+            }
 
             delete userState[chatId];
-            const loading = await bot.sendMessage(chatId, "⏳ *Menyiapkan QRIS...*", { parse_mode: 'Markdown' });
+            const userData = getUserData(userId);
+            const loading = await bot.sendMessage(chatId, "⏳ *Sedang menyiapkan metode pembayaran...*", { parse_mode: 'Markdown' });
 
             try {
                 const res = await axios.get(`https://my-payment.autsc.my.id/api/deposit`, { 
-                    params: { amount: nominal, apikey: config.apiKeyPayment } 
+                    params: { 
+                        amount: nominal, 
+                        apikey: config.apiKeyPayment 
+                    } 
                 });
+
                 await bot.deleteMessage(chatId, loading.message_id).catch(() => {});
 
                 if (res.data.status === 'success') {
-                    const pay = res.data.data;
-                    tempOrder[chatId] = { type: 'topup', trx_id: pay.id, amount_to_pay: pay.total_amount };
+                    const payData = res.data.data;
 
-                    await bot.sendPhoto(chatId, pay.qris_url, {
-                        caption: `💳 *TAGIHAN TOPUP*\n━━━━━━━━━━━━━━━━━━\n🆔 ID: \`${pay.id}\`\n💵 *TOTAL BAYAR* : *${formatRupiah(pay.total_amount)}*\n━━━━━━━━━━━━━━━━━━\n1. Scan QRIS di atas\n2. Masukkan nominal *PERSIS*`,
+                    tempOrder[chatId] = { 
+                        type: 'topup', 
+                        trx_id: payData.id, 
+                        amount_requested: nominal,
+                        amount_to_pay: payData.total_amount,
+                        user_id: userId,
+                        current_balance: userData.balance
+                    };
+
+                    const captionTopup = 
+                        `💳 *TAGIHAN TOPUP SALDO*\n` +
+                        `━━━━━━━━━━━━━━━━━━\n` +
+                        `🆔 *Order ID* : \`${payData.id}\`\n` +
+                        `👤 *Pengguna* : ${msg.from.first_name}\n` +
+                        `💰 *Nominal* : ${formatRupiah(nominal)}\n` +
+                        `➕ *Kode Unik* : ${formatRupiah(payData.total_amount - nominal)}\n` +
+                        `━━━━━━━━━━━━━━━━━━\n` +
+                        `💵 *TOTAL BAYAR* : *${formatRupiah(payData.total_amount)}*\n` +
+                        `━━━━━━━━━━━━━━━━━━\n\n` +
+                        `👇 *Cara Bayar:*\n` +
+                        `1. Screenshot QRIS di atas.\n` +
+                        `2. Scan di Aplikasi Dana, OVO, QRIS atau M-Banking.\n` +
+                        `3. Masukkan nominal *PERSIS* sesuai Total Bayar.\n\n` +
+                        `⏳ _Saldo akan masuk otomatis setelah pembayaran terdeteksi._`;
+
+                    await bot.sendPhoto(chatId, payData.qris_url, {
+                        caption: captionTopup,
                         parse_mode: 'Markdown',
-                        reply_markup: { inline_keyboard: [[{ text: '🔄 Cek Status', callback_data: 'check_payment' }], [{ text: '🔙 Batal', callback_data: 'menu_main' }]] }
+                        reply_markup: { 
+                            inline_keyboard: [
+                                [{ text: '🔄 Cek Status Pembayaran', callback_data: 'check_payment' }], 
+                                [{ text: '🔙 Batal', callback_data: 'back_to_menu' }]
+                            ] 
+                        }
                     });
+                } else {
+                    bot.sendMessage(chatId, "❌ Server payment sedang sibuk. Coba lagi nanti.");
                 }
-            } catch (e) { bot.sendMessage(chatId, "❌ Gagal membuat QRIS."); }
+
+            } catch (e) {
+                console.error("Error API Topup:", e);
+                await bot.deleteMessage(chatId, loading.message_id).catch(() => {});
+                bot.sendMessage(chatId, "❌ Gagal membuat QRIS. Pastikan koneksi server aman.");
+            }
         }
 
-        // --- FLOW CEK KUOTA / AKRAB ---
-        else if (state === 'WAITING_CHECK_QUOTA' || state === 'WAITING_CEK_AKRAB') {
+        // FLOW CEK KUOTA
+        else if (state === 'WAITING_CHECK_QUOTA') {
             let phone = text.replace(/[^0-9]/g, '');
             if (phone.startsWith('08')) phone = '62' + phone.slice(1);
             
-            const endpoint = state === 'WAITING_CHECK_QUOTA' ? 'cek_kuota' : 'cek_akrab';
-            const title = state === 'WAITING_CHECK_QUOTA' ? 'HASIL CEK KUOTA' : 'HASIL CEK AKRAB';
-
             delete userState[chatId];
-            await bot.sendMessage(chatId, '🔍 *Sedang mengecek...*', { parse_mode: 'Markdown' });
+            await bot.sendMessage(chatId, '🔍 *Sedang mengecek kuota ke server...*', { parse_mode: 'Markdown' });
 
             try {
-                const res = await axios.get(`https://apigw.kmsp-store.com/sidompul/v4/${endpoint}`, { 
+                const res = await axios.get(`https://apigw.kmsp-store.com/sidompul/v4/cek_kuota`, { 
                     params: { msisdn: phone, isJSON: 'true' }, 
-                    headers: { "Authorization": config.sidompulAuth, "X-API-Key": config.sidompulKey, "X-App-Version": "4.0.0" },
+                    headers: { 
+                        "Authorization": config.sidompulAuth, 
+                        "X-API-Key": config.sidompulKey,
+                        "X-App-Version": "4.0.0" 
+                    },
                     timeout: 20000
                 });
 
                 if (res.data.status && res.data.data.hasil) {
-                    const hasil = res.data.data.hasil.replace(/<br>/g, "\n").replace(/📃 RESULT:/g, `📊 *${title}*`);
-                    await bot.sendMessage(chatId, hasil, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🏠 Menu Utama', callback_data: 'menu_main' }]] } });
+                    const hasil = res.data.data.hasil
+                        .replace(/<br>/g, "\n")
+                        .replace(/📃 RESULT:/g, "📊 *HASIL CEK KUOTA*");
+                    
+                    await bot.sendMessage(chatId, hasil, { 
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: [[{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]] }
+                    });
                 } else {
-                    await bot.sendMessage(chatId, '❌ Data tidak ditemukan.');
+                    await bot.sendMessage(chatId, '❌ *Data tidak ditemukan.*\nNomor salah atau sedang gangguan server.');
                 }
-            } catch(e) { bot.sendMessage(chatId, '❌ Gagal terhubung ke provider.'); }
+            } catch(e) { 
+                console.error(e.message);
+                bot.sendMessage(chatId, '❌ *Gagal terhubung ke provider.*'); 
+            }
         }
+        
+        // FLOW CEK AKRAB
+        else if (state === 'WAITING_CEK_AKRAB') {
+            let phone = text.replace(/[^0-9]/g, '');
+            if (phone.startsWith('08')) phone = '62' + phone.slice(1);
+            
+            delete userState[chatId];
+            await bot.sendMessage(chatId, '🔍 *Sedang mengecek status paket Akrab...*', { parse_mode: 'Markdown' });
 
-        // --- FLOW XL LOGIN ---
+            try {
+                const res = await axios.get(`https://apigw.kmsp-store.com/sidompul/v4/cek_akrab`, { 
+                    params: { msisdn: phone, isJSON: 'true' }, 
+                    headers: { 
+                        "Authorization": config.sidompulAuth, 
+                        "X-API-Key": config.sidompulKey,
+                        "X-App-Version": "4.0.0" 
+                    },
+                    timeout: 20000
+                });
+
+                if (res.data.status && res.data.data.hasil) {
+                    const hasil = res.data.data.hasil
+                        .replace(/<br>/g, "\n")
+                        .replace(/📃 RESULT:/g, "📊 *HASIL CEK AKRAB*");
+                    
+                    await bot.sendMessage(chatId, hasil, { 
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: [[{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]] }
+                    });
+                } else {
+                    await bot.sendMessage(chatId, '❌ *Data tidak ditemukan.*');
+                }
+            } catch(e) { 
+                bot.sendMessage(chatId, '❌ *Gagal terhubung ke provider.*'); 
+            }
+        }
+        
+        // FLOW XL LOGIN (OTP)
         else if (state === 'WAITING_XL_PHONE') {
             let phone = text.replace(/[^0-9]/g, '');
             if (phone.startsWith('0')) phone = '62' + phone.slice(1);
             
-            await bot.sendMessage(chatId, '⏳ *Meminta OTP...*', { parse_mode: 'Markdown' });
+            await bot.sendMessage(chatId, '⏳ *Meminta kode OTP...*', { parse_mode: 'Markdown' });
             try {
                 const res = await axios.get(`https://golang-openapi-reqotp-xltembakservice.kmsp-store.com/v1`, {
                     params: { api_key: config.apiKeyKMSP, phone: phone, method: 'OTP' }
@@ -848,59 +956,109 @@ bot.on('message', async (msg) => {
                 if (res.data.status) {
                     tempOrder[chatId] = { auth_id: res.data.data.auth_id, phone: phone };
                     userState[chatId] = 'WAITING_XL_OTP';
-                    await bot.sendMessage(chatId, '✅ *OTP Terkirim!*\nMasukkan kode OTP:');
+                    await bot.sendMessage(chatId, '✅ *OTP Terkirim!*\nSilakan masukkan kode OTP yang masuk ke SMS kamu:');
+                } else {
+                    delete userState[chatId];
+                    await bot.sendMessage(chatId, `❌ *Gagal:* ${res.data.message}`);
                 }
             } catch (e) { bot.sendMessage(chatId, "❌ Gagal request OTP."); }
         }
-
         else if (state === 'WAITING_XL_OTP') {
             const dataLogin = tempOrder[chatId];
+            if (!dataLogin) return delete userState[chatId];
+            
+            await bot.sendMessage(chatId, '⏳ *Memverifikasi...*', { parse_mode: 'Markdown' });
             try {
                 const res = await axios.get(`https://golang-openapi-login-xltembakservice.kmsp-store.com/v1`, {
                     params: { api_key: config.apiKeyKMSP, phone: dataLogin.phone, method: 'OTP', auth_id: dataLogin.auth_id, otp: text.trim() }
                 });
                 if (res.data.status) {
+                    // Pastikan variabel xlSessions dideklarasikan secara global di atas kodemu
                     xlSessions[userId] = { phone: dataLogin.phone, access_token: res.data.data.access_token };
                     saveDB(config.xlSessionsFile, xlSessions);
-                    delete userState[chatId];
-                    await bot.sendMessage(chatId, '✅ *LOGIN BERHASIL!*');
+                    delete userState[chatId]; delete tempOrder[chatId];
+                    await bot.sendMessage(chatId, '✅ *LOGIN BERHASIL!*\nSekarang kamu bisa menggunakan menu Info XL.', { parse_mode: 'Markdown' });
                 } else {
-                    await bot.sendMessage(chatId, '❌ OTP Salah.');
+                    await bot.sendMessage(chatId, '❌ *OTP Salah atau Kadaluwarsa.*');
                 }
             } catch (e) { bot.sendMessage(chatId, "❌ Gagal verifikasi."); }
         }
 
-        // --- FLOW OWNER (ADD SALDO & BROADCAST) ---
-        else if (state === 'OWNER_WAITING_ID_ADD' && userId === config.ownerId) {
+        // FLOW OWNER (TAMBAH SALDO)
+        else if (state === 'OWNER_WAITING_ID_ADD') {
             const tId = text.trim();
-            if (!userBalance[tId]) return bot.sendMessage(chatId, "❌ ID tidak ditemukan.");
+            if (!userBalance[tId]) return bot.sendMessage(chatId, "❌ ID User tidak ditemukan.");
             tempOrder[chatId] = { targetId: tId };
             userState[chatId] = 'OWNER_WAITING_AMOUNT_ADD';
-            await bot.sendMessage(chatId, `💰 Masukkan nominal saldo untuk ID ${tId}:`);
+            await bot.sendMessage(chatId, `👤 User: ${tId}\n💰 *Masukkan nominal saldo:*`);
         }
-        else if (state === 'OWNER_WAITING_AMOUNT_ADD' && userId === config.ownerId) {
+        else if (state === 'OWNER_WAITING_AMOUNT_ADD') {
             const amount = parseInt(text);
             const tId = tempOrder[chatId].targetId;
+            if (isNaN(amount)) return bot.sendMessage(chatId, "❌ Nominal harus angka.");
+            
             userBalance[tId].balance += amount;
             saveDB(config.userBalanceFile, userBalance);
-            delete userState[chatId];
-            await bot.sendMessage(chatId, `✅ Berhasil tambah ${formatRupiah(amount)} ke ${tId}`);
-            bot.sendMessage(tId, `🎁 Saldo ditambahkan Admin: ${formatRupiah(amount)}`).catch(()=>{});
+            delete userState[chatId]; delete tempOrder[chatId];
+            
+            await bot.sendMessage(chatId, `✅ Berhasil menambahkan ${formatRupiah(amount)} ke ID ${tId}`);
+            bot.sendMessage(tId, `🎁 *Saldo Masuk!*\nAdmin telah menambahkan saldo sebesar ${formatRupiah(amount)} ke akunmu.`).catch(()=>{});
         }
-        else if (state === 'OWNER_WAITING_BC_TEXT' && userId === config.ownerId) {
+
+        // FLOW OWNER (BROADCAST)
+        else if (state === 'OWNER_WAITING_BC_TEXT') {
             delete userState[chatId];
             const users = Object.keys(userBalance);
-            await bot.sendMessage(chatId, `🚀 Memulai BC ke ${users.length} user...`);
+            await bot.sendMessage(chatId, `🚀 *Memulai Broadcast ke ${users.length} pengguna...*`, { parse_mode: 'Markdown' });
+            
             users.forEach((uid, idx) => {
                 setTimeout(() => {
-                    bot.sendMessage(uid, `📢 *PENGUMUMAN*\n\n${text}`, { parse_mode: 'Markdown' }).catch(()=>{});
-                }, idx * 100);
+                    bot.sendMessage(uid, `📢 *INFORMASI ADMIN*\n━━━━━━━━━━━━━━━━━━\n\n${text}`, { parse_mode: 'Markdown' })
+                    .catch((err) => console.log(`Gagal kirim ke ${uid}: ${err.message}`));
+                }, idx * 150); 
+            });
+        }
+
+        // FLOW OWNER (SET ROLE)
+        else if (state === 'OWNER_WAITING_ID_ROLE') {
+            const tId = text.trim();
+            if (!userBalance[tId]) {
+                return bot.sendMessage(chatId, "❌ *ID Salah atau User belum terdaftar.*", { parse_mode: 'Markdown' });
+            }
+            
+            delete userState[chatId];
+            await bot.sendMessage(chatId, `👤 *User ID:* \`${tId}\`\n\nSilakan pilih role baru untuk user tersebut:`, {
+                parse_mode: 'Markdown',
+                reply_markup: { 
+                    inline_keyboard: [
+                        [
+                            { text: 'Member', callback_data: `setrole_${tId}_member` }, 
+                            { text: 'Reseller', callback_data: `setrole_${tId}_reseller` }
+                        ],
+                        [{ text: '❌ Batal', callback_data: 'back_to_menu' }]
+                    ] 
+                }
             });
         }
 
     } catch (e) {
-        console.error("Error Handler:", e.message);
-        delete userState[chatId];
-        bot.sendMessage(chatId, "❌ Terjadi kesalahan. Silakan ulang /menu.");
+        console.error("Error Message Handler:", e);
+        delete userState[chatId]; // Hapus state biar gak stuck kalau error
+        bot.sendMessage(chatId, "❌ *Terjadi kesalahan sistem.* Silakan coba lagi.");
     }
+}); // <--- PENUTUP YANG BENAR ADA DI SINI
+
+// ==========================================
+// 6. ERROR HANDLING (Anti-Crash)
+// ==========================================
+process.on('uncaughtException', (err) => {
+    console.error('CRITICAL ERROR:', err);
 });
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('UNHANDLED REJECTION:', reason);
+});
+
+// STARTUP LOG
+console.log('🤖 BOT AKTIF!');
+console.log(`📅 Started: ${new Date().toLocaleString()}`);
