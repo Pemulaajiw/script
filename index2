@@ -389,11 +389,13 @@ bot.on('callback_query', async (callbackQuery) => {
                 delete tempOrder[chatId];
                 await bot.sendMessage(chatId, `✅ *TOPUP BERHASIL*\nSaldo masuk: ${formatRupiah(order.amount_added)}`);
             } else {
-                bot.answerCallbackQuery(callback.id, { text: "⏳ Belum ada pembayaran." });
+                // FIX: Gunakan callbackQuery.id
+                bot.answerCallbackQuery(callbackQuery.id, { text: "⏳ Belum ada pembayaran." }).catch(() => {});
             }
         }
         else if (data === 'menu_reseller') {
-            if (userData.role === 'reseller') return bot.answerCallbackQuery(callback.id, { text: "Sudah Reseller!" });
+            // FIX: Gunakan callbackQuery.id
+            if (userData.role === 'reseller') return bot.answerCallbackQuery(callbackQuery.id, { text: "Sudah Reseller!" }).catch(() => {});
             await bot.editMessageCaption(`👑 *UPGRADE RESELLER*\n\nBiaya: *${formatRupiah(config.priceUpgradeReseller)}*\nBenefit: Harga lebih murah & Prioritas.\n\nKlik setuju untuk potong saldo:`, {
                 chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
                 reply_markup: { inline_keyboard: [[{ text: '✅ SETUJU', callback_data: 'confirm_upgrade' }], [{ text: '❌ BATAL', callback_data: 'back_to_menu' }]] }
@@ -405,7 +407,6 @@ bot.on('callback_query', async (callbackQuery) => {
             userBalance[userId].balance -= config.priceUpgradeReseller;
             userBalance[userId].role = 'reseller';
             
-            // [PERBAIKAN 2] Perbaiki Typo Pemanggilan referred_by
             if (userData.referred_by && userBalance[userData.referred_by]) {
                 userBalance[userData.referred_by].balance += config.bonusReferralUpgrade;
                 bot.sendMessage(userData.referred_by, `💰 *BONUS REFERRAL!*\nTeman Anda upgrade reseller. Saldo +${formatRupiah(config.bonusReferralUpgrade)}`);
@@ -427,7 +428,8 @@ bot.on('callback_query', async (callbackQuery) => {
             await bot.sendMessage(chatId, '👨‍👩‍👧‍👦 *CEK AKRAB*\nMasukkan nomor XL pengelola:');
         }
         else if (data === 'menu_stok_akrab') {
-            await bot.answerCallbackQuery(callback.id, { text: "🔍 Menghubungi Server Sidompul..." });
+            // FIX: Gunakan callbackQuery.id
+            await bot.answerCallbackQuery(callbackQuery.id, { text: "🔍 Menghubungi Server Sidompul..." }).catch(() => {});
             try {
                 await bot.editMessageCaption("⏳ *MENGHUBUNGI SERVER SIDOMPUL...*\nSedang memproses autentikasi dan cek stok.", {
                     chat_id: chatId, message_id: messageId, parse_mode: 'Markdown'
@@ -551,13 +553,14 @@ bot.on('callback_query', async (callbackQuery) => {
                         const textGrup = `
 🔔 *TRANSAKSI BARU*
 ━━━━━━━━━━━━━━━━━━
-👤 *Pembeli:* ${callback.from.first_name}
+👤 *Pembeli:* ${callbackQuery.from.first_name}
 📦 *Produk:* ${order.name}
 📱 *Nomor:* \`${order.phone}\`
 💰 *Harga:* ${formatRupiah(order.price_sell)}
 🎭 *Role:* ${userData.role.toUpperCase()}
 ━━━━━━━━━━━━━━━━━━
 Status: *BERHASIL (LUNAS)*`;
+                        // FIX: Gunakan callbackQuery.from.first_name
                         await bot.sendMessage(config.notifGroupId, textGrup, { parse_mode: 'Markdown' }).catch(e => console.log("Gagal kirim ke grup:", e.message));
                     }
 
@@ -587,121 +590,120 @@ Status: *BERHASIL (LUNAS)*`;
                 }
             });
         }
-        else if (data === 'owner_add_saldo') {
-            userState[chatId] = 'OWNER_WAITING_ID_ADD';
-            bot.sendMessage(chatId, "Masukkan ID User:");
-        }
-        else if (data === 'owner_set_role') {
-            userState[chatId] = 'OWNER_WAITING_ID_ROLE';
-            bot.sendMessage(chatId, "Masukkan ID User untuk ganti role:");
-        }
-        else if (data.startsWith('setrole_')) {
-            const [ , targetId, role] = data.split('_');
-            if (userBalance[targetId]) {
-                userBalance[targetId].role = role;
-                saveDB(config.userBalanceFile, userBalance);
-                await bot.sendMessage(chatId, `✅ Berhasil! User ${targetId} sekarang adalah ${role.toUpperCase()}`);
-            }
-        }
-// --- RESET RIWAYAT TRANSAKSI ---
-        else if (data === 'owner_reset_history') {
-            if (userId !== config.ownerId) return bot.answerCallbackQuery(callback.id, { text: "❌ Akses Ditolak" });
-            
-            // Memunculkan peringatan sebelum menghapus
-            await bot.editMessageCaption("⚠️ *PERINGATAN BAHAYA!*\n\nApakah Anda yakin ingin menghapus **SEMUA** riwayat transaksi dari sistem?\n\n_Data yang sudah dihapus tidak dapat dikembalikan lagi!_", {
-                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
-                reply_markup: {
-                    inline_keyboard: [
-                        [{ text: '✅ YA, KOSONGKAN RIWAYAT', callback_data: 'confirm_reset_history' }],
-                        [{ text: '❌ BATAL', callback_data: 'menu_owner' }]
-                    ]
-                }
-            });
-        }
-        else if (data === 'confirm_reset_history') {
-            if (userId !== config.ownerId) return bot.answerCallbackQuery(callback.id, { text: "❌ Akses Ditolak" });
-            
-            // Mengosongkan memori riwayat
-            historyTrx.length = 0; 
-            
-            // Menyimpan memori yang sudah kosong ke file database history.json
-            saveDB(config.historyFile, historyTrx);
-            
-            await bot.editMessageCaption("🗑️ *RIWAYAT BERHASIL DIHAPUS*\n\nSemua data riwayat transaksi lama yang berantakan telah dibersihkan. Database riwayat sekarang kosong seperti baru.", {
-                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
-                reply_markup: {
-                    inline_keyboard: [[{ text: '🔙 Kembali ke Panel Owner', callback_data: 'menu_owner' }]]
-                }
-            });
-        }
-// --- CEK SALDO SUPPLIER KMSP (VERSI API TERBARU) ---
-        else if (data === 'owner_cek_saldo_kmsp') {
-            if (userId !== config.ownerId) return bot.answerCallbackQuery(callback.id, { text: "Akses Ditolak" });
-            
-            await bot.answerCallbackQuery(callback.id, { text: "🔍 Menghubungi Server KMSP..." });
-            
-            try {
-                // Menggunakan Endpoint yang baru kamu kasih
-                const res = await axios.get(`https://golang-openapi-panelaccountbalance-xltembakservice.kmsp-store.com/v1`, {
-                    params: { api_key: config.apiKeyKMSP },
-                    timeout: 20000 
-                });
-                
-                // Biasanya struktur respon KMSP itu res.data.data.balance atau res.data.balance
-                // Kita buat proteksi agar tidak error kalau strukturnya beda
-                const dataKMSP = res.data.data || res.data;
-                const saldoPusat = dataKMSP.balance;
+        else if (data === 'owner_add_saldo') {
+            userState[chatId] = 'OWNER_WAITING_ID_ADD';
+            bot.sendMessage(chatId, "Masukkan ID User:");
+        }
+        else if (data === 'owner_set_role') {
+            userState[chatId] = 'OWNER_WAITING_ID_ROLE';
+            bot.sendMessage(chatId, "Masukkan ID User untuk ganti role:");
+        }
+        else if (data.startsWith('setrole_')) {
+            const [ , targetId, role] = data.split('_');
+            if (userBalance[targetId]) {
+                userBalance[targetId].role = role;
+                saveDB(config.userBalanceFile, userBalance);
+                await bot.sendMessage(chatId, `✅ Berhasil! User ${targetId} sekarang adalah ${role.toUpperCase()}`);
+            }
+        }
+        // --- RESET RIWAYAT TRANSAKSI ---
+        else if (data === 'owner_reset_history') {
+            // FIX: Gunakan callbackQuery.id
+            if (userId !== config.ownerId) return bot.answerCallbackQuery(callbackQuery.id, { text: "❌ Akses Ditolak" }).catch(() => {});
+            
+            await bot.editMessageCaption("⚠️ *PERINGATAN BAHAYA!*\n\nApakah Anda yakin ingin menghapus **SEMUA** riwayat transaksi dari sistem?\n\n_Data yang sudah dihapus tidak dapat dikembalikan lagi!_", {
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '✅ YA, KOSONGKAN RIWAYAT', callback_data: 'confirm_reset_history' }],
+                        [{ text: '❌ BATAL', callback_data: 'menu_owner' }]
+                    ]
+                }
+            });
+        }
+        else if (data === 'confirm_reset_history') {
+            // FIX: Gunakan callbackQuery.id
+            if (userId !== config.ownerId) return bot.answerCallbackQuery(callbackQuery.id, { text: "❌ Akses Ditolak" }).catch(() => {});
+            
+            historyTrx.length = 0; 
+            saveDB(config.historyFile, historyTrx);
+            
+            await bot.editMessageCaption("🗑️ *RIWAYAT BERHASIL DIHAPUS*\n\nSemua data riwayat transaksi lama yang berantakan telah dibersihkan. Database riwayat sekarang kosong seperti baru.", {
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [[{ text: '🔙 Kembali ke Panel Owner', callback_data: 'menu_owner' }]]
+                }
+            });
+        }
+        // --- CEK SALDO SUPPLIER KMSP (VERSI API TERBARU) ---
+        else if (data === 'owner_cek_saldo_kmsp') {
+            // FIX: Gunakan callbackQuery.id
+            if (userId !== config.ownerId) return bot.answerCallbackQuery(callbackQuery.id, { text: "Akses Ditolak" }).catch(() => {});
+            
+            await bot.answerCallbackQuery(callbackQuery.id, { text: "🔍 Menghubungi Server KMSP..." }).catch(() => {});
+            
+            try {
+                const res = await axios.get(`https://golang-openapi-panelaccountbalance-xltembakservice.kmsp-store.com/v1`, {
+                    params: { api_key: config.apiKeyKMSP },
+                    timeout: 20000 
+                });
+                
+                const dataKMSP = res.data.data || res.data;
+                const saldoPusat = dataKMSP.balance;
 
-                if (saldoPusat !== undefined) {
-                    let peringatan = saldoPusat < 50000 ? "\n\n⚠️ *PERINGATAN:* Saldo menipis, segera isi ulang!" : "";
+                if (saldoPusat !== undefined) {
+                    let peringatan = saldoPusat < 50000 ? "\n\n⚠️ *PERINGATAN:* Saldo menipis, segera isi ulang!" : "";
 
-                    await bot.editMessageCaption(`💰 *SALDO MODAL KMSP*\n━━━━━━━━━━━━━━━━━━\n\nSisa Saldo Anda:\n*${formatRupiah(saldoPusat)}*${peringatan}\n\n_Update terakhir: ${new Date().toLocaleString('id-ID')}_`, {
-                        chat_id: chatId, 
-                        message_id: messageId, 
-                        parse_mode: 'Markdown',
-                        reply_markup: {
-                            inline_keyboard: [
-                                [{ text: '🔄 Refresh Saldo', callback_data: 'owner_cek_saldo_kmsp' }],
-                                [{ text: '🔙 Kembali', callback_data: 'menu_owner' }]
-                            ]
-                        }
-                    });
-                } else {
-                    await bot.sendMessage(chatId, `❌ *GAGAL:* Struktur data API berubah atau API Key salah.`);
-                }
-            } catch (e) {
-                console.error("Error Detail:", e.message);
-                await bot.sendMessage(chatId, `⚠️ *SERVER BUSY*\n\nDetail: Tidak ada respon dari KMSP. Coba lagi nanti.`);
-            }
-        }
-// --- 🏆 FITUR LEADERBOARD (TOP SPENDER) ---
-        else if (data === 'owner_leaderboard') {
-            await bot.answerCallbackQuery(callback.id);
-            // Urutkan user berdasarkan total transaksi terbanyak
-            let topUsers = Object.keys(userBalance)
-                .map(id => ({
-                    name: userBalance[id].name || "User Baru",
-                    total: userBalance[id].total_trx || 0
-                }))
-                .sort((a, b) => b.total - a.total)
-                .slice(0, 5); // Ambil 5 besar
+                    await bot.editMessageCaption(`💰 *SALDO MODAL KMSP*\n━━━━━━━━━━━━━━━━━━\n\nSisa Saldo Anda:\n*${formatRupiah(saldoPusat)}*${peringatan}\n\n_Update terakhir: ${new Date().toLocaleString('id-ID')}_`, {
+                        chat_id: chatId, 
+                        message_id: messageId, 
+                        parse_mode: 'Markdown',
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{ text: '🔄 Refresh Saldo', callback_data: 'owner_cek_saldo_kmsp' }],
+                                [{ text: '🔙 Kembali', callback_data: 'menu_owner' }]
+                            ]
+                        }
+                    });
+                } else {
+                    await bot.sendMessage(chatId, `❌ *GAGAL:* Struktur data API berubah atau API Key salah.`);
+                }
+            } catch (e) {
+                console.error("Error Detail:", e.message);
+                await bot.sendMessage(chatId, `⚠️ *SERVER BUSY*\n\nDetail: Tidak ada respon dari KMSP. Coba lagi nanti.`);
+            }
+        }
+        // --- 🏆 FITUR LEADERBOARD (TOP SPENDER) ---
+        else if (data === 'owner_leaderboard') {
+            // FIX: Gunakan callbackQuery.id
+            await bot.answerCallbackQuery(callbackQuery.id).catch(() => {});
+            
+            let topUsers = Object.keys(userBalance)
+                .map(id => ({
+                    name: userBalance[id].name || "User Baru",
+                    total: userBalance[id].total_trx || 0
+                }))
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 5);
 
-            let txt = `🏆 *TOP TRANSAKSI (BULAN INI)*\n━━━━━━━━━━━━━━━━━━\n\n`;
-            topUsers.forEach((u, i) => {
-                const medali = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👤';
-                txt += `${medali} *${u.name}* — ${u.total} Transaksi\n`;
-            });
-            txt += `\n_Tingkatkan transaksi & raih bonus saldo!_`;
+            let txt = `🏆 *TOP TRANSAKSI (BULAN INI)*\n━━━━━━━━━━━━━━━━━━\n\n`;
+            topUsers.forEach((u, i) => {
+                const medali = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👤';
+                txt += `${medali} *${u.name}* — ${u.total} Transaksi\n`;
+            });
+            txt += `\n_Tingkatkan transaksi & raih bonus saldo!_`;
 
-            await bot.editMessageCaption(txt, { 
-                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
-                reply_markup: { inline_keyboard: [[{ text: '🏠 KEMBALI', callback_data: 'back_to_menu' }]] }
-            });
-        }
+            await bot.editMessageCaption(txt, { 
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [[{ text: '🏠 KEMBALI', callback_data: 'back_to_menu' }]] }
+            });
+        }
 
-        // --- 📖 FITUR PANDUAN BOT ---
+        // --- 📖 FITUR PANDUAN BOT ---
         else if (data === 'menu_panduan') {
-            await bot.answerCallbackQuery(callback.id);
+            // FIX: Gunakan callbackQuery.id
+            await bot.answerCallbackQuery(callbackQuery.id).catch(() => {});
+            
             const txtPanduan = `📖 *PANDUAN PENGGUNAAN BOT*\n━━━━━━━━━━━━━━━━━━\n\n` +
                 `1️⃣ *ISI SALDO:* Klik menu Isi Saldo, bayar via QRIS otomatis.\n` +
                 `2️⃣ *BELI PAKET:* Pilih menu Beli Paket. Nomor akan tersimpan otomatis setelah transaksi pertama.\n` +
@@ -719,58 +721,53 @@ Status: *BERHASIL (LUNAS)*`;
                 reply_markup: { inline_keyboard: [[{ text: '🏠 MENU UTAMA', callback_data: 'back_to_menu' }]] }
             });
         }
-// --- MENU PROFIL (DENGAN TRACKER REWARD) ---
-        else if (data === 'menu_profile') {
-            const u = userBalance[userId] || { balance: 0, total_trx: 0, role: 'member' };
-            const totalTrx = u.total_trx || 0;
-            
-            // Hitung sisa transaksi menuju reward (Target: 20)
-            const targetReward = 20;
-            const sisaKeReward = targetReward - (totalTrx % targetReward);
-            const progress = totalTrx % targetReward;
+        // --- MENU PROFIL (DENGAN TRACKER REWARD) ---
+        else if (data === 'menu_profile') {
+            const u = userBalance[userId] || { balance: 0, total_trx: 0, role: 'member' };
+            const totalTrx = u.total_trx || 0;
+            
+            const targetReward = 20;
+            const sisaKeReward = targetReward - (totalTrx % targetReward);
+            const progress = totalTrx % targetReward;
 
-            let pText = `👤 *PROFIL PENGGUNA*\n━━━━━━━━━━━━━━━━━━\n\n`;
-            pText += `🆔 ID: \`${userId}\`\n`;
-            pText += `🎭 Role: *${u.role.toUpperCase()}*\n`;
-            pText += `💰 Saldo: *${formatRupiah(u.balance)}*\n`;
-            pText += `📊 Total Transaksi: *${totalTrx}*\n\n`;
-            
-            pText += `🎁 *PROGRESS REWARD*\n`;
-            pText += `[${'🟢'.repeat(Math.floor(progress/4))}${'⚪'.repeat(5 - Math.floor(progress/4))}] ${progress}/${targetReward}\n`;
-            pText += `👉 _Lakukan *${sisaKeReward}* transaksi lagi untuk bonus saldo Rp 2.000!_`;
+            let pText = `👤 *PROFIL PENGGUNA*\n━━━━━━━━━━━━━━━━━━\n\n`;
+            pText += `🆔 ID: \`${userId}\`\n`;
+            pText += `🎭 Role: *${u.role.toUpperCase()}*\n`;
+            pText += `💰 Saldo: *${formatRupiah(u.balance)}*\n`;
+            pText += `📊 Total Transaksi: *${totalTrx}*\n\n`;
+            
+            pText += `🎁 *PROGRESS REWARD*\n`;
+            pText += `[${'🟢'.repeat(Math.floor(progress/4))}${'⚪'.repeat(5 - Math.floor(progress/4))}] ${progress}/${targetReward}\n`;
+            pText += `👉 _Lakukan *${sisaKeReward}* transaksi lagi untuk bonus saldo Rp 2.000!_`;
 
-            await bot.editMessageCaption(pText, {
-                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
-                reply_markup: {
-                    inline_keyboard: [
-                        [{ text: '🔄 Refresh', callback_data: 'menu_profile' }],
-                        [{ text: '🏠 Kembali', callback_data: 'back_to_menu' }]
-                    ]
-                }
-            });
-        }
-// --- FITUR LOGOUT / GANTI NOMOR XL ---
-        else if (data === 'logout_xl') {
-            await bot.answerCallbackQuery(callback.id, { text: "Memproses Logout..." });
+            await bot.editMessageCaption(pText, {
+                chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '🔄 Refresh', callback_data: 'menu_profile' }],
+                        [{ text: '🏠 Kembali', callback_data: 'back_to_menu' }]
+                    ]
+                }
+            });
+        }
+        // --- FITUR LOGOUT / GANTI NOMOR XL ---
+        else if (data === 'logout_xl') {
+            // FIX: Gunakan callbackQuery.id
+            await bot.answerCallbackQuery(callbackQuery.id, { text: "Memproses Logout..." }).catch(() => {});
 
-            // Menghapus nomor XL yang tersimpan di database user
-            if (userBalance[userId]) {
-                userBalance[userId].saved_phone = null; // Menghapus data nomor
-                saveDB(config.userBalanceFile, userBalance);
-                
-                const pesanLogout = `✅ *LOGOUT BERHASIL*\n━━━━━━━━━━━━━━━━━━\n\nNomor XL kamu telah dihapus dari sistem. Saat melakukan pembelian berikutnya, kamu akan diminta memasukkan nomor baru.\n\n_Silakan kembali ke menu utama._`;
-                
-                await bot.editMessageCaption(pesanLogout, {
-                    chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
-                    reply_markup: { inline_keyboard: [[{ text: '🏠 MENU UTAMA', callback_data: 'back_to_menu' }]] }
-                });
-            }
-        }
-    } catch (err) {
-        console.error("Callback Error:", err);
-    }
-    bot.answerCallbackQuery(callback.id).catch(() => {});
-});
+            if (userBalance[userId]) {
+                userBalance[userId].saved_phone = null; 
+                saveDB(config.userBalanceFile, userBalance);
+                
+                const pesanLogout = `✅ *LOGOUT BERHASIL*\n━━━━━━━━━━━━━━━━━━\n\nNomor XL kamu telah dihapus dari sistem. Saat melakukan pembelian berikutnya, kamu akan diminta memasukkan nomor baru.\n\n_Silakan kembali ke menu utama._`;
+                
+                await bot.editMessageCaption(pesanLogout, {
+                    chat_id: chatId, message_id: messageId, parse_mode: 'Markdown',
+                    reply_markup: { inline_keyboard: [[{ text: '🏠 MENU UTAMA', callback_data: 'back_to_menu' }]] }
+                });
+            }
+        }
+        
 
 // ==========================================
 // 5. MESSAGE HANDLER (Chat Logic) - FIXED
