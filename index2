@@ -1022,6 +1022,48 @@ bot.on('message', async (msg) => {
             }
         }
 
+        // [G] OWNER: PROSES BROADCAST
+        else if (state === 'OWNER_WAITING_BC_TEXT') {
+            delete userState[chatId];
+            const users = Object.keys(userBalance);
+            
+            await bot.sendMessage(chatId, `🚀 *Memulai Broadcast ke ${users.length} pengguna...*`, { parse_mode: 'Markdown' });
+            
+            users.forEach((uid, idx) => {
+                // Jeda 150ms antar pesan agar tidak terkena limit/banned oleh Telegram
+                setTimeout(() => {
+                    bot.sendMessage(uid, `📢 *INFORMASI ADMIN*\n━━━━━━━━━━━━━━━━━━\n\n${text}`, { parse_mode: 'Markdown' })
+                    .catch((err) => {
+                        console.log(`⚠️ Gagal kirim ke ${uid}: ${err.message}`);
+                        // Biasanya gagal karena user memblokir bot
+                    });
+                }, idx * 150); 
+            });
+            
+            await bot.sendMessage(chatId, `✅ *Broadcast sedang berjalan di latar belakang.*`);
+        }
+
+        // [H] OWNER: INPUT ID UNTUK SET ROLE
+        else if (state === 'OWNER_WAITING_ID_ROLE') {
+            const tId = text.trim();
+            if (!userBalance[tId]) {
+                return bot.sendMessage(chatId, "❌ *ID Salah atau User belum terdaftar.*", { parse_mode: 'Markdown' });
+            }
+            
+            delete userState[chatId];
+            await bot.sendMessage(chatId, `👤 *User ID:* \`${tId}\`\n*Nama:* ${userBalance[tId].name || 'Tanpa Nama'}\n*Role Sekarang:* ${userBalance[tId].role}\n\nSilakan pilih role baru untuk user tersebut:`, {
+                parse_mode: 'Markdown',
+                reply_markup: { 
+                    inline_keyboard: [
+                        [
+                            { text: '👤 Member', callback_data: `setrole_${tId}_member` }, 
+                            { text: '💼 Reseller', callback_data: `setrole_${tId}_reseller` }
+                        ],
+                        [{ text: '❌ Batal', callback_data: 'back_to_menu' }]
+                    ] 
+                }
+            });
+        }
     } catch (e) {
         console.error("Handler Error:", e.message);
         delete userState[chatId];
