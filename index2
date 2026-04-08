@@ -199,7 +199,7 @@ const sendMainMenu = async (chatId, userId, name, messageId = null) => {
 };
 
 // ==========================================
-// 4. CALLBACK QUERY HANDLER
+// 5. CALLBACK QUERY HANDLER
 // ==========================================
 bot.on('callback_query', async (callbackQuery) => {
     const chatId = callbackQuery.message?.chat.id;
@@ -787,7 +787,7 @@ bot.on('callback_query', async (callbackQuery) => {
     }
 }); // <--- PENUTUP CALLBACK QUERY
 // ==========================================
-// 5. MESSAGE HANDLER (Chat Logic) - OPTIMIZED
+// 6. MESSAGE HANDLER (Chat Logic) - OPTIMIZED
 // ==========================================
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
