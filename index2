@@ -298,7 +298,16 @@ bot.on('callback_query', async (callbackQuery) => {
                     const namaAman = (p.package_name || 'Tanpa Nama').replace(/[*_`\[\]()]/g, '');
                     const priceFinal = `Rp ${hargaJual.toLocaleString('id-ID')}`;
                     
-                    pText += `🔹 *${namaAman}*\n💰 Harga: *${priceFinal}*\n\n`;
+                    // AMBIL DESKRIPSI DI SINI
+                    // Kita bersihkan karakter spesial Markdown agar tidak error
+                    const deskripsi = (p.package_description || "Proses otomatis, stok tersedia.")
+                                      .replace(/[*_`\[\]()]/g, '') 
+                                      .trim();
+                    
+                    // Tambahkan deskripsi ke dalam teks (pake font miring/italic)
+                    pText += `🔹 *${namaAman}*\n`;
+                    pText += `💰 Harga: *${priceFinal}*\n`;
+                    pText += `📝 _${deskripsi}_\n\n`; // <--- Deskripsi muncul di sini
                     
                     buttons.push([{
                         text: `🛒 BELI | ${priceFinal}`,
