@@ -69,16 +69,25 @@ const saveDB = (file, data) => {
     }
 };
 
-// Pindahkan deklarasi variabel ke atas sebelum fungsi getUserData
+// ==========================================
+// 2. DATABASE & GLOBAL VARIABLES
+// ==========================================
+const botStartTime = Date.now(); // Tambahkan ini agar fungsi getRuntime() jalan
+
 let userBalance = loadDB(config.userBalanceFile, {}); 
 let historyTrx = loadDB(config.historyFile, []);
 let xlSessions = loadDB(config.xlSessionsFile, {});
 
-// State Management
+// State Management (Penting untuk alur chat)
 const userState = {}; 
 const tempOrder = {}; 
 const isProcessing = {}; 
 
+// ==========================================
+// 3. HELPER FUNCTIONS
+// ==========================================
+
+// Fungsi mengambil data user / daftar otomatis jika belum ada
 function getUserData(userId, referrerId = null) {
     const id = String(userId); 
     if (!userBalance[id]) {
@@ -95,9 +104,14 @@ function getUserData(userId, referrerId = null) {
     return userBalance[id];
 }
 
-// Helper Functions
-const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+// Format Angka ke Rupiah
+const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { 
+    style: 'currency', 
+    currency: 'IDR', 
+    minimumFractionDigits: 0 
+}).format(n);
 
+// Menghitung masa aktif bot
 const getRuntime = () => {
     const uptime = Date.now() - botStartTime;
     const seconds = Math.floor((uptime / 1000) % 60);
@@ -108,7 +122,7 @@ const getRuntime = () => {
 };
 
 // ==========================================
-// 3. TAMPILAN MENU UTAMA
+// 4. TAMPILAN MENU UTAMA
 // ==========================================
 const sendMainMenu = async (chatId, userId, name, messageId = null) => {
     const userData = getUserData(userId);
@@ -187,153 +201,170 @@ const sendMainMenu = async (chatId, userId, name, messageId = null) => {
 // ==========================================
 // 4. CALLBACK QUERY HANDLER
 // ==========================================
-bot.on('callback_query', async (callbackQuery) => { // <--- Ganti jadi callbackQuery
+bot.on('callback_query', async (callbackQuery) => {
     const chatId = callbackQuery.message?.chat.id;
     const messageId = callbackQuery.message?.message_id;
     const data = callbackQuery.data;
     const userId = callbackQuery.from.id;
     const userData = getUserData(userId);
+    
     try {
         if (data === 'back_to_menu') {
-            await sendMainMenu(chatId, userId, callback.from.first_name, messageId);
+            // FIX: Menggunakan callbackQuery.from.first_name
+            await sendMainMenu(chatId, userId, callbackQuery.from.first_name, messageId);
+            await bot.answerCallbackQuery(callbackQuery.id).catch(() => {});
         }
         else if (data === 'menu_list') {
-            // JANGAN tulis const chatId lagi di sini! Pakai yang sudah ada di atas.
             const keyboard = [
                 [{ text: '💎 BEST SELLER', callback_data: 'cat_bestseller_0' }],
                 [{ text: '👥 XL AKRAB', callback_data: 'cat_akrab_0' }, { text: '🚀 EXTRA COMBO', callback_data: 'cat_combo_0' }],
                 [{ text: '🔥 HOTROD', callback_data: 'cat_hotrod_0' }, { text: '🌐 SEMUA PAKET', callback_data: 'cat_all_0' }],
                 [{ text: '📊 CEK STOK AKRAB', callback_data: 'menu_stok_akrab' }],
-                [{ text: '🔙 KEMBALI', callback_data: 'back_to_menu' }] // Sesuaikan dengan handler 'back_to_menu'
+                [{ text: '🔙 KEMBALI', callback_data: 'back_to_menu' }]
             ];
 
             try {
-                // Pakai chatId & messageId dari variabel global di atas
                 await bot.deleteMessage(chatId, messageId).catch(() => {});
                 
-                // Pastikan file './logo.jpg' ada, kalau ragu pakai sendMessage saja dulu
-                await bot.sendPhoto(chatId, './logo.jpg', {
-                    caption: '📂 *PILIH KATEGORI PAKET*:',
-                    parse_mode: 'Markdown',
-                    reply_markup: { inline_keyboard: keyboard }
-                });
+                // FIX: Memastikan file ada sebelum mengirim
+                if (fs.existsSync('./logo.jpg')) {
+                    await bot.sendPhoto(chatId, './logo.jpg', {
+                        caption: '📂 *PILIH KATEGORI PAKET*:',
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: keyboard }
+                    });
+                } else {
+                    await bot.sendMessage(chatId, '📂 *PILIH KATEGORI PAKET*:', {
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: keyboard }
+                    });
+                }
             } catch (err) {
-                // Jika kirim foto gagal, kirim teks saja
+                // Fallback jika tetap gagal
                 await bot.sendMessage(chatId, '📂 *PILIH KATEGORI PAKET*:', {
                     parse_mode: 'Markdown',
                     reply_markup: { inline_keyboard: keyboard }
                 });
             }
-            // PAKAI callback.id (Sesuai nama di baris paling atas), BUKAN callbackQuery.id
-            await bot.answerCallbackQuery(callback.id).catch(() => {});
+            // FIX: Menggunakan callbackQuery.id
+            await bot.answerCallbackQuery(callbackQuery.id).catch(() => {});
         }
-else if (data.startsWith('cat_')) {
-    const [, kategori, pageStr] = data.split('_');
-    const page = parseInt(pageStr) || 0;
-    const itemsPerPage = 5;
-    
-    // JANGAN tulis 'const chatId =' lagi di sini karena sudah ada di paling atas!
-    
-    try {
-        const apiUrl = `https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`;
-        const res = await axios.get(apiUrl);
-        let allData = (res.data && res.data.data) ? res.data.data : [];
-        
-        let filtered = allData.filter(p => {
-            const name = (p.package_name || "").toLowerCase();
-            if (kategori === 'bestseller') return /turbo|super|promo|extra/i.test(name);
-            if (kategori === 'akrab') return name.includes('akrab');
-            if (kategori === 'combo') return name.includes('combo') || name.includes('xtra');
-            if (kategori === 'hotrod') return name.includes('hotrod');
-            return true;
-        });
-        
-        if (filtered.length === 0) {
-            // PAKAI 'callback.id'
-            return bot.answerCallbackQuery(callback.id, {
-                text: "❌ Paket tidak tersedia saat ini.",
-                show_alert: true
-            }).catch(() => {});
-        }
-        
-        const totalPages = Math.ceil(filtered.length / itemsPerPage);
-        const paginated = filtered.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
-        const markup = (userData.role === 'reseller') ? config.markupReseller : config.markupMember;
-        
-        let pText = `📦 *KATEGORI: ${kategori.toUpperCase()}*\n`;
-        pText += `━━━━━━━━━━━━━━━━\n`;
-        pText += `Halaman: ${page + 1} dari ${totalPages}\n\n`;
-        const buttons = [];
-        
-        paginated.forEach(p => {
-            const hargaJual = Math.ceil(Number(p.package_harga_int || 0) + markup);
-            const deskripsi = (p.package_description || "Proses otomatis.").replace(/[*_`\[\]()]/g, '');
-            const namaAman = (p.package_name || 'Tanpa Nama').replace(/[*_`\[\]()]/g, '');
-            const priceFinal = formatRupiah(hargaJual);
+        else if (data.startsWith('cat_')) {
+            const [, kategori, pageStr] = data.split('_');
+            const page = parseInt(pageStr) || 0;
+            const itemsPerPage = 5;
             
-            pText += `🔹 *${namaAman}*\n💰 Harga: *${priceFinal}*\n📝 _${deskripsi}_\n\n`;
-            
-            buttons.push([{
-                text: `🛒 BELI | ${priceFinal}`,
-                callback_data: `buy_direct_${p.package_code}`.substring(0, 64)
-            }]);
-        });
-        
-        const nav = [];
-        if (page > 0) nav.push({ text: "⬅️ Prev", callback_data: `cat_${kategori}_${page - 1}` });
-        if (page + 1 < totalPages) nav.push({ text: "Next ➡️", callback_data: `cat_${kategori}_${page + 1}` });
-        if (nav.length > 0) buttons.push(nav);
-        buttons.push([{ text: "🔙 KEMBALI", callback_data: "menu_list" }]);
-        
-        // PAKAI 'callback.id'
-        await bot.answerCallbackQuery(callback.id).catch(() => {});
-        
-        await bot.editMessageText(pText, {
-            chat_id: chatId,
-            message_id: messageId,
-            parse_mode: 'Markdown',
-            reply_markup: { inline_keyboard: buttons }
-        }).catch(() => {});
+            try {
+                const apiUrl = `https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`;
+                const res = await axios.get(apiUrl);
+                let allData = (res.data && res.data.data) ? res.data.data : [];
+                
+                let filtered = allData.filter(p => {
+                    const name = (p.package_name || "").toLowerCase();
+                    if (kategori === 'bestseller') return /turbo|super|promo|extra/i.test(name);
+                    if (kategori === 'akrab') return name.includes('akrab');
+                    if (kategori === 'combo') return name.includes('combo') || name.includes('xtra');
+                    if (kategori === 'hotrod') return name.includes('hotrod');
+                    return true;
+                });
+                
+                if (filtered.length === 0) {
+                    // FIX: Menggunakan callbackQuery.id
+                    return bot.answerCallbackQuery(callbackQuery.id, {
+                        text: "❌ Paket tidak tersedia saat ini.",
+                        show_alert: true
+                    }).catch(() => {});
+                }
+                
+                const totalPages = Math.ceil(filtered.length / itemsPerPage);
+                const paginated = filtered.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+                const markup = (userData.role === 'reseller') ? config.markupReseller : config.markupMember;
+                
+                let pText = `📦 *KATEGORI: ${kategori.toUpperCase()}*\n`;
+                pText += `━━━━━━━━━━━━━━━━\n`;
+                pText += `Halaman: ${page + 1} dari ${totalPages}\n\n`;
+                const buttons = [];
+                
+                paginated.forEach(p => {
+                    const hargaJual = Math.ceil(Number(p.package_harga_int || 0) + markup);
+                    const deskripsi = (p.package_description || "Proses otomatis.").replace(/[*_`\[\]()]/g, '');
+                    const namaAman = (p.package_name || 'Tanpa Nama').replace(/[*_`\[\]()]/g, '');
+                    const priceFinal = formatRupiah(hargaJual);
+                    
+                    pText += `🔹 *${namaAman}*\n💰 Harga: *${priceFinal}*\n📝 _${deskripsi}_\n\n`;
+                    
+                    buttons.push([{
+                        text: `🛒 BELI | ${priceFinal}`,
+                        callback_data: `buy_direct_${p.package_code}`.substring(0, 64)
+                    }]);
+                });
+                
+                const nav = [];
+                if (page > 0) nav.push({ text: "⬅️ Prev", callback_data: `cat_${kategori}_${page - 1}` });
+                if (page + 1 < totalPages) nav.push({ text: "Next ➡️", callback_data: `cat_${kategori}_${page + 1}` });
+                if (nav.length > 0) buttons.push(nav);
+                buttons.push([{ text: "🔙 KEMBALI", callback_data: "menu_list" }]);
+                
+                // FIX: Menggunakan callbackQuery.id
+                await bot.answerCallbackQuery(callbackQuery.id).catch(() => {});
+                
+                await bot.editMessageText(pText, {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    parse_mode: 'Markdown',
+                    reply_markup: { inline_keyboard: buttons }
+                }).catch(() => {});
 
-    } catch (err) {
-        console.error("API Error:", err.message);
-        bot.answerCallbackQuery(callback.id, { text: "❌ Gagal memuat data." });
-    }
-}
-else if (data.startsWith('buy_direct_')) {
-    const code = data.replace('buy_direct_', '');
-    // PAKAI 'callback.id'
-    await bot.answerCallbackQuery(callback.id, { text: "⏳ Mengecek ketersediaan..." });
-    
-    try {  
-        const resSaldo = await axios.get(`https://golang-openapi-panelaccountbalance-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
-        const saldoModal = Number(resSaldo.data?.data?.balance || 0);
-        
-        const apiUrl = `https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`;
-        const res = await axios.get(apiUrl);
-        const p = res.data?.data?.find(x => x.package_code === code);
-        
-        if (!p) return bot.sendMessage(chatId, "❌ Paket tidak ditemukan.");
-        
-        const hargaModal = Number(p.package_harga_int);
-        const markup = (userData.role === 'reseller') ? config.markupReseller : config.markupMember;
-        const hargaJual = hargaModal + markup;
-        
-        if (saldoModal < hargaModal) {
-            return bot.sendMessage(chatId, `⚠️ *STOK SEDANG RE-FILL*`);
+            } catch (err) {
+                console.error("API Error:", err.message);
+                bot.answerCallbackQuery(callbackQuery.id, { text: "❌ Gagal memuat data." }).catch(()=>{});
+            }
+        }
+        else if (data.startsWith('buy_direct_')) {
+            const code = data.replace('buy_direct_', '');
+            
+            // FIX: Menggunakan callbackQuery.id
+            await bot.answerCallbackQuery(callbackQuery.id, { text: "⏳ Mengecek ketersediaan..." }).catch(()=>{});
+            
+            try {  
+                const resSaldo = await axios.get(`https://golang-openapi-panelaccountbalance-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
+                const saldoModal = Number(resSaldo.data?.data?.balance || 0);
+                
+                const apiUrl = `https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`;
+                const res = await axios.get(apiUrl);
+                const p = res.data?.data?.find(x => x.package_code === code);
+                
+                if (!p) return bot.sendMessage(chatId, "❌ Paket tidak ditemukan.");
+                
+                const hargaModal = Number(p.package_harga_int);
+                const markup = (userData.role === 'reseller') ? config.markupReseller : config.markupMember;
+                const hargaJual = hargaModal + markup;
+                
+                if (saldoModal < hargaModal) {
+                    return bot.sendMessage(chatId, `⚠️ *STOK SEDANG RE-FILL*`);
+                }
+                
+                tempOrder[chatId] = {
+                    package_code: code,
+                    price_sell: hargaJual,
+                    name: p.package_name,
+                    waitingForNumber: true
+                };
+                
+                await bot.sendMessage(chatId, `🛒 *ORDER:* ${p.package_name}\n💰 *HARGA:* Rp ${hargaJual.toLocaleString('id-ID')}\n\n✍️ *Kirimkan Nomor Tujuan:*`);
+                
+            } catch (err) {
+                bot.sendMessage(chatId, "❌ Terjadi kesalahan sistem saat mengecek order.");
+            }
+        } else {
+            // Mencegah loading bot nyangkut jika ada callback_data yang belum terhandle
+            await bot.answerCallbackQuery(callbackQuery.id).catch(() => {});
         }
         
-        tempOrder[chatId] = {
-            package_code: code,
-            price_sell: hargaJual,
-            name: p.package_name,
-            waitingForNumber: true
-        };
-        
-        await bot.sendMessage(chatId, `🛒 *ORDER:* ${p.package_name}\n💰 *HARGA:* Rp ${hargaJual.toLocaleString('id-ID')}\n\n✍️ *Kirimkan Nomor Tujuan:*`);
-        
-    } catch (err) {
-        bot.sendMessage(chatId, "❌ Terjadi kesalahan sistem.");
+    } catch (globalError) {
+        // FIX: Menambahkan penutup blok try-catch utama agar aplikasi tidak crash sepenuhnya
+        console.error("Global Callback Error:", globalError);
+        await bot.answerCallbackQuery(callbackQuery.id, { text: "Terjadi kesalahan internal." }).catch(() => {});
     }
 }
         else if (data === 'logout_xl_direct') {
