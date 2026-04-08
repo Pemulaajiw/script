@@ -546,13 +546,13 @@ bot.on('callback_query', async (callbackQuery) => {
         else if (data === 'confirm_buy') {
             const order = tempOrder[chatId];
             const userData = getUserData(userId); // Ambil data user agar saldo terbaca
-            const messageId = query.message.message_id; // Ambil ID pesan untuk diedit
+            const messageId = callbackQuery.message.message_id; // Sesuaikan variabel ini
 
-            if (!order) return bot.sendMessage(chatId, "❌ Sesi habis, silakan ulangi pembelian.");
-            if (userData.balance < order.price_sell) return bot.sendMessage(chatId, "❌ Saldo kurang.");
-            if (isProcessing[chatId]) return;
+    if (!order) return bot.sendMessage(chatId, "❌ Sesi habis, silakan ulangi pembelian.");
+    if (userData.balance < order.price_sell) return bot.sendMessage(chatId, "❌ Saldo kurang.");
+    if (isProcessing[chatId]) return;
 
-            isProcessing[chatId] = true;
+    isProcessing[chatId] = true;
             try {
                 // Beri feedback visual ke user
                 await bot.editMessageText("⏳ *SEDANG DIPROSES...*\nMohon jangan klik apapun.", { 
