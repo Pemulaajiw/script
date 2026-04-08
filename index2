@@ -1039,28 +1039,7 @@ bot.on('message', async (msg) => {
             }
         }
 
-        // [G] OWNER: PROSES BROADCAST
-        else if (state === 'OWNER_WAITING_BC_TEXT') {
-            delete userState[chatId];
-            const users = Object.keys(userBalance);
-            
-            await bot.sendMessage(chatId, `🚀 *Memulai Broadcast ke ${users.length} pengguna...*`, { parse_mode: 'Markdown' });
-            
-            users.forEach((uid, idx) => {
-                // Jeda 150ms antar pesan agar tidak terkena limit/banned oleh Telegram
-                setTimeout(() => {
-                    bot.sendMessage(uid, `📢 *INFORMASI ADMIN*\n━━━━━━━━━━━━━━━━━━\n\n${text}`, { parse_mode: 'Markdown' })
-                    .catch((err) => {
-                        console.log(`⚠️ Gagal kirim ke ${uid}: ${err.message}`);
-                        // Biasanya gagal karena user memblokir bot
-                    });
-                }, idx * 150); 
-            });
-            
-            await bot.sendMessage(chatId, `✅ *Broadcast sedang berjalan di latar belakang.*`);
-        }
-
-        // [H] OWNER: INPUT ID UNTUK SET ROLE
+        // [G] OWNER: INPUT ID UNTUK SET ROLE
         else if (state === 'OWNER_WAITING_ID_ROLE') {
             const tId = text.trim();
             if (!userBalance[tId]) {
@@ -1085,52 +1064,6 @@ bot.on('message', async (msg) => {
         console.error("Handler Error:", e.message);
         delete userState[chatId];
         bot.sendMessage(chatId, "❌ Terjadi gangguan sementara.");
-    }
-});
-
-// ==========================================
-// 7. CALLBACK QUERY HANDLER (Tombol Klik)
-// ==========================================
-bot.on('callback_query', async (query) => {
-    const chatId = query.message.chat.id;
-    const userId = query.from.id;
-    const data = query.data;
-
-    try {
-        // A. Penanganan Role (Admin Only)
-        if (data.startsWith('setrole_')) {
-            if (userId !== config.ownerId) return bot.answerCallbackQuery(query.id, { text: "❌ Lu bukan bos!" });
-            
-            const [_, tId, newRole] = data.split('_');
-            if (userBalance[tId]) {
-                userBalance[tId].role = newRole;
-                saveDB(config.userBalanceFile, userBalance);
-                bot.answerCallbackQuery(query.id, { text: `✅ Berhasil set ${newRole}!` });
-                bot.sendMessage(chatId, `✅ User \`${tId}\` sekarang adalah *${newRole.toUpperCase()}*`, { parse_mode: 'Markdown' });
-                bot.sendMessage(tId, `🎉 Selamat! Role kamu telah diubah menjadi *${newRole.toUpperCase()}* oleh Admin.`);
-            }
-        }
-
-        // B. Penanganan Bayar Paket (Confirm Buy)
-        if (data === 'confirm_buy') {
-            const order = tempOrder[chatId];
-            if (!order) return bot.answerCallbackQuery(query.id, { text: "❌ Sesi kadaluarsa." });
-            
-            // Logika potong saldo dan tembak API ditaruh di sini...
-            bot.answerCallbackQuery(query.id, { text: "⏳ Memproses pembelian..." });
-            // Lanjutkan dengan axios.post ke provider...
-        }
-
-        // C. Tombol Kembali
-        if (data === 'back_to_menu') {
-            delete userState[chatId];
-            await bot.deleteMessage(chatId, query.message.message_id).catch(() => {});
-            return sendMainMenu(chatId, userId, query.from.first_name);
-        }
-
-    } catch (e) {
-        console.error("Callback Error:", e.message);
-        bot.answerCallbackQuery(query.id, { text: "❌ Error saat klik tombol." });
     }
 });
 // ==========================================
