@@ -947,6 +947,80 @@ bot.on('message', async (msg) => {
             bot.sendMessage(chatId, `✅ Berhasil +${formatRupiah(amount)} ke ${tId}`);
             bot.sendMessage(tId, `🎁 Saldo ditambahkan Admin: ${formatRupiah(amount)}`);
         }
+        // [E] FITUR CEK KUOTA
+        else if (state === 'WAITING_CHECK_QUOTA') {
+            let phone = text.replace(/[^0-9]/g, '');
+            if (phone.startsWith('08')) phone = '62' + phone.slice(1);
+            
+            delete userState[chatId]; // Langsung hapus state agar tidak looping
+            await bot.sendMessage(chatId, '🔍 *Sedang mengecek kuota ke server...*', { parse_mode: 'Markdown' });
+
+            try {
+                const res = await axios.get(`https://apigw.kmsp-store.com/sidompul/v4/cek_kuota`, { 
+                    params: { msisdn: phone, isJSON: 'true' }, 
+                    headers: { 
+                        "Authorization": config.sidompulAuth, 
+                        "X-API-Key": config.sidompulKey,
+                        "X-App-Version": "4.0.0" 
+                    },
+                    timeout: 20000 // Beri timeout agak lama karena server provider sering delay
+                });
+
+                if (res.data.status && res.data.data.hasil) {
+                    const hasil = res.data.data.hasil
+                        .replace(/<br>/g, "\n")
+                        .replace(/📃 RESULT:/g, "📊 *HASIL CEK KUOTA*")
+                        .replace(/------------------------/g, "━━━━━━━━━━━━━━━━━━");
+                    
+                    await bot.sendMessage(chatId, hasil, { 
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: [[{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]] }
+                    });
+                } else {
+                    await bot.sendMessage(chatId, '❌ *Data tidak ditemukan.*\nNomor salah atau sedang gangguan server.');
+                }
+            } catch(e) { 
+                console.error("Cek Kuota Error:", e.message);
+                bot.sendMessage(chatId, '❌ *Gagal terhubung ke provider.*'); 
+            }
+        }
+        
+        // [F] FITUR CEK AKRAB
+        else if (state === 'WAITING_CEK_AKRAB') {
+            let phone = text.replace(/[^0-9]/g, '');
+            if (phone.startsWith('08')) phone = '62' + phone.slice(1);
+            
+            delete userState[chatId];
+            await bot.sendMessage(chatId, '🔍 *Sedang mengecek status paket Akrab...*', { parse_mode: 'Markdown' });
+
+            try {
+                const res = await axios.get(`https://apigw.kmsp-store.com/sidompul/v4/cek_akrab`, { 
+                    params: { msisdn: phone, isJSON: 'true' }, 
+                    headers: { 
+                        "Authorization": config.sidompulAuth, 
+                        "X-API-Key": config.sidompulKey,
+                        "X-App-Version": "4.0.0" 
+                    },
+                    timeout: 20000
+                });
+
+                if (res.data.status && res.data.data.hasil) {
+                    const hasil = res.data.data.hasil
+                        .replace(/<br>/g, "\n")
+                        .replace(/📃 RESULT:/g, "📊 *HASIL CEK AKRAB*")
+                        .replace(/------------------------/g, "━━━━━━━━━━━━━━━━━━");
+                    
+                    await bot.sendMessage(chatId, hasil, { 
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: [[{ text: '🏠 Menu Utama', callback_data: 'back_to_menu' }]] }
+                    });
+                } else {
+                    await bot.sendMessage(chatId, '❌ *Data tidak ditemukan.*');
+                }
+            } catch(e) { 
+                bot.sendMessage(chatId, '❌ *Gagal terhubung ke provider.*'); 
+            }
+        }
 
     } catch (e) {
         console.error("Handler Error:", e.message);
