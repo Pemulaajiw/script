@@ -1072,7 +1072,52 @@ bot.on('message', async (msg) => {
 });
 
 // ==========================================
-// 6. ERROR HANDLING & STARTUP
+// 7. CALLBACK QUERY HANDLER (Tombol Klik)
+// ==========================================
+bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
+    const userId = query.from.id;
+    const data = query.data;
+
+    try {
+        // A. Penanganan Role (Admin Only)
+        if (data.startsWith('setrole_')) {
+            if (userId !== config.ownerId) return bot.answerCallbackQuery(query.id, { text: "❌ Lu bukan bos!" });
+            
+            const [_, tId, newRole] = data.split('_');
+            if (userBalance[tId]) {
+                userBalance[tId].role = newRole;
+                saveDB(config.userBalanceFile, userBalance);
+                bot.answerCallbackQuery(query.id, { text: `✅ Berhasil set ${newRole}!` });
+                bot.sendMessage(chatId, `✅ User \`${tId}\` sekarang adalah *${newRole.toUpperCase()}*`, { parse_mode: 'Markdown' });
+                bot.sendMessage(tId, `🎉 Selamat! Role kamu telah diubah menjadi *${newRole.toUpperCase()}* oleh Admin.`);
+            }
+        }
+
+        // B. Penanganan Bayar Paket (Confirm Buy)
+        if (data === 'confirm_buy') {
+            const order = tempOrder[chatId];
+            if (!order) return bot.answerCallbackQuery(query.id, { text: "❌ Sesi kadaluarsa." });
+            
+            // Logika potong saldo dan tembak API ditaruh di sini...
+            bot.answerCallbackQuery(query.id, { text: "⏳ Memproses pembelian..." });
+            // Lanjutkan dengan axios.post ke provider...
+        }
+
+        // C. Tombol Kembali
+        if (data === 'back_to_menu') {
+            delete userState[chatId];
+            await bot.deleteMessage(chatId, query.message.message_id).catch(() => {});
+            return sendMainMenu(chatId, userId, query.from.first_name);
+        }
+
+    } catch (e) {
+        console.error("Callback Error:", e.message);
+        bot.answerCallbackQuery(query.id, { text: "❌ Error saat klik tombol." });
+    }
+});
+// ==========================================
+// 7. ERROR HANDLING & STARTUP
 // ==========================================
 process.on('uncaughtException', (err) => console.error('FATAL:', err));
 process.on('unhandledRejection', (reason) => console.error('REJECTION:', reason));
