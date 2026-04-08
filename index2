@@ -356,17 +356,7 @@ bot.on('callback_query', async (callbackQuery) => {
             } catch (err) {
                 bot.sendMessage(chatId, "❌ Terjadi kesalahan sistem saat mengecek order.");
             }
-        } else {
-            // Mencegah loading bot nyangkut jika ada callback_data yang belum terhandle
-            await bot.answerCallbackQuery(callbackQuery.id).catch(() => {});
         }
-        
-    } catch (globalError) {
-        // FIX: Menambahkan penutup blok try-catch utama agar aplikasi tidak crash sepenuhnya
-        console.error("Global Callback Error:", globalError);
-        await bot.answerCallbackQuery(callbackQuery.id, { text: "Terjadi kesalahan internal." }).catch(() => {});
-    }
-}
         else if (data === 'logout_xl_direct') {
             userBalance[userId].saved_phone = null;
             saveDB(config.userBalanceFile, userBalance);
