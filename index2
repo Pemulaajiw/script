@@ -343,42 +343,61 @@ bot.on('callback_query', async (callbackQuery) => {
             }
         }
         else if (data.startsWith('buy_direct_')) {
-            const code = data.replace('buy_direct_', '');
-            
-            // FIX: Menggunakan callbackQuery.id
-            await bot.answerCallbackQuery(callbackQuery.id, { text: "⏳ Mengecek ketersediaan..." }).catch(()=>{});
-            
-            try {  
-                const resSaldo = await axios.get(`https://golang-openapi-panelaccountbalance-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
-                const saldoModal = Number(resSaldo.data?.data?.balance || 0);
-                
-                const apiUrl = `https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`;
-                const res = await axios.get(apiUrl);
-                const p = res.data?.data?.find(x => x.package_code === code);
-                
-                if (!p) return bot.sendMessage(chatId, "❌ Paket tidak ditemukan.");
-                
-                const hargaModal = Number(p.package_harga_int);
-                const markup = (userData.role === 'reseller') ? config.markupReseller : config.markupMember;
-                const hargaJual = hargaModal + markup;
-                
-                if (saldoModal < hargaModal) {
-                    return bot.sendMessage(chatId, `⚠️ *STOK SEDANG RE-FILL*`);
-                }
-                
-                tempOrder[chatId] = {
-                    package_code: code,
-                    price_sell: hargaJual,
-                    name: p.package_name,
-                    waitingForNumber: true
-                };
-                
-                await bot.sendMessage(chatId, `🛒 *ORDER:* ${p.package_name}\n💰 *HARGA:* Rp ${hargaJual.toLocaleString('id-ID')}\n\n✍️ *Kirimkan Nomor Tujuan:*`);
-                
-            } catch (err) {
-                bot.sendMessage(chatId, "❌ Terjadi kesalahan sistem saat mengecek order.");
-            }
+    const code = data.replace('buy_direct_', '');
+    // Pastikan pakai callbackQuery.id sesuai nama variabel di atas
+    await bot.answerCallbackQuery(callbackQuery.id, { text: "⏳ Mengecek ketersediaan..." }).catch(() => {});
+
+    try {
+        // 1. Cek Saldo Modal KMSP
+        const resSaldo = await axios.get(`https://golang-openapi-panelaccountbalance-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
+        const saldoModal = resSaldo.data?.data?.balance || 0;
+
+        // 2. Ambil data paket
+        const res = await axios.get(`https://golang-openapi-packagelist-xltembakservice.kmsp-store.com/v1?api_key=${config.apiKeyKMSP}`);
+        const p = res.data?.data?.find(x => x.package_code === code);
+        
+        if (!p) return bot.sendMessage(chatId, "❌ Paket tidak ditemukan.");
+
+        const markup = userData.role === 'reseller' ? config.markupReseller : config.markupMember;
+        const hargaJual = parseInt(p.package_harga_int) + markup;
+
+        // 3. Validasi Saldo Modal Pusat
+        if (saldoModal < p.package_harga_int) {
+            return bot.sendMessage(chatId, `⚠️ *STOK SEDANG RE-FILL*\n\nSaldo pusat menipis (${formatRupiah(saldoModal)}).\n\nSilakan hubungi Admin.`);
         }
+        
+        // Simpan data ke tempOrder
+        tempOrder[chatId] = { 
+            package_code: code, 
+            price_sell: hargaJual, 
+            name: p.package_name 
+        };
+
+        // --- CEK AUTOFILL NOMOR ---
+        // Pastikan userBalance[userId] sudah ada di database kamu
+        if (userBalance[userId] && userBalance[userId].saved_phone) {
+            tempOrder[chatId].phone = userBalance[userId].saved_phone;
+            
+            await bot.sendMessage(chatId, `🛒 *ORDER:* ${p.package_name}\n💰 *HARGA:* ${formatRupiah(hargaJual)}\n📱 *NOMOR:* \`${tempOrder[chatId].phone}\`\n\nNomor ditemukan! Ingin menggunakan nomor ini lagi?`, {
+                parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '✅ YA, LANJUTKAN', callback_data: 'confirm_buy' }],
+                        [{ text: '🔄 GANTI NOMOR', callback_data: 'logout_xl_direct' }]
+                    ]
+                }
+            });
+        } else {
+            // Jika tidak ada nomor, set state agar bot.on('message') tahu user mau input nomor
+            userState[chatId] = 'WAITING_BUY_PHONE'; 
+            await bot.sendMessage(chatId, `🛒 *ORDER:* ${p.package_name}\n💰 *HARGA:* ${formatRupiah(hargaJual)}\n\n👉 *Masukkan NOMOR HP (XL):*`, { parse_mode: 'Markdown' });
+        }
+
+    } catch (e) {
+        console.error("Error Buy Direct:", e.message);
+        bot.sendMessage(chatId, "⚠️ Terjadi gangguan koneksi ke server pusat.");
+    }
+}
         else if (data === 'logout_xl_direct') {
             userBalance[userId].saved_phone = null;
             saveDB(config.userBalanceFile, userBalance);
