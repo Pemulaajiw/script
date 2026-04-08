@@ -511,67 +511,90 @@ bot.on('callback_query', async (callbackQuery) => {
                 bot.sendMessage(chatId, "⚠️ Gagal memuat riwayat.");
             }
         }
+        // B. Penanganan Bayar Paket (Confirm Buy)
         else if (data === 'confirm_buy') {
             const order = tempOrder[chatId];
-            if (!order) return bot.sendMessage(chatId, "❌ Sesi habis.");
+            const userData = getUserData(userId); // Ambil data user agar saldo terbaca
+            const messageId = query.message.message_id; // Ambil ID pesan untuk diedit
+
+            if (!order) return bot.sendMessage(chatId, "❌ Sesi habis, silakan ulangi pembelian.");
             if (userData.balance < order.price_sell) return bot.sendMessage(chatId, "❌ Saldo kurang.");
             if (isProcessing[chatId]) return;
 
             isProcessing[chatId] = true;
             try {
-                await bot.editMessageText("⏳ *SEDANG DIPROSES...*", { chat_id: chatId, message_id: messageId });
+                // Beri feedback visual ke user
+                await bot.editMessageText("⏳ *SEDANG DIPROSES...*\nMohon jangan klik apapun.", { 
+                    chat_id: chatId, 
+                    message_id: messageId, 
+                    parse_mode: 'Markdown' 
+                });
+
+                // Eksekusi Tembak Paket ke API KMSP
                 const res = await axios.get(`https://golang-openapi-packagepurchase-xltembakservice.kmsp-store.com/v1`, {
-                    params: { api_key: config.apiKeyKMSP, phone: order.phone, package_code: order.package_code }
+                    params: { 
+                        api_key: config.apiKeyKMSP, 
+                        phone: order.phone, 
+                        package_code: order.package_code 
+                    }
                 });
 
                 if (res.data && res.data.status) {
+                    // 1. Potong Saldo & Simpan Nomor
                     userBalance[userId].balance -= order.price_sell;
                     userBalance[userId].saved_phone = order.phone; 
-
                     userBalance[userId].total_trx = (userBalance[userId].total_trx || 0) + 1;
+                    
                     const currentTrx = userBalance[userId].total_trx;
 
+                    // 2. Logika Bonus Otomatis (Setiap 20 Transaksi)
                     if (currentTrx % 20 === 0) {
                         const bonus = 2000;
                         userBalance[userId].balance += bonus;
                         bot.sendMessage(userId, `🎉 *BONUS CAIR!* Saldo +${formatRupiah(bonus)} karena sudah mencapai ${currentTrx} transaksi!`);
                     }
 
+                    // 3. Logika Auto-Upgrade Reseller (50 Transaksi)
                     if (currentTrx >= 50 && userBalance[userId].role !== 'reseller') {
                         userBalance[userId].role = 'reseller';
-                        bot.sendMessage(userId, `🎊 *SELAMAT!* Anda resmi menjadi **RESELLER**!\nSekarang Anda mendapatkan harga lebih murah di setiap paket.`);
-                        bot.sendMessage(config.ownerId, `🚀 *UPGRADE ROLE:* User ${userId} otomatis jadi Reseller.`);
+                        bot.sendMessage(userId, `🎊 *SELAMAT!* Anda resmi menjadi **RESELLER**!\nSekarang harga paket otomatis lebih murah.`);
+                        bot.sendMessage(config.ownerId, `🚀 *UPGRADE ROLE:* User \`${userId}\` (${query.from.first_name}) otomatis jadi Reseller.`);
                     }
 
-                    historyTrx.push({ userId, date: new Date().toISOString(), product: order.name, price: order.price_sell, status: 'SUCCESS', phone: order.phone });
+                    // 4. Catat History & Simpan DB
+                    historyTrx.push({ 
+                        userId, 
+                        date: new Date().toLocaleString('id-ID'), 
+                        product: order.name, 
+                        price: order.price_sell, 
+                        status: 'SUCCESS', 
+                        phone: order.phone 
+                    });
+                    
                     saveDB(config.userBalanceFile, userBalance);
                     saveDB(config.historyFile, historyTrx);
 
-                    await bot.sendMessage(chatId, `✅ *SUKSES!*\n📦 ${order.name}\n📱 ${order.phone}\n💰 Sisa Saldo: ${formatRupiah(userBalance[userId].balance)}\n\n_Nomor HP ini telah disimpan untuk transaksi berikutnya._`);
+                    // 5. Notifikasi ke User
+                    await bot.sendMessage(chatId, `✅ *TRANSAKSI SUKSES!*\n━━━━━━━━━━━━━━━━━━\n📦 *Paket:* ${order.name}\n📱 *Nomor:* ${order.phone}\n💰 *Harga:* ${formatRupiah(order.price_sell)}\n💳 *Sisa Saldo:* ${formatRupiah(userBalance[userId].balance)}\n━━━━━━━━━━━━━━━━━━\n_Nomor HP disimpan untuk transaksi berikutnya._`, { parse_mode: 'Markdown' });
 
+                    // 6. Notifikasi ke Grup (Jika Ada)
                     if (config.notifGroupId) {
-                        const textGrup = `
-🔔 *TRANSAKSI BARU*
-━━━━━━━━━━━━━━━━━━
-👤 *Pembeli:* ${callbackQuery.from.first_name}
-📦 *Produk:* ${order.name}
-📱 *Nomor:* \`${order.phone}\`
-💰 *Harga:* ${formatRupiah(order.price_sell)}
-🎭 *Role:* ${userData.role.toUpperCase()}
-━━━━━━━━━━━━━━━━━━
-Status: *BERHASIL (LUNAS)*`;
-                        // FIX: Gunakan callbackQuery.from.first_name
-                        await bot.sendMessage(config.notifGroupId, textGrup, { parse_mode: 'Markdown' }).catch(e => console.log("Gagal kirim ke grup:", e.message));
+                        const textGrup = `🔔 *TRANSAKSI BARU*\n━━━━━━━━━━━━━━━━━━\n👤 *Pembeli:* ${query.from.first_name}\n📦 *Produk:* ${order.name}\n📱 *Nomor:* \`${order.phone}\`\n💰 *Harga:* ${formatRupiah(order.price_sell)}\n🎭 *Role:* ${userBalance[userId].role.toUpperCase()}\n━━━━━━━━━━━━━━━━━━\nStatus: *BERHASIL (LUNAS)*`;
+                        await bot.sendMessage(config.notifGroupId, textGrup, { parse_mode: 'Markdown' }).catch(e => {});
                     }
 
                     delete tempOrder[chatId];
                 } else {
-                    await bot.sendMessage(chatId, `❌ Gagal: ${res.data.message}`);
+                    // Jika Server API Balas Gagal
+                    await bot.sendMessage(chatId, `❌ *GAGAL:* ${res.data.message || 'Terjadi kesalahan sistem.'}`);
                 }
             } catch (e) { 
-                bot.sendMessage(chatId, "⚠️ Gangguan Server"); 
+                console.error("Purchase Error:", e.message);
+                bot.sendMessage(chatId, "⚠️ *Gangguan Server:* Gagal menghubungi provider, saldo tidak terpotong."); 
             } finally { 
                 delete isProcessing[chatId]; 
+                // Opsional: Hapus pesan konfirmasi lama agar bersih
+                bot.deleteMessage(chatId, messageId).catch(() => {});
             }
         }
         // --- OWNER PANEL (UPDATE) ---
