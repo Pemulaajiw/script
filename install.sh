@@ -17,7 +17,15 @@ if ! grep -q "$CURRENT_HOSTNAME" /etc/hosts; then
 fi
 
 
+export DEBIAN_FRONTEND=noninteractive
 
+rm -f /etc/resolv.conf
+echo "nameserver 1.1.1.1" > /etc/resolv.conf
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf|
+sed -i '/disable_ipv6/d' /etc/sysctl.conf
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+sysctl -p
 Green="\e[92;1m"
 RED="\033[31m"
 YELLOW="\033[33m"
