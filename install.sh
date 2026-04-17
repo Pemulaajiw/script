@@ -7,16 +7,6 @@
 # whatsapp   » wa.me/+6287812264674
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # FanVPN-Store
-
-
-# === OTOMATISASI FIX HOSTNAME UBUNTU 20.04===
-CURRENT_HOSTNAME=$(hostname)
-if ! grep -q "$CURRENT_HOSTNAME" /etc/hosts; then
-    echo -e "${GREEN}[*] Auto-Fixing Hostname Identity...${NC}"
-    echo "127.0.0.1 $CURRENT_HOSTNAME" >> /etc/hosts
-fi
-
-
 export DEBIAN_FRONTEND=noninteractive
 
 rm -f /etc/resolv.conf
@@ -26,6 +16,15 @@ sed -i '/disable_ipv6/d' /etc/sysctl.conf
 echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
 echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
 sysctl -p
+
+# === OTOMATISASI FIX HOSTNAME UBUNTU 20.04===
+CURRENT_HOSTNAME=$(hostname)
+if ! grep -q "$CURRENT_HOSTNAME" /etc/hosts; then
+    echo -e "${GREEN}[*] Auto-Fixing Hostname Identity...${NC}"
+    echo "127.0.0.1 $CURRENT_HOSTNAME" >> /etc/hosts
+fi
+
+
 Green="\e[92;1m"
 RED="\033[31m"
 YELLOW="\033[33m"
