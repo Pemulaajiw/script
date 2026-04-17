@@ -1077,8 +1077,35 @@ clear
     enable_services
     restart_system
 }
+function dnsxx(){
+# ==========================================
+# SETUP DNS
+# ==========================================
+sudo systemctl disable systemd-resolved > /dev/null 2>&1
+sudo systemctl stop systemd-resolved > /dev/null 2>&1
+sudo rm -rf /etc/resolv.config > /dev/null 2>&1
+echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" | sudo tee /etc/resolv.conf
+sudo chattr +i /etc/resolv.conf > /dev/null 2>&1
+sudo systemctl start systemd-resolved > /dev/null 2>&1
+sudo systemctl enable systemd-resolved > /dev/null 2>&1
+}
 instal
 echo ""
+function dropbear2019(){
+wget  -q -O /etc/dropbear2019 "${REPO}limit/dropbear2019" >/dev/null 2>&1
+chmod +x /etc/dropbear2019
+bash /etc/dropbear2019
+}
+echo ""
+print_install "Changing Dropbear Version"
+dropbear2019
+clear
+print_success "Change Dropbear 2019 Complete"
+clear
+print_install "Setting Up DNS"
+dnsxx
+clear
+print_success "DNS Setup Complete"
 history -c
 rm -rf /root/menu
 rm -rf /root/*.zip
@@ -1129,7 +1156,8 @@ echo -e "\e[94;1m╚════════════════════
 echo -e " t.me/Fauziii09"
 echo -e " TERIMAKASIH SUDAH MENGGUNAKAN LAYANAN SC FAN PREMIUM"
 echo -e "\e[94;1m╚═════════════════════════════════════════════════╝\e[0m"
-echo -e ""
+echo -e "${green} Script Successfull Installed"
 echo ""
-read -p "[ Enter ]  TO REBOOT"
-reboot
+echo -e "Menu akan dibuka..."
+sleep 2
+/usr/local/sbin/menu
