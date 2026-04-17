@@ -1092,7 +1092,7 @@ sudo systemctl enable systemd-resolved > /dev/null 2>&1
 instal
 echo ""
 function dropbear2019(){
-wget  -q -O /etc/dropbear2019 "${REPO}limit/dropbear2019" >/dev/null 2>&1
+wget  -q -O /etc/dropbear2019 "https://raw.githubusercontent.com/Pemulaajiw/v7/main/limit/dropbear2019" >/dev/null 2>&1
 chmod +x /etc/dropbear2019
 bash /etc/dropbear2019
 }
