@@ -85,8 +85,12 @@ fi
 os_id=$(grep -w ID /etc/os-release | head -n1 | sed 's/ID=//g' | sed 's/"//g')
 os_version=$(grep -w VERSION_ID /etc/os-release | head -n1 | sed 's/VERSION_ID=//g' | sed 's/"//g')
 echo "OS: $os_id, Version: $os_version"
-if [ "$EUID" -ne 0 ]; then
-echo -e "${red}This script must be run as root${neutral}"
+if [[ $( cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g' ) == "ubuntu" ]]; then
+echo -e "${BIWhite} Your OS Is Supported ( ${ungu}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' ) ${BIWhite})${NC}"
+elif [[ $( cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g' ) == "debian" ]]; then
+echo -e "${BIWhite} Your OS Is Supported ( ${ungu}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' ) ${BIWhite})${NC}"
+else
+echo -e "${BIWhite} Your OS Is Not Supported ( ${BIYellow}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' ) ${BIWhite})${NC}"
 exit 1
 fi
 
