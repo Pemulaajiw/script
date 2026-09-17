@@ -6,8 +6,31 @@ BANNER="/etc/gerhanatunnel.txt"
 
 # Buat isi banner
 cat > $BANNER << 'EOF'
-<font color="green">nikmatin Kang....</font>
-<p style="text-align:center"><span style=background-color:#000000;"><b><font color="cyan">V I P • S E R V E R • A L L X D D E F<br></font><font color="#ffffff">╞</><font color="#ffffff">═══════ </><font color="aqua">༶ </><font color="yellow">❅ </><font color="aqua">༶</><font color="#FFFFFF"> ═══════</><font color="#ffffff">╡<br></font><font color="cyan">1 Akun Untuk 2 Device<br>No Akses Situs/Apk 18+<br>No Hotspot & STB<br>No Ilegal Content<br><b></font><font color="green">Melanggar</><font color="#FFFFFF"> = </><font color="red">Banned!</><font><br><font color="#ffffff">╞</><font color="#ffffff">═══════ </><font color="aqua">༶ </><font color="yellow">❅ </><font color="aqua">༶</><font color="#FFFFFF"> ═══════</><font color="#ffffff">╡<br></span><span style=background-color:#000000;"><font color="cyan">꧁Trial & Order꧂</><br><b><u><i>wa.me/+6287898083051</font><br><b><u><i>wa.me/+6285238906544</font><br><span style='font-family:"Courier New";'><span style='color:#FF0000;'>©</span><span style=background-color:#000000;"><span style='color:#FF7F00;'>M</span><span style=background-color:#000000;"><span style='color:#FFFF00;'>E</span><span style=background-color:#000000;"><span style='color:#7FFF00;'>R</span><span style=background-color:#000000;"><span style='color:#00FF00;'>A</span><span style=background-color:#000000;"><span style='color:#00FF7F;'>U</span><span style=background-color:#000000;"><span style='color:#00FEFF;'>KE</span><span style=background-color:#000000;"><span style='color:#007FFF;'>•</span><span style=background-color:#000000;"><span style='color:blue;'>V</span><span style=background-color:#000000;"><span style='color:#7F00FF;'>P</span><span style=background-color:#000000;"><span style='color:#FF00FE;'>N</span><span style=background-color:#000000;"><span style='color:#FF007F;'>™</span> 
+<font color="#00FF00"><b>[⚡ ] ======================================== [⚡ ]</b></font><br>
+<b><font color="#00FF00">[SYSTEM]</font> <font color="#FFFFFF">ISLAMIC CYBER PROTOCOL 2026</font></b><br>
+<b><font color="#FFFF00">> CHECKING HEART STATUS... [SECURE]</font></b><br>
+<font color="#00FF00"><b>[⚡ ] ======================================== [⚡ ]</b></font><br>
+<br>
+<font color="#FFFF00"><b>[ QS. AL-AHZAB : 70 ]</b></font><br>
+<font color="#FFFFFF">"Wahai orang-orang yang beriman! Bertakwalah kamu kepada Allah dan ucapkanlah perkataan yang benar."</font><br>
+<br>
+<font color="#FF0000"><b>[ SYSTEM WARNING ]</b></font><br>
+<font color="#FFFFFF">Jangan obral janji manis kalau cuma bikin orang
+lain berharap.</font><br>
+<font color="#FFFFFF">Ramah itu akhlak, tapi memberi harapan palsu itu dosa.</font><br>
+<br>
+<font color="#FFFF00"><b>[ PROTOCOL LAWS ]</b></font><br>
+<font color="#FF66CC">✔ <b>ADAB</b>     : Jagalah lisan dan perasaan sesama</font><br>
+<font color="#FF66CC">✔ <b>REMINDER</b> : Salat 5 waktu tetap yang utama</font><br>
+<font color="#FF66CC">✔ <b>NO ABUSE</b> : Gunakan internet untuk hal bermanfaat</font><br>
+<br>
+<font color="#00FF00">[✓] STATUS   : HALAL NETWORK</font><br>
+<font color="#00FF00">[✓] MOTTO    : "Khoirunnas Anfahuhum Linnas"</font><br>
+<br>
+<b><font color="#FFFF00">✨  Selamat menikmati koneksinya, jaga adab &
+niat ✨ </font></b><br>
+<font color="#00FF00"><b>[⚡ ] ======================================== [⚡ ]</b></font>
+FUCK ROMANCE
 EOF
 
 systemctl restart ssh
