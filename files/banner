@@ -1,0 +1,40 @@
+#!/bin/bash
+# Auto install Banner SSH / Dropbear
+
+# Lokasi banner
+BANNER="/etc/gerhanatunnel.txt"
+
+# Buat isi banner
+cat > $BANNER << 'EOF'
+<font color="#00FF00"><b>[⚡ ] ======================================== [⚡ ]</b></font><br>
+<b><font color="#00FF00">[SYSTEM]</font> <font color="#FFFFFF">ISLAMIC CYBER PROTOCOL 2026</font></b><br>
+<b><font color="#FFFF00">> CHECKING HEART STATUS... [SECURE]</font></b><br>
+<font color="#00FF00"><b>[⚡ ] ======================================== [⚡ ]</b></font><br>
+<br>
+<font color="#FFFF00"><b>[ QS. AL-AHZAB : 70 ]</b></font><br>
+<font color="#FFFFFF">"Wahai orang-orang yang beriman! Bertakwalah kamu kepada Allah dan ucapkanlah perkataan yang benar."</font><br>
+<br>
+<font color="#FF0000"><b>[ SYSTEM WARNING ]</b></font><br>
+<font color="#FFFFFF">Jangan obral janji manis kalau cuma bikin orang
+lain berharap.</font><br>
+<font color="#FFFFFF">Ramah itu akhlak, tapi memberi harapan palsu itu dosa.</font><br>
+<br>
+<font color="#FFFF00"><b>[ PROTOCOL LAWS ]</b></font><br>
+<font color="#FF66CC">✔ <b>ADAB</b>     : Jagalah lisan dan perasaan sesama</font><br>
+<font color="#FF66CC">✔ <b>REMINDER</b> : Salat 5 waktu tetap yang utama</font><br>
+<font color="#FF66CC">✔ <b>NO ABUSE</b> : Gunakan internet untuk hal bermanfaat</font><br>
+<br>
+<font color="#00FF00">[✓] STATUS   : HALAL NETWORK</font><br>
+<font color="#00FF00">[✓] MOTTO    : "Khoirunnas Anfahuhum Linnas"</font><br>
+<br>
+<b><font color="#FFFF00">✨  Selamat menikmati koneksinya, jaga adab &
+niat ✨ </font></b><br>
+<font color="#00FF00"><b>[⚡ ] ======================================== [⚡ ]</b></font>
+FUCK ROMANCE
+EOF
+
+systemctl restart ssh
+# systemctl restart sshd
+systemctl restart dropbear
+
+echo "✅ Banner berhasil dipasang!"
