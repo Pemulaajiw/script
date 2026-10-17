@@ -500,8 +500,10 @@ class Handler(BaseHTTPRequestHandler):
     def _token_ok(self):
         token = load_token()
         if not token:
-            return True
+            return False
         header_token = self.headers.get("X-API-Token", "")
+        if not header_token:
+            header_token = self.headers.get("X-Token", "")
         auth = self.headers.get("Authorization", "")
         if header_token == token:
             return True
@@ -522,9 +524,13 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": True, "service": "wendy-api"})
             return
         if path == "/api/stats":
+            if not self._require_token():
+                return
             self._send_json(system_stats())
             return
         if path == "/api/services":
+            if not self._require_token():
+                return
             self._send_json({"services": [service_state(name) for name in SERVICE_NAMES]})
             return
         if path == "/api/token":
@@ -581,6 +587,32 @@ class Handler(BaseHTTPRequestHandler):
                 payload, status = handle_notif_state("notif_backup")
             elif parts[2] == "notif-limit":
                 payload, status = handle_notif_state("notif_limit")
+            elif parts[2] == "add-bot-notif":
+                user_v = str(body.get("user", "")).strip()
+                chat_v = str(body.get("chat_id", "")).strip()
+                if not user_v or not chat_v:
+                    payload, status = {"ok": False, "error": "user and chat_id required"}, 400
+                else:
+                    cmd = "printf '%s\\n' '%s' '%s' | /usr/local/sbin/add-bot-notif" % (user_v, chat_v)
+                    _r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=180)
+                    payload = {"ok": _r.returncode == 0, "stdout": _r.stdout, "stderr": _r.stderr}
+                    status = 200 if _r.returncode == 0 else 500
+            elif parts[2] == "del-bot-notif":
+                _r = subprocess.run(["/usr/local/sbin/del-bot-notif"], capture_output=True, text=True, timeout=180)
+                payload = {"ok": _r.returncode == 0, "stdout": _r.stdout, "stderr": _r.stderr}
+                status = 200 if _r.returncode == 0 else 500
+            elif parts[2] == "run-menu":
+                opt = str(body.get("option", "")).strip()
+                if not opt.isdigit():
+                    payload, status = {"ok": False, "error": "option must be numeric"}, 400
+                else:
+                    _r = subprocess.run("printf '%%s\\n' '%s' | menu" % opt, shell=True, capture_output=True, text=True, timeout=180)
+                    payload = {"ok": _r.returncode == 0, "stdout": _r.stdout, "stderr": _r.stderr}
+                    status = 200 if _r.returncode == 0 else 500
+            elif parts[2] == "cek-login-ssh":
+                _r = subprocess.run(["/usr/local/sbin/bot-cek-login-ssh"], capture_output=True, text=True, timeout=180)
+                payload = {"ok": _r.returncode == 0, "stdout": _r.stdout, "stderr": _r.stderr, "returncode": _r.returncode}
+                status = 200 if _r.returncode == 0 else 500
             elif parts[2] == "reboot":
                 payload, status = handle_reboot()
             elif parts[2] == "speedtest":
@@ -619,6 +651,7 @@ class Handler(BaseHTTPRequestHandler):
                 os.makedirs("/etc/bot", exist_ok=True)
                 with open("/etc/bot/.bot.db", "w") as f:
                     f.write(f"#bot# {bot_token} {chat_id}\n")
+                os.chmod("/etc/bot/.bot.db", 0o600)
                 self._send_json({"ok": True, "stdout": "Bot config updated"})
                 return
             self._send_json({"ok": False, "error": "not_found"}, status=404)
@@ -660,6 +693,9 @@ class Handler(BaseHTTPRequestHandler):
             action = parts[3]
             if action not in ALLOWED_ACTIONS:
                 self._send_json({"ok": False, "error": "unsupported_action"}, status=400)
+                return
+            if service_name not in SERVICE_NAMES:
+                self._send_json({"ok": False, "error": "unknown_service"}, status=400)
                 return
             result = run(["systemctl", action, service_name])
             if result.returncode == 0:
